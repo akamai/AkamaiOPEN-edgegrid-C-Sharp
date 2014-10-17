@@ -50,6 +50,8 @@ namespace Akamai.EdgeGrid
             string outputfile = null;
             string uploadfile = null;
             string data = null;
+
+            bool verbose = false;
            
             string firstarg = null;
             foreach (string arg in args)
@@ -84,7 +86,7 @@ namespace Akamai.EdgeGrid
                         case "-H":
                             headers.Add(arg);
                             break;
-                        
+
                     }
                     firstarg = null;
                 }
@@ -93,6 +95,8 @@ namespace Akamai.EdgeGrid
                     help();
                     return;
                 }
+                else if (arg == "-v" || arg == "-vv")
+                    verbose = true;
                 else if (arg == "-P")
                     isGetMethod = false;
                 else if (!arg.StartsWith("-"))
@@ -101,11 +105,24 @@ namespace Akamai.EdgeGrid
                     firstarg = arg;
             }
 
+            if (verbose)
+            {
+                Console.WriteLine("{0} {1}", isGetMethod ? "GET" : "POST", apiurl);
+                Console.WriteLine("ClientToken: {0}", clientToken);
+                Console.WriteLine("AccessToken: {0}", accessToken);
+                Console.WriteLine("Secret: {0}", secret);
+                if (data != null) Console.WriteLine("Data: [{0}]", data);
+                if (uploadfile != null) Console.WriteLine("UploadFile: {0}", uploadfile);
+                if (outputfile != null) Console.WriteLine("OutputFile: {0}", outputfile);
+                foreach (string header in headers)
+                    Console.WriteLine("{0}", header);
+                Console.WriteLine("Content-Type: {0}", contentType);
+            }
 
-            execute(isGetMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, contentType);
+            execute(isGetMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, contentType, verbose);
         }
 
-        static void execute(bool isGetMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, string contentType)
+        static void execute(bool isGetMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, string contentType, bool verbose = false)
         {
             if (apiurl == null || clientToken == null || accessToken == null || secret == null)
             {
@@ -137,6 +154,12 @@ namespace Akamai.EdgeGrid
             Stream output = Console.OpenStandardOutput();
             if (outputfile != null)
                 output = new FileInfo(outputfile).OpenWrite();
+
+            if (verbose)
+            {
+                signer.Sign(request, credential, uploadStream);
+                Console.WriteLine("Authorization: {0}", request.Headers.Get("Authorization"));
+            }
               
             using (var result = signer.Execute(request, credential, uploadStream))
             {
