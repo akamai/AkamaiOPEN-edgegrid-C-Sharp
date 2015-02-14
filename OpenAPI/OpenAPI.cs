@@ -43,7 +43,7 @@ namespace Akamai.EdgeGrid
             string accessToken = null;
             string apiurl = null;
             List<string> headers = new List<string>();
-            bool isGetMethod = true;
+            string httpMethod = "GET";
             string contentType = "application/json";
 
 
@@ -73,11 +73,11 @@ namespace Akamai.EdgeGrid
                             outputfile = arg;
                             break;
                         case "-f":
-                            isGetMethod = false;
+                            if (httpMethod == "GET") httpMethod = "PUT";
                             uploadfile = arg;
                             break;
                         case "-d":
-                            isGetMethod = false;
+                            if (httpMethod == "GET") httpMethod = "POST";
                             data = arg;
                             break;
                         case "-T":
@@ -85,6 +85,9 @@ namespace Akamai.EdgeGrid
                             break;
                         case "-H":
                             headers.Add(arg);
+                            break;
+                        case "-X":
+                            httpMethod = arg;
                             break;
 
                     }
@@ -96,9 +99,7 @@ namespace Akamai.EdgeGrid
                     return;
                 }
                 else if (arg == "-v" || arg == "-vv")
-                    verbose = true;
-                else if (arg == "-P")
-                    isGetMethod = false;
+                    verbose = true;           
                 else if (!arg.StartsWith("-"))
                     apiurl = arg;
                 else
@@ -107,7 +108,7 @@ namespace Akamai.EdgeGrid
 
             if (verbose)
             {
-                Console.WriteLine("{0} {1}", isGetMethod ? "GET" : "POST", apiurl);
+                Console.WriteLine("{0} {1}", httpMethod, apiurl);
                 Console.WriteLine("ClientToken: {0}", clientToken);
                 Console.WriteLine("AccessToken: {0}", accessToken);
                 Console.WriteLine("Secret: {0}", secret);
@@ -119,10 +120,10 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("Content-Type: {0}", contentType);
             }
 
-            execute(isGetMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, contentType, verbose);
+            execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, contentType, verbose);
         }
 
-        static void execute(bool isGetMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, string contentType, bool verbose = false)
+        static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, string contentType, bool verbose = false)
         {
             if (apiurl == null || clientToken == null || accessToken == null || secret == null)
             {
@@ -141,15 +142,9 @@ namespace Akamai.EdgeGrid
 
             var uri = new Uri(apiurl);
             var request = WebRequest.Create(uri);
-
-            if (uploadStream != null)
-            {
-                isGetMethod = false;
-                request.ContentType = contentType;
-            }
-
+            
             foreach (string header in headers) request.Headers.Add(header);
-            request.Method = isGetMethod ? "GET" : "POST";
+            request.Method = httpMethod;
 
             Stream output = Console.OpenStandardOutput();
             if (outputfile != null)
@@ -187,7 +182,8 @@ namespace Akamai.EdgeGrid
             Console.Error.WriteLine(@"
 Usage: openapi <-c client-token> <-a access-token> <-s secret>
            [-d data] [-f srcfile]
-           [-o outfile] [-P]
+           [-o outfile] 
+           [-X method]
            [-H header-line]
            [-T content-type]
            <url>
@@ -197,7 +193,7 @@ Where:
     -d data         string of data to PUT to the API
     -f srcfile      local file used as source when action=upload
     -H header-line  Http Header 'Name: value'
-    -P              force HTTP PUT 
+    -X method       force HTTP PUT,POST,DELETE 
     -T content-type the HTTP content type (default = application/json)
     url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations       
 
