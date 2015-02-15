@@ -44,7 +44,7 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual(signer.HashVersion, EdgeGridV1Signer.HashType.SHA256);
             Assert.IsNotNull(signer.HeadersToInclude);
             Assert.AreEqual(signer.HeadersToInclude.Count, 0);
-            Assert.AreEqual(signer.MaxBodySize, long.MaxValue);
+            Assert.IsNull(signer.MaxBodySize);
         }
 
         [TestMethod]
@@ -152,16 +152,24 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual("Tors1txMl65Vww75sekbSCnvWHGxYmK0Yog4qA3AwuI=", signer.GetRequestStreamHash(stream));
             Assert.AreEqual(stream.Position, 0);
         }
+
         [TestMethod]
-        [ExpectedException(typeof(IOException))]
-        public void GetRequestStreamHashTest_NullStream()
+        public void GetRequestStreamHashMaxSizeTest()
         {
-            EdgeGridV1Signer signer = new EdgeGridV1Signer();
+            EdgeGridV1Signer signer = new EdgeGridV1Signer(null, 50);
+            Assert.AreEqual(String.Empty, signer.GetRequestStreamHash(null));
 
             var data = "Lorem ipsum dolor sit amet, an sea putant quaeque, homero aperiam te eos.".ToByteArray();
             var stream = new MemoryStream(data);
-            signer = new EdgeGridV1Signer(null, 1);
-            signer.GetRequestStreamHash(stream);
+            Assert.AreEqual("IHJu55sckdViGcpD7CpUttVSzYoy/DiTQsmy7jrzoMU=", signer.GetRequestStreamHash(stream));
+            Assert.AreEqual(stream.Position, 0);
+        }
+
+        [TestMethod]
+        public void GetRequestStreamHashTest_NullStream()
+        {
+            EdgeGridV1Signer signer = new EdgeGridV1Signer();
+            Assert.AreEqual(signer.GetRequestStreamHash(null), "");
         }
 
         [TestMethod]

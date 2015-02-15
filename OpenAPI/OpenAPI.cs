@@ -50,6 +50,7 @@ namespace Akamai.EdgeGrid
             string outputfile = null;
             string uploadfile = null;
             string data = null;
+            int maxBodySize = 2048;
 
             bool verbose = false;
            
@@ -66,25 +67,28 @@ namespace Akamai.EdgeGrid
                         case "-c":
                             clientToken = arg;
                             break;
-                        case "-s":
-                            secret = arg;
-                            break;
-                        case "-o":
-                            outputfile = arg;
+                        case "-d":
+                            if (httpMethod == "GET") httpMethod = "POST";
+                            data = arg;
                             break;
                         case "-f":
                             if (httpMethod == "GET") httpMethod = "PUT";
                             uploadfile = arg;
                             break;
-                        case "-d":
-                            if (httpMethod == "GET") httpMethod = "POST";
-                            data = arg;
+                        case "-H":
+                            headers.Add(arg);
+                            break;
+                        case "-m":
+                            maxBodySize = Convert.ToInt32(arg);
+                            break;
+                        case "-o":
+                            outputfile = arg;
+                            break;
+                        case "-s":
+                            secret = arg;
                             break;
                         case "-T":
                             contentType = arg;
-                            break;
-                        case "-H":
-                            headers.Add(arg);
                             break;
                         case "-X":
                             httpMethod = arg;
@@ -120,10 +124,10 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("Content-Type: {0}", contentType);
             }
 
-            execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, contentType, verbose);
+            execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, maxBodySize, contentType, verbose);
         }
 
-        static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, string contentType, bool verbose = false)
+        static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, int? maxBodySize, string contentType, bool verbose = false)
         {
             if (apiurl == null || clientToken == null || accessToken == null || secret == null)
             {
@@ -131,7 +135,7 @@ namespace Akamai.EdgeGrid
                 return;
             }
             
-            EdgeGridV1Signer signer = new EdgeGridV1Signer();
+            EdgeGridV1Signer signer = new EdgeGridV1Signer(null, maxBodySize);
             ClientCredential credential = new ClientCredential(clientToken, accessToken, secret);
 
             Stream uploadStream = null;
@@ -183,7 +187,8 @@ namespace Akamai.EdgeGrid
             Console.Error.WriteLine(@"
 Usage: openapi <-c client-token> <-a access-token> <-s secret>
            [-d data] [-f srcfile]
-           [-o outfile] 
+           [-o outfile]
+           [-m max-size]
            [-X method]
            [-H header-line]
            [-T content-type]
@@ -193,6 +198,7 @@ Where:
     -o outfile      local file name to use to save response from the API
     -d data         string of data to PUT to the API
     -f srcfile      local file used as source when action=upload
+    -m max-size     maximum amount of data to use in the signing hash. Default is 2048
     -H header-line  Http Header 'Name: value'
     -X method       force HTTP PUT,POST,DELETE 
     -T content-type the HTTP content type (default = application/json)

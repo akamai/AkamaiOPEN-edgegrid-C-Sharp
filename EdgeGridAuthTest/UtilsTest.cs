@@ -45,6 +45,14 @@ namespace Akamai.Utils
         }
 
         [TestMethod]
+        public void ComputeHashBase64LimitTest()
+        {
+            var data = "Lorem ipsum dolor sit amet, an sea putant quaeque, homero aperiam te eos.".ToByteArray();
+            Assert.AreEqual(new MemoryStream(data).ComputeHash(ChecksumAlgorithm.SHA256, 50).ToBase64(),
+                "IHJu55sckdViGcpD7CpUttVSzYoy/DiTQsmy7jrzoMU=");
+        }
+
+        [TestMethod]
         public void ComputeHashBase64Test()
         {
             var data = "Lorem ipsum dolor sit amet, an sea putant quaeque, homero aperiam te eos.".ToByteArray();
@@ -117,6 +125,16 @@ namespace Akamai.Utils
             // this is probably not a complete test, should be expanded...
             var data = "Lorem ipsum";
             Assert.AreEqual(data.URLEncode(), "Lorem%20ipsum");
+        }
+
+        [TestMethod]
+        public void ReadExactlyTest()
+        {
+            var data = "Lorem ipsum dolor sit amet, an sea putant quaeque, homero aperiam te eos.".ToByteArray();
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                Assert.AreEqual(Encoding.UTF8.GetString(stream.ReadExactly(50)), "Lorem ipsum dolor sit amet, an sea putant quaeque,");
+            }
         }
     }
 }

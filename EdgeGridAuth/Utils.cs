@@ -53,6 +53,7 @@ namespace Akamai.Utils
     public static class ExtensionMethods
     {
 
+       
         /// <summary>
         /// Computes the hash of a given InputStream. This is a wrapper over the HashAlgorithm crypto functions.
         /// </summary>
@@ -60,12 +61,15 @@ namespace Akamai.Utils
         /// <param name="hashType">the Algorithm to use to compute the hash</param>
         /// <returns>a byte[] representation of the hash. If the Stream is a null object 
         /// then null will be returned. If the Stream is empty an empty byte[] {} will be returned.</returns>
-        public static byte[] ComputeHash(this Stream stream, ChecksumAlgorithm hashType = ChecksumAlgorithm.SHA256)
+        public static byte[] ComputeHash(this Stream stream, ChecksumAlgorithm hashType = ChecksumAlgorithm.SHA256, long? maxBodySize = null)
         {
             if (stream == null) return null;
 
             using (var algorithm = HashAlgorithm.Create(hashType.ToString()))
-                return algorithm.ComputeHash(stream);
+                if (maxBodySize != null && maxBodySize > 0)
+                    return algorithm.ComputeHash(stream.ReadExactly((long) maxBodySize));
+                else
+                    return algorithm.ComputeHash(stream);
         }
 
         /// <summary>
@@ -86,6 +90,32 @@ namespace Akamai.Utils
             {
                 algorithm.Key = key.ToByteArray();
                 return algorithm.ComputeHash(data);
+            }
+        }
+
+        /// <summary>
+        /// Reads a stream up to @maxCount number of bytes. Less bytes will be returned 
+        /// if the end of the file is reached.
+        /// </summary>
+        /// <param name="stream">the stream to read</param>
+        /// <param name="maxCount">the maximum number of bytes to read</param>
+        /// <returns></returns>
+        public static byte[] ReadExactly(this Stream stream, long maxCount)
+        {
+
+            using (MemoryStream result = new MemoryStream())
+            {
+                byte[] buffer = new byte[1024 * 1024];
+                int bytesRead = 0;
+                long leftToRead = maxCount;
+
+                while ((bytesRead = stream.Read(buffer, 0, leftToRead > int.MaxValue ? int.MaxValue : Convert.ToInt32(leftToRead))) != 0)
+                {
+                    leftToRead -= bytesRead;
+                    result.Write(buffer, 0, bytesRead);
+                }
+
+                return result.ToArray();
             }
         }
 
