@@ -49,7 +49,8 @@ namespace Akamai.EdgeGrid.Auth
         public override string Method { get; set; }
         public override WebHeaderCollection Headers { get; set; }
         public override long ContentLength { get; set; }
-
+        public override string ContentType { get; set; }
+        
         public override Uri RequestUri { get { return this.itemUri; } }
 
         private Uri itemUri;

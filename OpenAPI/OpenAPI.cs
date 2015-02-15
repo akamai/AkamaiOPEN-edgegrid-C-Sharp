@@ -154,6 +154,7 @@ namespace Akamai.EdgeGrid
             {
                 signer.Sign(request, credential, uploadStream);
                 Console.WriteLine("Authorization: {0}", request.Headers.Get("Authorization"));
+                Console.WriteLine();
             }
               
             using (var result = signer.Execute(request, credential, uploadStream))
@@ -162,7 +163,7 @@ namespace Akamai.EdgeGrid
                 {
                     using (result)
                     {
-                        byte[] buffer = new byte[32*1024];
+                        byte[] buffer = new byte[1024*1024];
                         int bytesRead = 0;
 
                         while ((bytesRead = result.Read(buffer, 0, buffer.Length)) != 0)

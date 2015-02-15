@@ -122,7 +122,8 @@ namespace Akamai.EdgeGrid.Auth
 
             String headers = GetRequestHeaders(requestHeaders);
             String bodyHash = "";
-            if (method == "POST" || method == "PUT")
+            // Only POST body is hashed
+            if (method == "POST")
                 bodyHash = GetRequestStreamHash(requestStream);
 
             return string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t",
@@ -197,7 +198,14 @@ namespace Akamai.EdgeGrid.Auth
                     if (DateTime.Now.Subtract(responseDate).TotalSeconds > 30)
                         throw new HttpRequestException("Local server Date is more than 30s out of sync with Remote server");
 
-                throw new HttpRequestException(string.Format("Unexpected Response from Server: {0} {1}\n{2}", httpResponse.StatusCode, httpResponse.StatusDescription, response.Headers));
+                string responseBody = null;
+                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                {
+                    responseBody = reader.ReadToEnd();
+                    // Do something with the value
+                }
+               
+                throw new HttpRequestException(string.Format("Unexpected Response from Server: {0} {1}\n{2}\n\n{3}", httpResponse.StatusCode, httpResponse.StatusDescription, response.Headers, responseBody));
             }
         }
 
@@ -235,7 +243,7 @@ namespace Akamai.EdgeGrid.Auth
             ServicePointManager.EnableDnsRoundRobin = true;
             request = this.Sign(request, credential, uploadStream);
 
-            if (request.Method == "PUT" || request.Method == "POST")
+            if (request.Method == "PUT" || request.Method == "POST" || request.Method == "PATCH")
             {
                 //Disable the nastiness of Expect100Continue
                 ServicePointManager.Expect100Continue = false;
@@ -252,10 +260,21 @@ namespace Akamai.EdgeGrid.Auth
                     if (request is HttpWebRequest)
                         ((HttpWebRequest)request).AllowWriteStreamBuffering = false;
 
+                    if (String.IsNullOrEmpty(request.ContentType))
+                        request.ContentType = "application/json";
+
                     using (Stream requestStream = request.GetRequestStream())
                     using (uploadStream)
-                        uploadStream.CopyTo(requestStream, 32 * 1024);
+                        uploadStream.CopyTo(requestStream, 1024 * 1024);
                 }
+            }
+
+            if (request is HttpWebRequest) 
+            {
+                var httpRequest = (HttpWebRequest)request;
+                httpRequest.Accept = "*/*";
+                if (String.IsNullOrEmpty(httpRequest.UserAgent)) 
+                    httpRequest.UserAgent = "EdgeGrid.Net/v1";
             }
 
             WebResponse response = null;
