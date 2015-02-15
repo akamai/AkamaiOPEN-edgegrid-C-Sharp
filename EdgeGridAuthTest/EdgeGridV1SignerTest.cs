@@ -44,7 +44,7 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual(signer.HashVersion, EdgeGridV1Signer.HashType.SHA256);
             Assert.IsNotNull(signer.HeadersToInclude);
             Assert.AreEqual(signer.HeadersToInclude.Count, 0);
-            Assert.IsNull(signer.MaxBodySize);
+            Assert.AreEqual(signer.MaxBodyHashSize, 2048);
         }
 
         [TestMethod]
@@ -54,7 +54,7 @@ namespace Akamai.EdgeGrid.Auth
             EdgeGridV1Signer signer = new EdgeGridV1Signer(headers, 100);
             Assert.AreEqual(signer.HeadersToInclude.Count, 1);
             Assert.IsTrue(signer.HeadersToInclude.Contains("test"));
-            Assert.AreEqual(signer.MaxBodySize, 100);
+            Assert.AreEqual(signer.MaxBodyHashSize, 100);
         }
 
         [TestMethod]

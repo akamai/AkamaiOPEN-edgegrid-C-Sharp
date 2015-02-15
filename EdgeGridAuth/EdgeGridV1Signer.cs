@@ -91,12 +91,12 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The maximum body size used for computing the POST body hash (in bytes).
         /// </summary>
-	    internal long? MaxBodySize {get; private set; }
+	    internal long? MaxBodyHashSize {get; private set; }
 
-        public EdgeGridV1Signer(IList<string> headers = null, long? maxBodySize = null)
+        public EdgeGridV1Signer(IList<string> headers = null, long? maxBodyHashSize = 2048)
         {
             this.HeadersToInclude = headers ?? new List<string>();
-            this.MaxBodySize = maxBodySize;
+            this.MaxBodyHashSize = maxBodyHashSize;
             this.SignVersion = SignType.HMACSHA256;
             this.HashVersion = HashType.SHA256;
         }
@@ -160,7 +160,7 @@ namespace Akamai.EdgeGrid.Auth
             if (!requestStream.CanSeek)
                 throw new IOException("Stream must be seekable!");
 
-            string streamHash = requestStream.ComputeHash(this.HashVersion.Checksum, MaxBodySize).ToBase64();
+            string streamHash = requestStream.ComputeHash(this.HashVersion.Checksum, MaxBodyHashSize).ToBase64();
             requestStream.Seek(0, SeekOrigin.Begin);
             return streamHash;
         }
