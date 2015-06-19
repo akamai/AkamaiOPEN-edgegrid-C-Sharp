@@ -244,6 +244,8 @@ namespace Akamai.EdgeGrid.Auth
             {
                 //Disable the nastiness of Expect100Continue
                 ServicePointManager.Expect100Continue = false;
+                //Also disable it on request object !
+                ((HttpWebRequest)request).ServicePoint.Expect100Continue = false;
                 if (uploadStream == null)
                     request.ContentLength = 0;
                 else if (uploadStream.CanSeek)
