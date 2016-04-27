@@ -211,10 +211,10 @@ namespace Akamai.EdgeGrid.Auth
             }
         }
                 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             DateTime timestamp = DateTime.UtcNow;
-            Stream uploadStream = null; // TODO: figure out what to do with this
+            Stream uploadStream = request.Content == null ? null : await request.Content.ReadAsStreamAsync();
 
             //already signed?
             if (request.Headers.Contains(EdgeGridV1Signer.AuthorizationHeader))
@@ -225,7 +225,7 @@ namespace Akamai.EdgeGrid.Auth
             string authHeader = GetAuthorizationHeaderValue(_creds, timestamp, authData, requestData);
             request.Headers.Add(EdgeGridV1Signer.AuthorizationHeader, authHeader);
 
-            return base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, cancellationToken);
         }
     }
 }
