@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientCredential.cs" />
+    <Compile Include="EdgeGridV1HttpMessageHandler.cs" />
     <Compile Include="EdgeGridV1Signer.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="IRequestSigner.cs" />
