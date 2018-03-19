@@ -269,9 +269,16 @@ namespace Akamai.EdgeGrid.Auth
             if (request is HttpWebRequest) 
             {
                 var httpRequest = (HttpWebRequest)request;
-                httpRequest.Accept = "*/*";
-                if (String.IsNullOrEmpty(httpRequest.UserAgent)) 
+
+                if (string.IsNullOrWhiteSpace(httpRequest.Accept))
+                {
+                    httpRequest.Accept = "*/*";
+                }
+
+                if (String.IsNullOrEmpty(httpRequest.UserAgent))
+                {
                     httpRequest.UserAgent = "EdgeGrid.Net/v1";
+                }
             }
 
             WebResponse response = null;
