@@ -49,5 +49,14 @@ namespace Akamai.EdgeGrid.Auth
         /// <param name="uploadStream">the optional stream to upload</param>
         /// <returns>the stream from the response (may be empty)</returns>
         Stream Execute(WebRequest request, ClientCredential credential, Stream uploadStream = null);
+
+        /// <summary>
+        /// Signs and Executes a request with the client credential and closes the underlying resources automatically
+        /// </summary>
+        /// <param name="request">the web request object to sign</param>
+        /// <param name="credential">the credential used in the signing</param>
+        /// <param name="uploadStream">the optional stream to upload</param>
+        /// <returns>The stream contents in string format</returns>
+        string ExecuteRead(WebRequest request, ClientCredential credential, Stream uploadStream = null);
     }
 }

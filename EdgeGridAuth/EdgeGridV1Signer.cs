@@ -19,12 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid.Auth
 {
@@ -269,9 +267,16 @@ namespace Akamai.EdgeGrid.Auth
             if (request is HttpWebRequest) 
             {
                 var httpRequest = (HttpWebRequest)request;
-                httpRequest.Accept = "*/*";
-                if (String.IsNullOrEmpty(httpRequest.UserAgent)) 
+
+                if (string.IsNullOrWhiteSpace(httpRequest.Accept))
+                {
+                    httpRequest.Accept = "*/*";
+                }
+
+                if (String.IsNullOrEmpty(httpRequest.UserAgent))
+                {
                     httpRequest.UserAgent = "EdgeGrid.Net/v1";
+                }
             }
 
             WebResponse response = null;
@@ -288,6 +293,89 @@ namespace Akamai.EdgeGrid.Auth
             }
 
             return response.GetResponseStream();
+        }
+
+        /// <summary>
+        /// Signs and Executes a request with the client credential and closes the underlying resources automatically
+        /// </summary>
+        /// <param name="request">the web request object to sign</param>
+        /// <param name="credential">the credential used in the signing</param>
+        /// <param name="uploadStream">the optional stream to upload</param>
+        /// <returns>The stream contents in string format</returns>
+        public string ExecuteRead(WebRequest request, ClientCredential credential, Stream uploadStream = null)
+        {
+
+            //Make sure that this connection will behave nicely with multiple calls in a connection pool.
+            ServicePointManager.EnableDnsRoundRobin = true;
+            request = this.Sign(request, credential, uploadStream);
+
+            if (request.Method == "PUT" || request.Method == "POST" || request.Method == "PATCH")
+            {
+                //Disable the nastiness of Expect100Continue
+                ServicePointManager.Expect100Continue = false;
+                //ServicePointManager.DefaultConnectionLimit = 100;
+
+                if (uploadStream == null)
+                    request.ContentLength = 0;
+                else if (uploadStream.CanSeek)
+                    request.ContentLength = uploadStream.Length;
+                else if (request is HttpWebRequest)
+                    ((HttpWebRequest)request).SendChunked = true;
+
+                if (uploadStream != null)
+                {
+                    // avoid internal memory allocation before buffering the output
+                    if (request is HttpWebRequest)
+                        ((HttpWebRequest)request).AllowWriteStreamBuffering = false;
+
+                    if (String.IsNullOrEmpty(request.ContentType))
+                        request.ContentType = "application/json";
+
+                    using (Stream requestStream = request.GetRequestStream())
+                    using (uploadStream)
+                        uploadStream.CopyTo(requestStream, 1024 * 1024);
+                }
+            }
+
+            if (request is HttpWebRequest)
+            {
+                var httpRequest = (HttpWebRequest)request;
+
+                if (string.IsNullOrWhiteSpace(httpRequest.Accept))
+                {
+                    httpRequest.Accept = "*/*";
+                }
+
+                if (String.IsNullOrEmpty(httpRequest.UserAgent))
+                {
+                    httpRequest.UserAgent = "EdgeGrid.Net/v1";
+                }
+            }
+
+            WebResponse response = null;
+
+            try
+            {
+                using (response = request.GetResponse())
+                {
+                    using (var stream = response.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            return reader.ReadToEnd();
+                        }
+                    }
+                }
+            }
+            catch (WebException e)
+            {
+                // non 200 OK responses throw exceptions.
+                // is this because of Time drift? can we re-try?
+                using (response = e.Response)
+                    Validate(response);
+            }
+
+            return null;
         }
 
     }
