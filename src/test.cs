@@ -14,13 +14,20 @@ namespace Akamai
         private static readonly HttpClient client = new HttpClient();
 
         public static void Main(string[] args){
-		ProcessRepositories().Wait();
+		//ProcessRepositories().Wait();
 
         string ClientToken = "lala";
-		string AccessToken = "mema";
+		string AccessToken = "mema"; 
 		string ClientSecret = "dej9d";        
         
-    
+        Dictionary<string, string> headers;
+
+        headers = new Dictionary<string,string>();
+
+        headers.Add("X-Some-Signed-Header", "header value");
+        headers.Add("X-Some-Signed-Header", "header value");
+
+        Akamai.EdgeGrid.AuthenticationHeader test = new Akamai.EdgeGrid.AuthenticationHeader();
         Akamai.EdgeGrid.Credential credentialEnv = Akamai.EdgeGrid.CredentialFactory.CreateFromEnvironment();
         Akamai.EdgeGrid.Credential credentialFile = Akamai.EdgeGrid.CredentialFactory.CreateFromEdgeRcFile("default", "/Users/miguel.chang/Documents/akamai/auth.edgerc");
         Akamai.EdgeGrid.Credential credential = new Akamai.EdgeGrid.Credential(ClientToken, AccessToken, ClientSecret);
