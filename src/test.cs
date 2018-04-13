@@ -1,6 +1,7 @@
 ﻿using System;
 using Akamai;
 using Akamai.EdgeGrid;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -25,9 +26,13 @@ namespace Akamai
         headers = new Dictionary<string,string>();
 
         headers.Add("X-Some-Signed-Header", "header value");
-        headers.Add("X-Some-Signed-Header", "header value");
 
         Akamai.EdgeGrid.AuthenticationHeader test = new Akamai.EdgeGrid.AuthenticationHeader();
+        Task request = testRequest(test);
+
+        request.Wait();
+
+
         Akamai.EdgeGrid.Credential credentialEnv = Akamai.EdgeGrid.CredentialFactory.CreateFromEnvironment();
         Akamai.EdgeGrid.Credential credentialFile = Akamai.EdgeGrid.CredentialFactory.CreateFromEdgeRcFile("default", "/Users/miguel.chang/Documents/akamai/auth.edgerc");
         Akamai.EdgeGrid.Credential credential = new Akamai.EdgeGrid.Credential(ClientToken, AccessToken, ClientSecret);
@@ -49,6 +54,19 @@ namespace Akamai
             var msg = await stringTask;
             Console.Write(msg);
         }
+
+        private static async Task<string> testRequest(Akamai.EdgeGrid.AuthenticationHeader AuthHeader) {
+            string sresponse =string.Empty;
+            try{
+                var response = await client.SendAsync(AuthHeader.GetRequestMessage());
+                sresponse = await response.Content.ReadAsStringAsync();
+            }catch (Exception ex){
+
+             string here = ex.Message;
+            }
+            return sresponse;
+        }
+
 
     }
 }
