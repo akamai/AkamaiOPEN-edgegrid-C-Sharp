@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Json;
 
+
 namespace Akamai
 {
     public class test
@@ -25,34 +26,31 @@ namespace Akamai
 
         headers = new Dictionary<string,string>();
 
-        headers.Add("X-Some-Signed-Header", "header value");
-
+        string Host = "akab-nncvkmov5ebjtmy5-wszz3cqirmefgkn7.luna.akamaiapis.net";
+        string resource = "/diagnostic-tools/v2/ghost-locations/available";
+        string requestUrl = "https://" + Host + resource;
+        
         Akamai.EdgeGrid.AuthenticationHeader test = new Akamai.EdgeGrid.AuthenticationHeader();
+        test.getCredentialsFromEnvironment();
+        test.setRequestURI(requestUrl);
+        test.setHttpMethod(HttpMethod.Get);
         Task request = testRequest(test);
-
         request.Wait();
+        
+        
+        Akamai.EdgeGrid.AuthenticationHeader test2 = new Akamai.EdgeGrid.AuthenticationHeader(HttpMethod.Get,requestUrl);
+        test.getCredentialsFromEnvironment();
+        Task request2 = testRequest(test);
+        request2.Wait();
 
 
-        Akamai.EdgeGrid.Credential credentialEnv = Akamai.EdgeGrid.CredentialFactory.CreateFromEnvironment();
-        Akamai.EdgeGrid.Credential credentialFile = Akamai.EdgeGrid.CredentialFactory.CreateFromEdgeRcFile("default", "/Users/miguel.chang/Documents/akamai/auth.edgerc");
+        Akamai.EdgeGrid.AuthenticationHeader test3 = new Akamai.EdgeGrid.AuthenticationHeader(HttpMethod.Get,requestUrl);
+        test.getCredentialsFromEdgerc("papi", "/Users/miguel.chang/Documents/akamai/auth.edgerc");
+        Task request3 = testRequest(test3);
+        request3.Wait();
+
         Akamai.EdgeGrid.Credential credential = new Akamai.EdgeGrid.Credential(ClientToken, AccessToken, ClientSecret);
-
             bool areCredentialsValid = credential.isValid;
-            var serializer = new DataContractJsonSerializer(typeof(Akamai.EdgeGrid.Credential));
-
-        }
-
-        private static async Task ProcessRepositories()
-        {
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
-
-            var stringTask = client.GetStringAsync("https://api.github.com/orgs/dotnet/repos");
-
-            var msg = await stringTask;
-            Console.Write(msg);
         }
 
         private static async Task<string> testRequest(Akamai.EdgeGrid.AuthenticationHeader AuthHeader) {

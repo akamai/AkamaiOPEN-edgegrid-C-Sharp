@@ -12,12 +12,25 @@ namespace Akamai.EdgeGrid
         //Akamai API Host
         private readonly string _host;
 
+		//Akamai API post body size
+        private readonly string _maxSize;
+
 		public Credential(string clientToken, string accessToken, string clientSecret)
 		{
             this._clientToken = clientToken;
 			this._accessToken = accessToken;
 			this._clientSecret = clientSecret;
 		}
+		
+		public Credential(string clientToken, string accessToken, string clientSecret, string host, string maxSize)
+		{
+            this._clientToken = string.IsNullOrWhiteSpace(clientToken) ? "": clientToken;
+			this._accessToken = string.IsNullOrWhiteSpace(accessToken) ? "": accessToken; 
+			this._clientSecret = string.IsNullOrWhiteSpace(clientSecret) ? "": clientSecret; 
+			this._host = string.IsNullOrWhiteSpace(host) ? "": host; 
+			this._maxSize = string.IsNullOrWhiteSpace(maxSize) ? "": maxSize; 
+		}
+
 		public string ClientToken
 		{
 			get
@@ -37,6 +50,21 @@ namespace Akamai.EdgeGrid
 			get
 			{
 				return this._clientSecret;
+			}
+		}
+
+		public string Host
+		{
+			get
+			{
+				return this._host;
+			}
+		}
+		public string MaxSize
+		{
+			get
+			{
+				return this._maxSize;
 			}
 		}
 
