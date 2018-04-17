@@ -9,18 +9,19 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Akamai.EdgeGrid.Exception;
 using System.Web;
 
 namespace Akamai.EdgeGrid
 {
     public class AuthenticationHeader
     {
-
         private const string AUTHENTICATIONHEADER = "{0} client_token={1};access_token={2};timestamp={3};nonce={4};"; 
         private const string SIGNATURE = "signature={0}";
         private const string CANONALIZEDHEADER = "{METHOD}\t{SCHEME}\t{HOST}\t{QUERY}\t{HEADERS}\t{BODY}\t{AUTHENTICATION}";
-        private const string Algorithm = "EG1-HMAC-SHA256";
+        private const string ALGORITHM = "EG1-HMAC-SHA256";
+        
+        private const int BODYMAXSIZE = 131072;
         private string ClientToken;
         private string AccessToken;
         private string ClientSecret;
@@ -30,7 +31,6 @@ namespace Akamai.EdgeGrid
             set {_timestamp = value;}
         }
         private string Nonce;
-        private string Signature;
         private string Host;
 
 
@@ -89,12 +89,22 @@ namespace Akamai.EdgeGrid
                 throw new System.Exception("ClientSecret is null or has not been loaded");
             }
 
+            if (this._httpRequest.Method == HttpMethod.Post || this._httpRequest.Method == HttpMethod.Put){
+                if (this._maxBodySize == 0){
+                    throw new System.Exception("Max Body size not set for POST or PUT requests");
+                    }
+                if (this._httpRequest.Content.Headers.ContentLength == null) {
+                    throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Body content not set for this message request");                    
+                }
+            }
+
         }
 
         public void generateSignedRequest(){
             this.Timestamp = this.GetCurrentTimeStamp();
             this.Nonce = this.GenerateNonce();
-            string authHeader = string.Format(AUTHENTICATIONHEADER, Algorithm , ClientToken , AccessToken , Timestamp, Nonce);
+            this.validateData();
+            string authHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM , ClientToken , AccessToken , Timestamp, Nonce);
             string signingKey = getEncryptedSHA256(this.Timestamp, this.ClientSecret);
             string dataToSign = generateDataToSign(authHeader);
             string signedData = getEncryptedSHA256(dataToSign,signingKey);
@@ -133,6 +143,8 @@ namespace Akamai.EdgeGrid
             this.ClientToken = ClientToken;
             this.AccessToken = AccessToken;
             this. ClientSecret = ClientSecret;
+            //set the default body max size to 131072
+            this._maxBodySize = 131072;
         }
 
         public void setCredential(Credential credential){
@@ -150,9 +162,12 @@ namespace Akamai.EdgeGrid
                 if (isConvertable){
                     this._maxBodySize = maxSizeNumber;
                 }else{
-                    throw new System.Exception("Could not convert credential.MaxSize to int");
+                    throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Could not convert credential.MaxSize to int");
                 }
                 
+            }else{
+                //set the default body max size to 131072
+                this._maxBodySize = 131072;
             }
         }
 
@@ -166,10 +181,30 @@ namespace Akamai.EdgeGrid
            this.setCredential(fileCredential);
         }
 
+        public void setApiCustomHeaders(Dictionary<string, string> customHeaders){
+            this.apiHeaders = customHeaders;
+        }
+
+        public void addApiCustomHeaders( string name, string value ){
+            this.apiHeaders.Add(name, value);
+        }
+
         public string getSignedAuthorizationHeader() {
             return string.Empty;
         }
-
+        
+        private string getEncryptedSHA256(string message, string secret)
+        {
+        var encoding = new System.Text.UTF8Encoding();
+        byte[] keyByte = encoding.GetBytes(secret);
+        byte[] messageBytes = encoding.GetBytes(message);
+        using (var hmacsha256 = new HMACSHA256(keyByte))
+        {
+            byte[] hashmessage = hmacsha256.ComputeHash(messageBytes);
+            return Convert.ToBase64String(hashmessage);
+        }
+        }
+        
         private string checkAndCorrectPathQuery(string pathQuery) {
 			if (string.IsNullOrEmpty(pathQuery))
 			{
@@ -184,46 +219,9 @@ namespace Akamai.EdgeGrid
 
 		private string GetCurrentTimeStamp()
 		{   
-			return DateTime.UtcNow.ToString("yyyyMMddTHH:mm:ss+0000");
+        	return DateTime.UtcNow.ToString("yyyyMMddTHH:mm:ss+0000");
 		}
-        
-        private string getEncryptedSHA256(string message, string secret)
-        {
-        var encoding = new System.Text.UTF8Encoding();
-        byte[] keyByte = encoding.GetBytes(secret);
-        byte[] messageBytes = encoding.GetBytes(message);
-        using (var hmacsha256 = new HMACSHA256(keyByte))
-        {
-            byte[] hashmessage = hmacsha256.ComputeHash(messageBytes);
-            return Convert.ToBase64String(hashmessage);
-        }
-        }
-
-        private string getHashedBody(string bodyContent){
-            
-            string requestBody = string.Empty;
-
-            if (_httpRequest != null) {
-                if(_httpRequest.Content != null){
-                    var encoding = new System.Text.UTF8Encoding();
-                    byte[] messageBytes = encoding.GetBytes(bodyContent);
-                    requestBody = getHashedSHA256Body(messageBytes);
-                }
-
-            }
-            return requestBody;
-
-        }
-
-        private string getHashedSHA256Body(byte[] contentBytes)
-        {
-        using (var hmacsha256 = new HMACSHA256())
-        {
-            byte[] hashmessage = hmacsha256.ComputeHash(contentBytes);
-            return Convert.ToBase64String(hashmessage);
-        }
-        }
-
+       
         /// <summary> 
         /// Generate a nonce 
         /// </summary> 
@@ -243,18 +241,21 @@ namespace Akamai.EdgeGrid
                     //TODO: should auto detect headers and remove standard non-http headers
                     string value = apiHeaders[key];
                     if (!string.IsNullOrEmpty(value))
-                        customHeaders.AppendFormat("{0}:{1}\t", key.ToLower(), Regex.Replace(value.Trim(), "\\s+", " ", RegexOptions.Compiled));
+                        customHeaders.AppendFormat("{0}:{1}\t", key.ToLower(), Regex.Replace(value.Trim(), "\\s+", " ", RegexOptions.CultureInvariant));
                 }
             }
             return customHeaders.ToString();
 		}
 
+        public void setBodyContent(string bodyContent) {
+            this._httpRequest.Content = new StringContent(bodyContent, System.Text.Encoding.UTF8, "application/json");
+        } 
         private string GetContentHash(HttpRequestMessage request)
 		{
 			String data = "";
 
 			// only do hash for POSTs for this version
-			if ("POST".Equals(request.Method.Method, StringComparison.InvariantCultureIgnoreCase))
+			if (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put)
 			{
 
 				HttpContent content = request.Content;
@@ -262,25 +263,26 @@ namespace Akamai.EdgeGrid
 				{
 					if (content != null)
 					{
+                        var contentString = content.ReadAsStringAsync();
+                        contentString.Wait();
+                        byte[] contentBytes = Encoding.UTF8.GetBytes(contentString.Result);
 
-						MemoryStream memoryStream = new MemoryStream();
-						Task task = content.CopyToAsync(memoryStream);
+                        int lengthToHash = contentBytes.Length;
+                        if(lengthToHash > _maxBodySize ){
+                            lengthToHash = _maxBodySize;
+                        }
 
-						task.Wait();
-
-						byte[] contentBytes = memoryStream.ToArray();
                         byte[] hashmessage;
-                        using (var hmacsha256 = new HMACSHA256())
+                        using (var sha = SHA256.Create())
                         {
-                            hashmessage = hmacsha256.ComputeHash(contentBytes);
-                            
+                            hashmessage = sha.ComputeHash(contentBytes, 0, lengthToHash);
                         }
                         data = Convert.ToBase64String(hashmessage);
 					}
 				}
 				catch (IOException ioe)
 				{
-					throw new System.Exception("Failed to get content hash: failed to read content", ioe);
+					throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Failed to get content hash: failed to read content", ioe);
 				}					
 
 			}

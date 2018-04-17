@@ -5,10 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Akamai.EdgeGrid.Exception;
 
 namespace Akamai.EdgeGrid
 {
-    public static class EnvironmentCredentialReader
+    internal static class EnvironmentCredentialReader
     {
         public static Credential getCredential(string section){
                 
@@ -23,20 +24,19 @@ namespace Akamai.EdgeGrid
             string bodySize = Environment.GetEnvironmentVariable(prefix + "MAX_SIZE");
 
             if (sectionHost == null){
-                throw new System.Exception("host could not be loaded from environment");
+                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("host could not be loaded from environment");
             }
             if (ClientToken == null){
-                throw new System.Exception("client_token could not be loaded from environment");
+                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("client_token could not be loaded from environment");
             }
             if (AccessToken == null){
-                throw new System.Exception("access_token could not be loaded from environment");      
+                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("access_token could not be loaded from environment");      
             }
             if (ClientSecret == null){
-                throw new System.Exception("client_secret could not be loaded from environment");               
+                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("client_secret could not be loaded from environment");               
             }
             if (bodySize == null){
-                //set the default body max size to 131072
-                bodySize = "131072";              
+                bodySize = "";              
             }
             environmentCredential = new Credential(ClientToken, AccessToken, ClientSecret, sectionHost, bodySize);
             return environmentCredential;

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid
 {
-    public static class EdgeFileReader
+    internal static class EdgeFileReader
     {   
-        public static Credential CreateFromEdgeRcFile(string section, string path) {
+        internal static Credential CreateFromEdgeRcFile(string section, string path) {
             
             Credential fileCredential;
 
@@ -18,14 +18,14 @@ namespace Akamai.EdgeGrid
             {
                 Dictionary<string,string> edgercDictionary = parseEdgeRcFile(section, path);
                 fileCredential = new Credential(
-                     edgercDictionary["client_token"],
-                     edgercDictionary["access_token"],
-                     edgercDictionary["client_secret"],
-                     edgercDictionary["host"],
-                     edgercDictionary["maxSize"]
+                    edgercDictionary.ContainsKey("client_token")?  edgercDictionary["client_token"] : "",
+                    edgercDictionary.ContainsKey("access_token")?  edgercDictionary["client_token"] : "",
+                    edgercDictionary.ContainsKey("client_secret")?  edgercDictionary["client_token"] : "",
+                    edgercDictionary.ContainsKey("host")?  edgercDictionary["client_token"] : "",
+                    edgercDictionary.ContainsKey("maxSize")?  edgercDictionary["client_token"] : ""
                 );
             }else{
-                throw new System.IO.FileNotFoundException("edgerc file not found");
+                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("edgerc file not found");
             }  
             return fileCredential;
         }  
@@ -37,14 +37,12 @@ namespace Akamai.EdgeGrid
             string[] edgeRcFileArray = System.IO.File.ReadAllLines(path);
             string sectionToBeSearched = "[" + section + "]";
             if(edgeRcFileArray.Length > 0){
-                for (int lineIndex=0; lineIndex <= edgeRcFileArray.Length; ++lineIndex)
+                for (int lineIndex=0; lineIndex < edgeRcFileArray.Length; ++lineIndex)
                     if (sectionToBeSearched.Equals(edgeRcFileArray[lineIndex].ToString().Trim())){
                         //if the section matches a section inside the file
                         //then load the properties    
                         dictionaryCredentials = iterateOverSectionCredentials (dictionaryCredentials, edgeRcFileArray,lineIndex+1);
-                        break;
                     }
-                    
             }
 
             return dictionaryCredentials; 
@@ -80,27 +78,26 @@ namespace Akamai.EdgeGrid
                     key = property;
                     value = trimmedLine.Split(textToMatch)[1];
                     if (!dictionaryCredentials.ContainsKey(key)){
-                        dictionaryCredentials.Add(key,value);
-                        break;
+                        dictionaryCredentials.Add(key,value);    
                     }else{
-                        throw new System.Exception("Duplicate" + key +" found. Possible causes: the credential could be declared more than once or it's taking the credential from another section");
+                        throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Duplicate" + key +" found. Possible causes: the credential could be declared more than once or it's taking the credential from another section");
                     }
                 }
             }
             return dictionaryCredentials;
         }
 
-        private static void validateCredentialParams (Dictionary<string, string> dictionaryCredentials){
+        private static void validateCredentialParams(Dictionary<string, string> dictionaryCredentials){
             
             string[] credentialsToValidate = new string[] { "client_secret", "host", "access_token", "client_token"}; 
             
             foreach( string credential in credentialsToValidate) {
                 if (dictionaryCredentials.ContainsKey(credential)) {
                     if(string.IsNullOrWhiteSpace(dictionaryCredentials[credential])){
-                        throw new System.Exception(credential + " should not be empty. Check if it's not empty inside the edgerc file");
+                        throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException(credential + " should not be empty. Check if it's not empty inside the edgerc file");
                     }
                 }else{
-                        throw new System.Exception("Missing "+ credential + " could not be loaded from the edgerc file. Possible problems: syntax error, unexpected property inside the section or missing credential inside file");                    
+                        throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Missing "+ credential + " could not be loaded from the edgerc file. Possible problems: syntax error, unexpected property inside the section or missing credential inside file");                    
                 }
             }
         }
