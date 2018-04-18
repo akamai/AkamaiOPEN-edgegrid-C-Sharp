@@ -19,10 +19,10 @@ namespace Akamai.EdgeGrid
                 Dictionary<string,string> edgercDictionary = parseEdgeRcFile(section, path);
                 fileCredential = new Credential(
                     edgercDictionary.ContainsKey("client_token")?  edgercDictionary["client_token"] : "",
-                    edgercDictionary.ContainsKey("access_token")?  edgercDictionary["client_token"] : "",
-                    edgercDictionary.ContainsKey("client_secret")?  edgercDictionary["client_token"] : "",
-                    edgercDictionary.ContainsKey("host")?  edgercDictionary["client_token"] : "",
-                    edgercDictionary.ContainsKey("maxSize")?  edgercDictionary["client_token"] : ""
+                    edgercDictionary.ContainsKey("access_token")?  edgercDictionary["access_token"] : "",
+                    edgercDictionary.ContainsKey("client_secret")?  edgercDictionary["client_secret"] : "",
+                    edgercDictionary.ContainsKey("host")?  edgercDictionary["host"] : "",
+                    edgercDictionary.ContainsKey("maxSize")?  edgercDictionary["maxSize"] : ""
                 );
             }else{
                 throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("edgerc file not found");
