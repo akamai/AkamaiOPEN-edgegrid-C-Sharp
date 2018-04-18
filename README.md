@@ -14,7 +14,8 @@ The API Spec can be found at: https://developer.akamai.com/api
 * Copy the AkamaiEdgeGrid.dll to your application or solution. 
 
 ## Getting Started
-* Create an instance of the `EdgeGridSigner` using any of the constructors available
+
+Create an instance of the `EdgeGridSigner` using any of the constructors available
 
 ```
 using Akamai.EdgeGrid.Auth;
@@ -30,7 +31,7 @@ HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "http
 var signerWithHttpRequestMessage = new EdgeGridSigner(requestMessage);
 ```
 
-* Add the required Credentials to the Signer by either: 
+Add the required Credentials to the Signer by either: 
 * Creating your own credentials and passing it to the signer
 ```
     string client_token = "default_client_token";
@@ -54,13 +55,13 @@ var signerWithHttpRequestMessage = new EdgeGridSigner(requestMessage);
     signer.getCredentialsFromEdgerc("Section Name", "Path to the file");
 ```
 
-* The Signer constructor defaults to the 'GET' method if none is specified during the constructor, you can change this using setMethod
+The Signer constructor defaults to the 'GET' method if none is specified during the constructor, you can change this using setMethod
 ```
     var signer = new EdgeGridSigner();
     signer.setHttpMethod(HttpMethod.Get);
 ```
 
-* If the method is 'POST', a content-body must be set with setBodyContent or the signer will fail with an exception
+If the method is 'POST', a content-body must be set with setBodyContent or the signer will fail with an exception
 ```
     string postBody = "{\n    \"endUserName\": \"name\",\n    \"url\": \"www.test.com\"\n}";
 
@@ -69,17 +70,17 @@ var signerWithHttpRequestMessage = new EdgeGridSigner(requestMessage);
     signer.setBodyContent(postBody);
 ```
 
-* An URL request is needed, add it if you didn't specify one in the constructor 
+An URL request is needed, add it if you didn't specify one in the constructor 
 ```
     signer.setRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
 ```
 
-* If all the requirements are meet then we can call GetRequestMessage which will generate our signed HttpRequestMessage
+If all the requirements are meet then we can call GetRequestMessage which will generate our signed HttpRequestMessage
 ```
     HttpRequestMessage messageRequest = test.GetRequestMessage();
 ```
 
-##Complete example of a get request:
+## Complete example of a get request
 
 ```
     string client_token = "Akamai_client_token";
@@ -102,7 +103,7 @@ var signerWithHttpRequestMessage = new EdgeGridSigner(requestMessage);
 
 ```
 
-##Complete example of a post request:
+## Complete example of a post request
 
 ```
     string client_token = "Akamai_client_token";
@@ -127,7 +128,7 @@ var signerWithHttpRequestMessage = new EdgeGridSigner(requestMessage);
     //Process response after it finish
 ```
 
-##Notes:
+## Notes:
 
 * This signer was build specifically for the HttpClient, but if you want to use another client the signer has an option that generates the Authorization Header in string value.
    
