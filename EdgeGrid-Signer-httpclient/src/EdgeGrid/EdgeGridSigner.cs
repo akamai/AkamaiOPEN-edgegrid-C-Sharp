@@ -20,7 +20,7 @@ namespace Akamai.EdgeGrid
         private const string CANONALIZEDHEADER = "{METHOD}\t{SCHEME}\t{HOST}\t{QUERY}\t{HEADERS}\t{BODY}\t{AUTHENTICATION}";
         private const string ALGORITHM = "EG1-HMAC-SHA256";
         
-        private const int BODYMAXSIZE = 131072;
+        private const int MAXBODYSIZE = 131072;
         private string ClientToken;
         private string AccessToken;
         private string ClientSecret;
@@ -29,7 +29,12 @@ namespace Akamai.EdgeGrid
             get {return _timestamp;}
             set {_timestamp = value;}
         }
-        private string Nonce;
+        private string _nonce;
+
+        public string Nonce {
+            get {return _nonce;}
+            set {_nonce = value;}   
+        }
         private string Host;
 
 
@@ -45,6 +50,7 @@ namespace Akamai.EdgeGrid
 
         public EdgeGridSigner(HttpMethod method,string requestUrl){
             this._httpRequest = new HttpRequestMessage();
+            this._httpRequest.Method = method;
             this.setRequestURI(requestUrl);
         }
 
@@ -66,6 +72,12 @@ namespace Akamai.EdgeGrid
         }
 
         private void validateData(){
+            if (Timestamp == null){
+                this.Timestamp = this.GetCurrentTimeStamp();
+            }
+            if (this.Nonce == null){
+                this.Nonce = this.GenerateNonce();
+            }
             if(this._httpRequest.RequestUri == null){
                 throw new System.Exception("Request URL not Set");
             }
@@ -76,23 +88,20 @@ namespace Akamai.EdgeGrid
                 }
             }
             
-            if(this.ClientToken == null){
+            if(String.IsNullOrWhiteSpace(this.ClientToken)){
                 throw new System.Exception("ClientToken is null or has not been loaded");
             }
 
-            if(this.AccessToken == null){
+            if(String.IsNullOrWhiteSpace(this.AccessToken)){
                 throw new System.Exception("AccessToken is null or has not been loaded");
             }
 
-            if(this.ClientSecret == null){
+            if(String.IsNullOrWhiteSpace(this.ClientSecret)){
                 throw new System.Exception("ClientSecret is null or has not been loaded");
             }
 
             if (this._httpRequest.Method == HttpMethod.Post || this._httpRequest.Method == HttpMethod.Put){
-                if (this._maxBodySize == 0){
-                    throw new System.Exception("Max Body size not set for POST or PUT requests");
-                    }
-                if (this._httpRequest.Content.Headers.ContentLength == null) {
+                if (this._httpRequest.Content == null) {
                     throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("Body content not set for this message request");                    
                 }
             }
@@ -100,8 +109,6 @@ namespace Akamai.EdgeGrid
         }
 
         public void generateSignedRequest(){
-            this.Timestamp = this.GetCurrentTimeStamp();
-            this.Nonce = this.GenerateNonce();
             this.validateData();
             string authHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM , ClientToken , AccessToken , Timestamp, Nonce);
             string signingKey = getEncryptedHMACSHA256(this.Timestamp, this.ClientSecret);
@@ -111,7 +118,16 @@ namespace Akamai.EdgeGrid
              _httpRequest.Headers.Add("Authorization",completeAuthHeader);
         }
 
-        public string generateDataToSign(string AuthHeader){
+        public string generateAuthorizationString(){
+            this.validateData();
+            string authHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM , ClientToken , AccessToken , Timestamp, Nonce);
+            string signingKey = getEncryptedHMACSHA256(this.Timestamp, this.ClientSecret);
+            string dataToSign = generateDataToSign(authHeader);
+            string signedData = getEncryptedHMACSHA256(dataToSign,signingKey);
+            string completeAuthHeader = authHeader + string.Format(SIGNATURE, signedData);
+            return completeAuthHeader;
+        }
+        private string generateDataToSign(string AuthHeader){
             StringBuilder SBdataToSign = new StringBuilder(CANONALIZEDHEADER);
 
             string requestMethod = _httpRequest.Method.Method.ToUpper();
@@ -143,7 +159,7 @@ namespace Akamai.EdgeGrid
             this.AccessToken = AccessToken;
             this. ClientSecret = ClientSecret;
             //set the default body max size to 131072
-            this._maxBodySize = 131072;
+            this._maxBodySize = MAXBODYSIZE;
         }
 
         public void setCredential(Credential credential){
@@ -185,6 +201,9 @@ namespace Akamai.EdgeGrid
         }
 
         public void addApiCustomHeaders( string name, string value ){
+            if(this.apiHeaders == null){
+                this.apiHeaders = new Dictionary<string, string>();
+            }
             this.apiHeaders.Add(name, value);
         }
 
