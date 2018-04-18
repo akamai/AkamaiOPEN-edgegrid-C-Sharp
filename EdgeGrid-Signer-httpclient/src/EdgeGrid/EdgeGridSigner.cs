@@ -207,10 +207,6 @@ namespace Akamai.EdgeGrid
             this.apiHeaders.Add(name, value);
         }
 
-        public string getSignedAuthorizationHeader() {
-            return string.Empty;
-        }
-        
         private string getEncryptedHMACSHA256(string message, string secret)
         {
         var encoding = new System.Text.UTF8Encoding();
