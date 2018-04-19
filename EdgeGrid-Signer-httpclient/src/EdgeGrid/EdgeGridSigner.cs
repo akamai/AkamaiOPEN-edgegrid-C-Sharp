@@ -108,7 +108,7 @@ namespace Akamai.EdgeGrid
 
         }
 
-        public void generateSignedRequest(){
+        private void generateSignedRequest(){
             this.validateData();
             string authHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM , ClientToken , AccessToken , Timestamp, Nonce);
             string signingKey = getEncryptedHMACSHA256(this.Timestamp, this.ClientSecret);
