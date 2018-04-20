@@ -156,3 +156,7 @@ If all the requirements are meet then we can call GetRequestMessage which will g
 ```
 client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=z1aM4VHWZURQ/iuN1t/OtqI1Y+612kmL3m4hTs49tYM=
 ```
+
+## Sample application (OpenApi)
+A sample application has been created that can take command line parameters. 
+Check the instructions here: [OpenApi](/OpenApi/README.md)
