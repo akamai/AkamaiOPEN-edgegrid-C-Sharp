@@ -86,6 +86,7 @@ namespace OpenApi
                             outputfile = arg;
                             break;
                         case "--r":
+                            edgercfilePath = arg;
                             loadCredFromEnvironment = false;
                             //loading credentials from edgerc file takes precedence over environment
                             loadCredFromEdgerc = true;
@@ -158,8 +159,8 @@ namespace OpenApi
                 if (loadCredFromEnvironment){
                     signer.getCredentialsFromEnvironment(section);            
                 }
-                if (loadCredFromEnvironment){
-                    signer.getCredentialsFromEdgerc(edgercfilePath,section);            
+                if (loadCredFromEdgerc){
+                    signer.getCredentialsFromEdgerc(section, edgercfilePath);            
                 }
             }
             
@@ -190,6 +191,20 @@ namespace OpenApi
                 signer.setApiCustomHeaders(dictionaryHeader);
                 }
             }
+
+            ///IMPORTANT///
+            ///*This part is usually not required, the signer library automatically gets the latest datetime from your system in UTC format
+            /// but sometimes the date of your NTP may have an offset higher thant 30 seconds and that's when you will probably be hit with the infamous:
+            ///         400 Bad Request: Invalid Timestamp
+            ///*This happens because the timestamp of your local machine differs from the AKAMAI NTP server by more than 30 seconds 
+            ///(30 seconds is the MAX amount of time a request can differ from the AKAMAI API NTP in order to be accepted)
+            ///*In order to bypass this problem I had to add (or substract) the seconds to make the request valid for AKAMAI
+            ///*You can check your time offeset by doing "ntpdate" on an unix console
+            DateTime currentDate = DateTime.Now;
+            signer.Timestamp = currentDate.AddSeconds(-15).ToUniversalTime().ToString("yyyyMMddTHH:mm:ss+0000");
+            ///End of the temporary patch code   
+            ///Remove this lines if you don't need it
+
             HttpRequestMessage request;
             try{
                 request = signer.GetRequestMessage();
@@ -205,7 +220,7 @@ namespace OpenApi
             }
             var response = client.SendAsync(request);
             response.Wait();
-
+            
 
             var responseContent = response.Result.Content.ReadAsStringAsync();
             responseContent.Wait();
@@ -213,10 +228,10 @@ namespace OpenApi
             string result = responseContent.Result;
 
             if(string.IsNullOrWhiteSpace(outputfile)){
-                Console.WriteLine("Request response: {0}" , responseContent.ToString());
+                Console.WriteLine("Request response: {0}" , result);
             }else{
                 try{
-                    System.IO.File.WriteAllText(outputfile, responseContent.ToString());
+                    System.IO.File.WriteAllText(outputfile, result);
                 }catch(Exception ex){
                     Console.WriteLine(ex.Message);
                 }
