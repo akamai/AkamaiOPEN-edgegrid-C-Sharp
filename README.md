@@ -7,6 +7,7 @@ The API Spec can be found at: https://developer.akamai.com/api
 * /EdgeGrid-Signer-httpclient - core auth signer for .net httpclient
 * /EdgeGridAuthTest - nunit unit tests
 * /AkamaiEdgeGrid.sln - root VisualStudio solution
+* /OpenApi - Cli example leveraging the EdgeGrid-Signer-httpclient library
 
 ## Install
 * Open the Akamai.EdgeGrid.Auth.sln in Visual Studio; Rebuild All
