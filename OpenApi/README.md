@@ -31,5 +31,5 @@ This application is a CLI that leverages the EdgeGridSigner signer library.
 
 * Loading Post Body from file
 ```
-    ./OpenApi --a "Access_Token" --c "Client_Token" --s "Client_Secret" --f "/Users/miguel.chang/Documents/AkamaiEdgeGrid/OpenApi/postBody" "https://AkamaiHost.net/diagnostic-tools/v2/end-users/diagnostic-url"
+    ./OpenApi --a "Access_Token" --c "Client_Token" --s "Client_Secret" --f "{workspace}/OpenApi/postBody" "https://AkamaiHost.net/diagnostic-tools/v2/end-users/diagnostic-url"
 ```
