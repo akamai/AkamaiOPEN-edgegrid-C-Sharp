@@ -159,4 +159,4 @@ client_token=default_client_token;access_token=default_access_token;timestamp=20
 
 ## Sample application (OpenApi)
 A sample application has been created that can take command line parameters. 
-Check the instructions here: [OpenApi](/OpenApi/README.md)
+Check the instructions here: [OpenApi](/OpenApi)
