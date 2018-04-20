@@ -11,7 +11,7 @@ This application is a CLI that leverages the EdgeGridSigner signer library.
 
 * Get Request
 ```
-    ./OpenApi --a "Access_Token" --c "Client_Token" --s  "Client_Secret" --d "{\n    \"endUserName\": \"name\",\n    \"url\": \"www.test.com\"\n}" "https://AkamaiHost.net/diagnostic-tools/v2/end-users/diagnostic-url"
+    ./OpenApi --a "Access_Token" --c "Client_Token" --s  "Client_Secret" "https://AkamaiHost.net/diagnostic-tools/v2/ghost-locations/available"
 ```
 
 * Post Request
