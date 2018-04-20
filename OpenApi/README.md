@@ -4,8 +4,8 @@ This application is a CLI that leverages the EdgeGridSigner signer library.
 
 ## Getting Started
 
-*Build the project in release mode.
-*Copy executable and dll to a directory you want to store it
+* Build the project in release mode.
+* Copy executable and dll to a directory you want to store it
 
 ## How to use
 
