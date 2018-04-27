@@ -21,9 +21,6 @@
     <None Remove=".edgerc" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="EdgeGridNonceTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Authentication\" />
   </ItemGroup>
 </Project>
