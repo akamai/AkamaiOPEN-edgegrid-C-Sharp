@@ -1,6 +1,8 @@
-using NUnit.Framework;
-using Akamai.EdgeGrid;
 using System.Net.Http;
+using Akamai.EdgeGrid;
+using AkamaiEdgeGrid.EdgeGrid;
+using Akamai.EdgeGrid.Exception;
+using NUnit.Framework;
 
 namespace Tests
 {
@@ -8,287 +10,226 @@ namespace Tests
     {
 
         [Test]
-        public void Test_ConstructorDefaultCreation()
+        public void TestEdgeGridConstructorDefaultCreation()
         {
             EdgeGridSigner test = new EdgeGridSigner();
             Assert.NotNull(test);
         }
+
         [Test]
-        public void Test_SecondConstructorCreation()
+        public void TestEdgeGridSecondConstructorCreation()
         {
             EdgeGridSigner test = new EdgeGridSigner(HttpMethod.Get, "https://test_host/diagnostic-tools/v2/ghost-locations/available");
             Assert.NotNull(test);
         }
 
         [Test]
-        public void Test_ThirdConstructorCreation()
+        public void TestEdgeGridThirdConstructorCreation()
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://test_host/diagnostic-tools/v2/ghost-locations/available");
             EdgeGridSigner test = new EdgeGridSigner(requestMessage);
             Assert.NotNull(test);
         }
 
-
         [Test]
-        public void Test_generateGetSignedRequest()
+        public void TestEdgeGridGenerateGetSignedRequest()
         {
             EdgeGridSigner test = new EdgeGridSigner();
-            test.getCredentialsFromEdgerc("default", "../../../auth.edgerc");
-            test.setHttpMethod(HttpMethod.Get);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.GetCredentialsFromEdgerc("default", "../../../auth.edgerc");
+            test.SetHttpMethod(HttpMethod.Get);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
             string expectedAuthorizationsValue = "client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=ife78XmO9ajbUoZ6yKwgK0T44TywQxQeHkIUxY90oFo=";
 
-            Assert.AreEqual(expectedAuthorizationscheme ,messageRequest.Headers.Authorization.Scheme);
+            Assert.AreEqual(expectedAuthorizationscheme, messageRequest.Headers.Authorization.Scheme);
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest.Headers.Authorization.Parameter);
         }
-        
+
         [Test]
-        public void Test_generateGetAuthorizationString()
+        public void TestEdgeGridGenerateGetAuthorizationString()
         {
             EdgeGridSigner test = new EdgeGridSigner();
-            test.getCredentialsFromEdgerc("default", "../../../auth.edgerc");
-            test.setHttpMethod(HttpMethod.Get);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
-            string messageRequest = test.generateAuthorizationString();
+            test.GetCredentialsFromEdgerc("default", "../../../auth.edgerc");
+            test.SetHttpMethod(HttpMethod.Get);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            string messageRequest = test.GenerateAuthorizationString();
             string expectedAuthorizationsValue = "EG1-HMAC-SHA256 client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=ife78XmO9ajbUoZ6yKwgK0T44TywQxQeHkIUxY90oFo=";
 
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest);
         }
 
         [Test]
-        public void Test_generatePostSignedRequest()
+        public void TestEdgeGridGeneratePostSignedRequest()
         {
             string postBody = "{\n    \"endUserName\": \"name\",\n    \"url\": \"www.test.com\"\n}";
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.getCredentialsFromEdgerc("default", "../../../auth.edgerc");
-            test.setHttpMethod(HttpMethod.Post);
-            test.setBodyContent(postBody);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            test.GetCredentialsFromEdgerc("default", "../../../auth.edgerc");
+            test.SetHttpMethod(HttpMethod.Post);
+            test.SetBodyContent(postBody);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
             string expectedAuthorizationsValue = "client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=z1aM4VHWZURQ/iuN1t/OtqI1Y+612kmL3m4hTs49tYM=";
 
-            Assert.AreEqual(expectedAuthorizationscheme ,messageRequest.Headers.Authorization.Scheme);
+            Assert.AreEqual(expectedAuthorizationscheme, messageRequest.Headers.Authorization.Scheme);
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest.Headers.Authorization.Parameter);
         }
 
-
         [Test]
-        public void Test_generateExtraHeadersSignedRequest()
+        public void TestEdgeGridGenerateExtraHeadersSignedRequest()
         {
             string postBody = "{\n    \"endUserName\": \"name\",\n    \"url\": \"www.test.com\"\n}";
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.getCredentialsFromEdgerc("default", "../../../auth.edgerc");
-            test.setHttpMethod(HttpMethod.Post);
-            test.setBodyContent(postBody);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.addApiCustomHeaders("x-a","va" );
-            test.addApiCustomHeaders("x-c","\"      xc        \"");
-            test.addApiCustomHeaders("x-b","    w         b");
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            test.GetCredentialsFromEdgerc("default", "../../../auth.edgerc");
+            test.SetHttpMethod(HttpMethod.Post);
+            test.SetBodyContent(postBody);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.AddApiCustomHeaders("x-a", "va");
+            test.AddApiCustomHeaders("x-c", "\"      xc        \"");
+            test.AddApiCustomHeaders("x-b", "    w         b");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
             string expectedAuthorizationsValue = "client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=U3v36bcZAwWqfl0CrdivBbxhjYdCOwDKYO8cKvEhuE8=";
 
-            Assert.AreEqual(expectedAuthorizationscheme ,messageRequest.Headers.Authorization.Scheme);
+            Assert.AreEqual(expectedAuthorizationscheme, messageRequest.Headers.Authorization.Scheme);
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest.Headers.Authorization.Parameter);
         }
 
         [Test]
-        public void Test_generateCustomCredentialSignedRequest()
+        public void TestEdgeGridGenerateCustomCredentialSignedRequest()
         {
-            string client_token = "default_client_token";
-            string access_token = "default_access_token";
-            string client_secret = "default_client_secret";
+            string clientToken = "default_client_token";
+            string accessToken = "default_access_token";
+            string clientSecret = "default_client_secret";
 
-            Credential credential = new Credential(client_token, access_token, client_secret);
+            Credential credential = new Credential(clientToken, accessToken, clientSecret);
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setCredential(credential);
-            test.setHttpMethod(HttpMethod.Get);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetCredential(credential);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
             string expectedAuthorizationsValue = "client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=ife78XmO9ajbUoZ6yKwgK0T44TywQxQeHkIUxY90oFo=";
 
-            Assert.AreEqual(expectedAuthorizationscheme ,messageRequest.Headers.Authorization.Scheme);
+            Assert.AreEqual(expectedAuthorizationscheme, messageRequest.Headers.Authorization.Scheme);
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest.Headers.Authorization.Parameter);
         }
 
         [Test]
-        public void Test_generateSecondCustomCredentialSignedRequest()
+        public void TestEdgeGridGenerateSecondCustomCredentialSignedRequest()
         {
-            string client_token = "default_client_token";
+            string clientToken = "default_client_token";
             string host = "default_host";
-            string access_token = "default_access_token";
-            string client_secret = "default_client_secret";
-            string max_body_size = "2800";
+            string accessToken = "default_access_token";
+            string clientSecret = "default_client_secret";
+            string maxBodySize = "2800";
 
-            Credential credential = new Credential(client_token, access_token, client_secret, host, max_body_size);
+            Credential credential = new Credential(clientToken, accessToken, clientSecret, host, maxBodySize);
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setCredential(credential);
-            test.setHttpMethod(HttpMethod.Get);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetCredential(credential);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
+            test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
             string expectedAuthorizationsValue = "client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=ife78XmO9ajbUoZ6yKwgK0T44TywQxQeHkIUxY90oFo=";
 
-            Assert.AreEqual(expectedAuthorizationscheme ,messageRequest.Headers.Authorization.Scheme);
+            Assert.AreEqual(expectedAuthorizationscheme, messageRequest.Headers.Authorization.Scheme);
             Assert.AreEqual(expectedAuthorizationsValue, messageRequest.Headers.Authorization.Parameter);
         }
 
         [Test]
-        public void Test_HostDifferentFromURIException()
+        public void TestEdgeGridHostDifferentFromURIException()
         {
-            string client_token = "default_client_token";
+            string clientToken = "default_client_token";
             string host = "otherhost";
-            string access_token = "default_access_token";
-            string client_secret = "default_client_secret";
-            string max_body_size = "2800";
+            string accessToken = "default_access_token";
+            string clientSecret = "default_client_secret";
+            string maxBodySize = "2800";
 
-            Credential credential = new Credential(client_token, access_token, client_secret, host, max_body_size);
+            Credential credential = new Credential(clientToken, accessToken, clientSecret, host, maxBodySize);
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setCredential(credential);
-            test.setHttpMethod(HttpMethod.Get);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
-            string exceptionMessage ="";
-            try {
-                HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "URI Request does not match the HOST from the loaded Credentials";
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.SetCredential(credential);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.Timestamp = new EdgeGridTimestamp();
+            test.Nonce = new EdgeGridNonce();
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            Assert.Throws<EdgeGridSignerException>(() => test.GetRequestMessage());
         }
 
         [Test]
-        public void Test_HostDifferentNoURIException()
+        public void TestEdgeGridNoHostUriException()
         {
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setHttpMethod(HttpMethod.Get);
-            string exceptionMessage ="";
-            try {
-            HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "Request URL not Set";
-
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.SetHttpMethod(HttpMethod.Get);
+            Assert.Throws<System.ArgumentNullException>(() => test.GetRequestMessage());
         }
 
         [Test]
-        public void Test_NoClientTokenException()
+        public void TestEdgeGridNoClientTokenException()
         {
-            string client_token = "";
-            Credential credential = new Credential(client_token, "test", "test", "test", "10");
+            Credential credential = new Credential("", "test", "test", "test", "10");
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setHttpMethod(HttpMethod.Get);
-            test.setRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
-            test.setCredential(credential);
-            string exceptionMessage ="";
-            try {
-            HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "ClientToken is null or has not been loaded";
-
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
         [Test]
-        public void Test_NoAccessTokenException()
+        public void TestEdgeGridNoAccessTokenException()
         {
-            string access_token = "";
-            Credential credential = new Credential("test", access_token,"test", "test", "10");
+            Credential credential = new Credential("test", "", "test", "test", "10");
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setHttpMethod(HttpMethod.Get);
-            test.setRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
-            test.setCredential(credential);
-            string exceptionMessage ="";
-            try {
-            HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "AccessToken is null or has not been loaded";
-
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
         [Test]
-        public void Test_NoClientSecretException()
+        public void TestEdgeGridNoClientSecretException()
         {
-            string Client_Secret = "";
-            Credential credential = new Credential("test", "test",Client_Secret, "test", "10");
+            Credential credential = new Credential("test", "test", "", "test", "10");
 
             EdgeGridSigner test = new EdgeGridSigner();
-            test.setHttpMethod(HttpMethod.Get);
-            test.setRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
-            test.setCredential(credential);
-            string exceptionMessage ="";
-            try {
-            HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "ClientSecret is null or has not been loaded";
-
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.SetHttpMethod(HttpMethod.Get);
+            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
         [Test]
-        public void Test_NoPostContentException()
+        public void TestEdgeGridNoPostContentException()
         {
             EdgeGridSigner test = new EdgeGridSigner();
-            test.getCredentialsFromEdgerc("default", "../../../auth.edgerc");
-            test.setHttpMethod(HttpMethod.Post);
-            test.Timestamp  =  "20180416T20:52:22+0000";
-            test.Nonce = "ad5b09f0-2402-41df-9a35-a24ec46149b1";
-            test.setRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
-            string exceptionMessage ="";
-            try {
-            HttpRequestMessage messageRequest = test.GetRequestMessage();
-            }catch(System.Exception exception){
-                exceptionMessage = exception.Message;
-            }
-            string expectedExceptionMessage= "Body content not set for this message request";
-
-
-            Assert.AreEqual(expectedExceptionMessage ,exceptionMessage);
+            test.GetCredentialsFromEdgerc("default", "../../../auth.edgerc");
+            test.SetHttpMethod(HttpMethod.Post);
+            test.Timestamp = new EdgeGridTimestamp();
+            test.Nonce = new EdgeGridNonce();
+            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            Assert.Throws<EdgeGridSignerException>(() => test.GetRequestMessage());
         }
-
     }
 }

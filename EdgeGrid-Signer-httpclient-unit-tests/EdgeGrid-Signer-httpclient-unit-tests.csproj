@@ -16,4 +16,14 @@
     <ProjectReference Include="..\EdgeGrid-Signer-httpclient\AkamaiEdgeGrid.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove=".edgerc" />
+    <None Remove=".edgerc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="EdgeGridNonceTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Authentication\" />
+  </ItemGroup>
 </Project>
