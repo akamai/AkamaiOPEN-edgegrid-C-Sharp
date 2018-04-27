@@ -154,19 +154,19 @@ namespace OpenApi
             EdgeGridSigner signer = new EdgeGridSigner( requestMethod, apiurl);
 
             if (!string.IsNullOrWhiteSpace(clientToken) && !string.IsNullOrWhiteSpace(accessToken) && !string.IsNullOrWhiteSpace(secret) && !string.IsNullOrWhiteSpace(apiurl)){
-                signer.setCredential(clientToken, accessToken, secret);            
+                signer.SetCredential(clientToken, accessToken, secret);            
             }else{
                 if (loadCredFromEnvironment){
-                    signer.getCredentialsFromEnvironment(section);            
+                    signer.GetCredentialsFromEnvironment(section);            
                 }
                 if (loadCredFromEdgerc){
-                    signer.getCredentialsFromEdgerc(section, edgercfilePath);            
+                    signer.GetCredentialsFromEdgerc(section, edgercfilePath);            
                 }
             }
             
             if(requestMethod == HttpMethod.Post || requestMethod == HttpMethod.Put){
                 if(!string.IsNullOrWhiteSpace(data) ){
-                    signer.setBodyContent(data);
+                    signer.SetBodyContent(data);
                 }
 
                 if(uploadFromFile){
@@ -177,7 +177,7 @@ namespace OpenApi
                         Console.WriteLine(io.Message);
                         return;
                     }
-                    signer.setBodyContent(bodyContent);
+                    signer.SetBodyContent(bodyContent);
                 }
             }
 
@@ -188,7 +188,7 @@ namespace OpenApi
                        string[] keyAndValue = header.Split(':',2);
                        dictionaryHeader.Add(keyAndValue[0], keyAndValue[1]);
                     }
-                signer.setApiCustomHeaders(dictionaryHeader);
+                signer.SetApiCustomHeaders(dictionaryHeader);
                 }
             }
 
@@ -201,7 +201,7 @@ namespace OpenApi
             ///*In order to bypass this problem I had to add (or substract) the seconds to make the request valid for AKAMAI
             ///*You can check your time offeset by doing "ntpdate" on an unix console
             DateTime currentDate = DateTime.Now;
-            signer.Timestamp = currentDate.AddSeconds(-15).ToUniversalTime().ToString("yyyyMMddTHH:mm:ss+0000");
+            signer.Timestamp.Timestamp = currentDate.AddSeconds(-15).ToUniversalTime();
             ///End of the temporary patch code   
             ///Remove this lines if you don't need it
 
