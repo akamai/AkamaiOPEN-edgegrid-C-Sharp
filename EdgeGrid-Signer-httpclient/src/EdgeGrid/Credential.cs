@@ -24,11 +24,11 @@ namespace Akamai.EdgeGrid
 
         public Credential(string clientToken, string accessToken, string clientSecret, string host, string maxSize)
         {
-            this._clientToken = string.IsNullOrWhiteSpace(clientToken) ? "" : clientToken;
-            this._accessToken = string.IsNullOrWhiteSpace(accessToken) ? "" : accessToken;
-            this._clientSecret = string.IsNullOrWhiteSpace(clientSecret) ? "" : clientSecret;
-            this._host = string.IsNullOrWhiteSpace(host) ? "" : host;
-            this._maxSize = string.IsNullOrWhiteSpace(maxSize) ? "" : maxSize;
+            this._clientToken = string.IsNullOrWhiteSpace(clientToken) ? string.Empty : clientToken;
+            this._accessToken = string.IsNullOrWhiteSpace(accessToken) ? string.Empty : accessToken;
+            this._clientSecret = string.IsNullOrWhiteSpace(clientSecret) ? string.Empty : clientSecret;
+            this._host = string.IsNullOrWhiteSpace(host) ? string.Empty : host;
+            this._maxSize = string.IsNullOrWhiteSpace(maxSize) ? string.Empty : maxSize;
         }
 
         public string ClientToken

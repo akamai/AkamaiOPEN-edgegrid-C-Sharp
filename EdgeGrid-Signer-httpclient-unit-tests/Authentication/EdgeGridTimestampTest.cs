@@ -18,11 +18,11 @@ namespace Tests
         public void TestIsValid()
         {
             var timestamp = new EdgeGridTimestamp();
-            Assert.IsTrue(timestamp.isValid());
+            Assert.IsTrue(timestamp.IsValid());
             var timestampInterval = new TimeSpan(0, 0, 0);
-            timestamp.setValidFor(timestampInterval);
+            timestamp.SetValidFor(timestampInterval);
             System.Threading.Thread.Sleep(1000);
-            Assert.IsFalse(timestamp.isValid());
+            Assert.IsFalse(timestamp.IsValid());
         }
     }
 }

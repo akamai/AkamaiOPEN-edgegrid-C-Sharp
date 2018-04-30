@@ -11,14 +11,14 @@ namespace AkamaiEdgeGrid.EdgeGrid
 
         public EdgeGridNonce()
         {
-            this.nonce = this.getNonce();
+            this.nonce = this.GetNonce();
         }
 
         public EdgeGridNonce(string nonce)
         {
             if (String.IsNullOrWhiteSpace(nonce))
             {
-                this.nonce = this.getNonce();
+                this.nonce = this.GetNonce();
             }
             else
             {
@@ -26,7 +26,7 @@ namespace AkamaiEdgeGrid.EdgeGrid
             }
         }
 
-        public string getNonce(){
+        public string GetNonce(){
             return Guid.NewGuid().ToString();
         }
 

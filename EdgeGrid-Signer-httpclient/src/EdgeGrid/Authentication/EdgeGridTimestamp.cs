@@ -56,7 +56,7 @@ namespace AkamaiEdgeGrid.EdgeGrid
         /// Determinate if the Timestamp is valid
         /// </summary>
         /// <returns><c>true</c>, if valid timestamp, <c>false</c> otherwise.</returns>
-        public bool isValid()
+        public bool IsValid()
         {
             bool result = false;
 
@@ -70,7 +70,7 @@ namespace AkamaiEdgeGrid.EdgeGrid
         /// Sets the valid interval
         /// </summary>
         /// <param name="timespanInterval">Timespan interval</param>
-        public void setValidFor(TimeSpan timespanInterval)
+        public void SetValidFor(TimeSpan timespanInterval)
         {
             this.timestampInterval = timespanInterval;
         }
