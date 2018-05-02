@@ -55,12 +55,7 @@ namespace Akamai.EdgeGrid
 
         public EdgeGridSigner(HttpRequestMessage request)
         {
-            if (request == null)
-            {
-                throw new ArgumentException("Invalid request parameter");
-            }
-
-            HttpRequest = request;
+            HttpRequest = request ?? throw new ArgumentException("Invalid request parameter");
         }
 
         public void SetRequestUri(string request)
@@ -274,7 +269,6 @@ namespace Akamai.EdgeGrid
 
         private string CheckAndCorrectPathQuery(string pathQuery)
         {
-
             if (string.IsNullOrEmpty(pathQuery))
             {
                 pathQuery = "/";
