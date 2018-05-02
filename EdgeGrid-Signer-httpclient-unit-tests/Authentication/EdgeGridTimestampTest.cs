@@ -1,6 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
-using AkamaiEdgeGrid.EdgeGrid;
+using Akamai.EdgeGrid;
 
 namespace Tests
 {

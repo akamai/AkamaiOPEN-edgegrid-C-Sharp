@@ -1,6 +1,6 @@
 using System.Net.Http;
 using Akamai.EdgeGrid;
-using AkamaiEdgeGrid.EdgeGrid;
+using Akamai.EdgeGrid;
 using Akamai.EdgeGrid.Exception;
 using NUnit.Framework;
 
@@ -39,7 +39,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Get);
             test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
             test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
@@ -57,7 +57,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Get);
             test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
             test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             string messageRequest = test.GenerateAuthorizationString();
             string expectedAuthorizationsValue = "EG1-HMAC-SHA256 client_token=default_client_token;access_token=default_access_token;timestamp=20180416T20:52:22+0000;nonce=ad5b09f0-2402-41df-9a35-a24ec46149b1;signature=ife78XmO9ajbUoZ6yKwgK0T44TywQxQeHkIUxY90oFo=";
 
@@ -75,7 +75,7 @@ namespace Tests
             test.SetBodyContent(postBody);
             test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
             test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
@@ -99,7 +99,7 @@ namespace Tests
             test.AddApiCustomHeaders("x-a", "va");
             test.AddApiCustomHeaders("x-c", "\"      xc        \"");
             test.AddApiCustomHeaders("x-b", "    w         b");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
@@ -123,7 +123,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Get);
             test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
             test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
@@ -149,7 +149,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Get);
             test.Timestamp = new EdgeGridTimestamp("20180416T20:52:22+0000");
             test.Nonce = new EdgeGridNonce("ad5b09f0-2402-41df-9a35-a24ec46149b1");
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             HttpRequestMessage messageRequest = test.GetRequestMessage();
 
             string expectedAuthorizationscheme = "EG1-HMAC-SHA256";
@@ -175,7 +175,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Get);
             test.Timestamp = new EdgeGridTimestamp();
             test.Nonce = new EdgeGridNonce();
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/ghost-locations/available");
             Assert.Throws<EdgeGridSignerException>(() => test.GetRequestMessage());
         }
 
@@ -194,7 +194,7 @@ namespace Tests
 
             EdgeGridSigner test = new EdgeGridSigner();
             test.SetHttpMethod(HttpMethod.Get);
-            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://test/diagnostic-tools/v2/ghost-locations/available");
             Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
@@ -205,7 +205,7 @@ namespace Tests
 
             EdgeGridSigner test = new EdgeGridSigner();
             test.SetHttpMethod(HttpMethod.Get);
-            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://test/diagnostic-tools/v2/ghost-locations/available");
             Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
@@ -216,7 +216,7 @@ namespace Tests
 
             EdgeGridSigner test = new EdgeGridSigner();
             test.SetHttpMethod(HttpMethod.Get);
-            test.SetRequestURI("https://test/diagnostic-tools/v2/ghost-locations/available");
+            test.SetRequestUri("https://test/diagnostic-tools/v2/ghost-locations/available");
             Assert.Throws<System.ArgumentException>(() => test.SetCredential(credential));
         }
 
@@ -228,7 +228,7 @@ namespace Tests
             test.SetHttpMethod(HttpMethod.Post);
             test.Timestamp = new EdgeGridTimestamp();
             test.Nonce = new EdgeGridNonce();
-            test.SetRequestURI("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
+            test.SetRequestUri("https://default_host/diagnostic-tools/v2/end-users/diagnostic-url");
             Assert.Throws<EdgeGridSignerException>(() => test.GetRequestMessage());
         }
     }
