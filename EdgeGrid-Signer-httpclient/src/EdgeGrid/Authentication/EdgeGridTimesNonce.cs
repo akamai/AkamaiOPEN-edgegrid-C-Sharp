@@ -1,29 +1,22 @@
 ﻿using System;
 
-namespace AkamaiEdgeGrid.EdgeGrid
+namespace Akamai.EdgeGrid
 {
     /// <summary>
     /// Generate a nonce.
     /// </summary>
     public class EdgeGridNonce
     {
-        protected string nonce;
+        protected string Nonce;
 
         public EdgeGridNonce()
         {
-            this.nonce = this.GetNonce();
+            Nonce = GetNonce();
         }
 
         public EdgeGridNonce(string nonce)
         {
-            if (String.IsNullOrWhiteSpace(nonce))
-            {
-                this.nonce = this.GetNonce();
-            }
-            else
-            {
-                this.nonce = nonce;
-            }
+            Nonce = String.IsNullOrWhiteSpace(nonce) ? GetNonce() : nonce;
         }
 
         public string GetNonce(){
@@ -32,7 +25,7 @@ namespace AkamaiEdgeGrid.EdgeGrid
 
         public override string ToString()
         {
-            return this.nonce;
+            return Nonce;
         }
     }
 }

@@ -16,14 +16,14 @@ namespace Akamai.EdgeGrid
             Credential environmentCredential;
             section = section.ToUpper();
 
-            string sectionHost = Environment.GetEnvironmentVariable("AKAMAI_" + section + "_HOST");
-            string prefix = string.IsNullOrWhiteSpace(sectionHost) ? "AKAMAI_" : "AKAMAI_" + section + "_";
-            string ClientToken = Environment.GetEnvironmentVariable(prefix + "CLIENT_TOKEN");
-            string AccessToken = Environment.GetEnvironmentVariable(prefix + "ACCESS_TOKEN");
-            string ClientSecret = Environment.GetEnvironmentVariable(prefix + "CLIENT_SECRET");
-            string bodySize = Environment.GetEnvironmentVariable(prefix + "MAX_SIZE");
+            string SectionHost = Environment.GetEnvironmentVariable("AKAMAI_" + section + "_HOST");
+            string Prefix = string.IsNullOrWhiteSpace(SectionHost) ? "AKAMAI_" : "AKAMAI_" + section + "_";
+            string ClientToken = Environment.GetEnvironmentVariable(Prefix + "CLIENT_TOKEN");
+            string AccessToken = Environment.GetEnvironmentVariable(Prefix + "ACCESS_TOKEN");
+            string ClientSecret = Environment.GetEnvironmentVariable(Prefix + "CLIENT_SECRET");
+            string BodySize = Environment.GetEnvironmentVariable(Prefix + "MAX_SIZE");
 
-            if (sectionHost == null)
+            if (SectionHost == null)
             {
                 throw new EdgeGridSignerException("host could not be loaded from environment");
             }
@@ -39,11 +39,11 @@ namespace Akamai.EdgeGrid
             {
                 throw new EdgeGridSignerException("client secret could not be loaded from environment");
             }
-            if (bodySize == null)
+            if (BodySize == null)
             {
-                bodySize = "";
+                BodySize = "";
             }
-            environmentCredential = new Credential(ClientToken, AccessToken, ClientSecret, sectionHost, bodySize);
+            environmentCredential = new Credential(ClientToken, AccessToken, ClientSecret, SectionHost, BodySize);
             return environmentCredential;
         }
 

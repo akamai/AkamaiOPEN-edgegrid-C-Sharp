@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace AkamaiEdgeGrid.EdgeGrid
+namespace Akamai.EdgeGrid
 {
     public class EdgeGridTimestamp
     {
@@ -12,8 +12,8 @@ namespace AkamaiEdgeGrid.EdgeGrid
 
         public EdgeGridTimestamp()
         {
-            this.timestamp = DateTime.UtcNow;
-            this.timestampInterval = new TimeSpan(0, 0, 10);
+            timestamp = DateTime.UtcNow;
+            timestampInterval = new TimeSpan(0, 0, 10);
         }
 
         public EdgeGridTimestamp(string timestamp)
@@ -22,7 +22,7 @@ namespace AkamaiEdgeGrid.EdgeGrid
             if(DateTime.TryParseExact(timestamp, FORMAT, null, DateTimeStyles.None, out dateValue))
             {
                 this.timestamp = dateValue;
-                this.timestampInterval = new TimeSpan(0, 0, 10);
+                timestampInterval = new TimeSpan(0, 0, 10);
             }
             else
             {
@@ -30,26 +30,10 @@ namespace AkamaiEdgeGrid.EdgeGrid
             }
         }
 
-        public TimeSpan TimestampInterval
-        {
-            get => this.timestampInterval;
-            set
-            {
-                if (value == null)
-                {
-                    this.timestampInterval = new TimeSpan(0, 0, 10);
-                }
-                else
-                {
-                    this.timestampInterval = value;
-                }
-            }
-        }
-
         public DateTime Timestamp
         {
-            get => this.timestamp;
-            set => this.timestamp = value;
+            get => timestamp;
+            set => timestamp = value;
         }
 
         /// <summary>
@@ -58,12 +42,12 @@ namespace AkamaiEdgeGrid.EdgeGrid
         /// <returns><c>true</c>, if valid timestamp, <c>false</c> otherwise.</returns>
         public bool IsValid()
         {
-            bool result = false;
+            bool Result;
 
-            DateTime now = DateTime.UtcNow;
-            result = this.timestamp.Add(this.timestampInterval) >= now;
+            DateTime Now = DateTime.UtcNow;
+            Result = timestamp.Add(timestampInterval) >= Now;
 
-            return result;
+            return Result;
         }
 
         /// <summary>
@@ -72,12 +56,12 @@ namespace AkamaiEdgeGrid.EdgeGrid
         /// <param name="timespanInterval">Timespan interval</param>
         public void SetValidFor(TimeSpan timespanInterval)
         {
-            this.timestampInterval = timespanInterval;
+            timestampInterval = timespanInterval;
         }
 
         public override string ToString()
         {
-            return this.timestamp.ToString(FORMAT);
+            return timestamp.ToString(FORMAT);
         }
     }
 }

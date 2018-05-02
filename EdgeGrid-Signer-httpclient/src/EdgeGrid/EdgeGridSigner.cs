@@ -1,11 +1,11 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
-using AkamaiEdgeGrid.EdgeGrid;
+using System.Text;
+using System.Text.RegularExpressions;
+using Akamai.EdgeGrid.Exception;
 
 namespace Akamai.EdgeGrid
 {
@@ -25,13 +25,13 @@ namespace Akamai.EdgeGrid
         public EdgeGridTimestamp Timestamp;
         public EdgeGridNonce Nonce;
         private string Host;
-        private Dictionary<string, string> apiHeaders;
+        private Dictionary<string, string> ApiHeaders;
         private int MaxBodySize;
         private HttpRequestMessage HttpRequest;
 
         public EdgeGridSigner()
         {
-            this.HttpRequest = new HttpRequestMessage();
+            HttpRequest = new HttpRequestMessage();
         }
 
         public EdgeGridSigner(HttpMethod method, string requestUrl)
@@ -40,21 +40,17 @@ namespace Akamai.EdgeGrid
             {
                 throw new ArgumentException("Invalid method parameter");
             }
-            else
+
+            if (String.IsNullOrWhiteSpace(requestUrl))
             {
-                if (String.IsNullOrWhiteSpace(requestUrl))
-                {
-                    throw new ArgumentException("Invalid requestUrl parameter");
-                }
-                else
-                {
-                    this.HttpRequest = new HttpRequestMessage
-                    {
-                        Method = method
-                    };
-                    this.SetRequestURI(requestUrl);
-                }
+                throw new ArgumentException("Invalid requestUrl parameter");
             }
+
+            HttpRequest = new HttpRequestMessage
+            {
+                Method = method
+            };
+            SetRequestUri(requestUrl);
         }
 
         public EdgeGridSigner(HttpRequestMessage request)
@@ -63,23 +59,19 @@ namespace Akamai.EdgeGrid
             {
                 throw new ArgumentException("Invalid request parameter");
             }
-            else
-            {
-                this.HttpRequest = request;
-            }
+
+            HttpRequest = request;
         }
 
-        public void SetRequestURI(string request)
+        public void SetRequestUri(string request)
         {
             if (String.IsNullOrWhiteSpace(request))
             {
                 throw new ArgumentException("Invalid request parameter");
             }
-            else
-            {
-                Uri requestUri = new Uri(request);
-                this.HttpRequest.RequestUri = requestUri;
-            }
+
+            Uri RequestUri = new Uri(request);
+            HttpRequest.RequestUri = RequestUri;
         }
 
         public void SetHttpMethod(HttpMethod method)
@@ -88,65 +80,63 @@ namespace Akamai.EdgeGrid
             {
                 throw new ArgumentNullException("Invalid method parameter");
             }
-            else
-            {
-                this.HttpRequest.Method = method;
-            }
+
+            HttpRequest.Method = method;
         }
 
         public HttpRequestMessage GetRequestMessage()
         {
-            this.GenerateSignedRequest();
-            return this.HttpRequest;
+            GenerateSignedRequest();
+            return HttpRequest;
         }
 
         private void ValidateData()
         {
             if (Timestamp == null)
             {
-                this.Timestamp = new EdgeGridTimestamp();
+                Timestamp = new EdgeGridTimestamp();
             }
-            if (this.Nonce == null)
+            if (Nonce == null)
             {
-                this.Nonce = new EdgeGridNonce();
+                Nonce = new EdgeGridNonce();
             }
-            if (this.HttpRequest.RequestUri == null)
+            if (HttpRequest.RequestUri == null)
             {
                 throw new ArgumentNullException("Request URL not Set");
             }
 
-            if (this.Host != null)
+            if (Host != null)
             {
-                if (this.HttpRequest.RequestUri.Host != this.Host)
+                if (HttpRequest.RequestUri.Host != Host)
                 {
-                    throw new Exception.EdgeGridSignerException("URI Request does not match the HOST from the loaded Credentials");
+                    throw new EdgeGridSignerException("URI Request does not match the HOST from the loaded Credentials");
                 }
             }
 
-            if (this.HttpRequest.Method == HttpMethod.Post || this.HttpRequest.Method == HttpMethod.Put)
+            if (HttpRequest.Method == HttpMethod.Post || HttpRequest.Method == HttpMethod.Put)
             {
-                if (this.HttpRequest.Content == null)
+                if (HttpRequest.Content == null)
                 {
-                    throw new Exception.EdgeGridSignerException("Body content not set for this message request");
+                    throw new EdgeGridSignerException("Body content not set for this message request");
                 }
             }
 
-            this.ValidateClientData();//TODO check if this is necessary here, iam not sure
+            ValidateClientData();//TODO check if this is necessary here, iam not sure
         }
 
         private void ValidateClientData()
         {
-            if (String.IsNullOrWhiteSpace(this.ClientToken))
+            if (String.IsNullOrWhiteSpace(ClientToken))
             {
                 throw new ArgumentException("ClientToken is null or has not been loaded");
             }
 
-            if (String.IsNullOrWhiteSpace(this.AccessToken))
+            if (String.IsNullOrWhiteSpace(AccessToken))
             {
                 throw new ArgumentException("AccessToken is null or has not been loaded");
             }
 
-            if (String.IsNullOrWhiteSpace(this.ClientSecret))
+            if (String.IsNullOrWhiteSpace(ClientSecret))
             {
                 throw new ArgumentException("ClientSecret is null or has not been loaded");
             }
@@ -154,102 +144,101 @@ namespace Akamai.EdgeGrid
 
         private void GenerateSignedRequest()
         {
-            string completeAuthHeader = this.GenerateAuthorizationString();
-            this.HttpRequest.Headers.Add("Authorization", completeAuthHeader);
+            string CompleteAuthHeader = GenerateAuthorizationString();
+            HttpRequest.Headers.Add("Authorization", CompleteAuthHeader);
         }
 
         public string GenerateAuthorizationString()
         {
-            this.ValidateData();
-            string authHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM, ClientToken, AccessToken, this.Timestamp.ToString(), this.Nonce.ToString());
-            string signingKey = GetEncryptedHMACSHA256(this.Timestamp.ToString(), this.ClientSecret);
-            string dataToSign = GenerateDataToSign(authHeader);
-            string signedData = GetEncryptedHMACSHA256(dataToSign, signingKey);
-            string completeAuthHeader = authHeader + string.Format(SIGNATURE, signedData);
-            return completeAuthHeader;
+            ValidateData();
+            string AuthHeader = string.Format(AUTHENTICATIONHEADER, ALGORITHM, ClientToken, AccessToken, Timestamp, Nonce);
+            string SigningKey = GetEncryptedHMACSHA256(Timestamp.ToString(), ClientSecret);
+            string DataToSign = GenerateDataToSign(AuthHeader);
+            string SignedData = GetEncryptedHMACSHA256(DataToSign, SigningKey);
+            string CompleteAuthHeader = AuthHeader + string.Format(SIGNATURE, SignedData);
+            return CompleteAuthHeader;
         }
 
-        private string GenerateDataToSign(string AuthHeader)
+        private string GenerateDataToSign(string authHeader)
         {
             StringBuilder SBdataToSign = new StringBuilder(CANONALIZEDHEADER);
 
-            string requestMethod = this.HttpRequest.Method.Method.ToUpper();
-            SBdataToSign = SBdataToSign.Replace("{METHOD}", requestMethod);
+            string RequestMethod = HttpRequest.Method.Method.ToUpper();
+            SBdataToSign = SBdataToSign.Replace("{METHOD}", RequestMethod);
 
-            string scheme = this.HttpRequest.RequestUri.Scheme.ToLower();
-            SBdataToSign = SBdataToSign.Replace("{SCHEME}", scheme);
+            string Scheme = HttpRequest.RequestUri.Scheme.ToLower();
+            SBdataToSign = SBdataToSign.Replace("{SCHEME}", Scheme);
 
-            string requestHost = this.HttpRequest.RequestUri.Host.ToLower();
-            SBdataToSign = SBdataToSign.Replace("{HOST}", requestHost);
+            string RequestHost = HttpRequest.RequestUri.Host.ToLower();
+            SBdataToSign = SBdataToSign.Replace("{HOST}", RequestHost);
 
-            string pathAndQuery = CheckAndCorrectPathQuery(this.HttpRequest.RequestUri.PathAndQuery);
-            SBdataToSign = SBdataToSign.Replace("{QUERY}", pathAndQuery);
+            string PathAndQuery = CheckAndCorrectPathQuery(HttpRequest.RequestUri.PathAndQuery);
+            SBdataToSign = SBdataToSign.Replace("{QUERY}", PathAndQuery);
 
-            string canonicalizedHeader = GetCanonicalizedHeaders();
-            SBdataToSign = SBdataToSign.Replace("{HEADERS}", canonicalizedHeader);
+            string CanonicalizedHeader = GetCanonicalizedHeaders();
+            SBdataToSign = SBdataToSign.Replace("{HEADERS}", CanonicalizedHeader);
 
-            string contentHashBody = GetContentHash(this.HttpRequest);
-            SBdataToSign = SBdataToSign.Replace("{BODY}", contentHashBody);
+            string ContentHashBody = GetContentHash(HttpRequest);
+            SBdataToSign = SBdataToSign.Replace("{BODY}", ContentHashBody);
 
-            SBdataToSign = SBdataToSign.Replace("{AUTHENTICATION}", AuthHeader);
+            SBdataToSign = SBdataToSign.Replace("{AUTHENTICATION}", authHeader);
 
             return SBdataToSign.ToString();
         }
 
-        public void SetCredential(string ClientToken, string AccessToken, string ClientSecret)
+        public void SetCredential(string clientToken, string accessToken, string clientSecret)
         {
-            this.ClientToken = ClientToken;
-            this.AccessToken = AccessToken;
-            this.ClientSecret = ClientSecret;
+            ClientToken = clientToken;
+            AccessToken = accessToken;
+            ClientSecret = clientSecret;
             //set the default body max size to 131072
-            this.MaxBodySize = MAXBODYSIZE;
+            MaxBodySize = MAXBODYSIZE;
 
-            this.ValidateClientData();
+            ValidateClientData();
         }
 
         public void SetCredential(Credential credential)
         {
-            this.ClientToken = credential.ClientToken;
-            this.AccessToken = credential.AccessToken;
-            this.ClientSecret = credential.ClientSecret;
+            ClientToken = credential.ClientToken;
+            AccessToken = credential.AccessToken;
+            ClientSecret = credential.ClientSecret;
 
-            this.ValidateClientData();
+            ValidateClientData();
 
             if (!string.IsNullOrWhiteSpace(credential.Host))
             {
-                this.Host = credential.Host;
+                Host = credential.Host;
             }
 
             if (!string.IsNullOrWhiteSpace(credential.MaxSize))
             {
-                int maxSizeNumber;
-                bool isConvertable = Int32.TryParse(credential.MaxSize, out maxSizeNumber);
-                if (isConvertable)
+                bool IsConvertable = Int32.TryParse(credential.MaxSize, out var MaxSizeNumber);
+                if (IsConvertable)
                 {
-                    this.MaxBodySize = maxSizeNumber;
+                    MaxBodySize = MaxSizeNumber;
                 }
                 else
                 {
-                    throw new Exception.EdgeGridSignerException("Could not convert credential.MaxSize to int");
+                    throw new EdgeGridSignerException("Could not convert credential.MaxSize to int");
                 }
             }
             else
             {
                 //set the default body max size to 131072
-                this.MaxBodySize = MAXBODYSIZE;
+                MaxBodySize = MAXBODYSIZE;
             }
         }
 
         public void GetCredentialsFromEnvironment(string section = "default")
         {
-            Credential environmentCredential = EnvironmentCredentialReader.GetCredential(section);
-            this.SetCredential(environmentCredential);
+            Credential EnvironmentCredential = EnvironmentCredentialReader.GetCredential(section);
+            SetCredential(EnvironmentCredential);
         }
 
         public void GetCredentialsFromEdgerc(string section = "default", string filePath = ".edgerc")
         {
-            Credential fileCredential = EdgeFileReader.CreateFromEdgeRcFile(section, filePath);
-            this.SetCredential(fileCredential);
+            Credential FileCredential = EdgeFileReader.CreateFromEdgeRcFile(section, filePath);
+            SetCredential(FileCredential);
         }
 
         public void SetApiCustomHeaders(Dictionary<string, string> customHeaders)
@@ -258,30 +247,28 @@ namespace Akamai.EdgeGrid
             {
                 throw new ArgumentException("Invalid customHeaders parameter maybe is empty");
             }
-            else
-            {
-                this.apiHeaders = customHeaders;
-            }
+
+            ApiHeaders = customHeaders;
         }
 
         public void AddApiCustomHeaders(string name, string value)
         {
-            if (this.apiHeaders == null)
+            if (ApiHeaders == null)
             {
-                this.apiHeaders = new Dictionary<string, string>();
+                ApiHeaders = new Dictionary<string, string>();
             }
-            this.apiHeaders.Add(name, value);
+            ApiHeaders.Add(name, value);
         }
 
         private string GetEncryptedHMACSHA256(string message, string secret)
         {
-            var encoding = new UTF8Encoding();
-            byte[] keyByte = encoding.GetBytes(secret);
-            byte[] messageBytes = encoding.GetBytes(message);
-            using (var hmacsha256 = new HMACSHA256(keyByte))
+            var Encoding = new UTF8Encoding();
+            byte[] KeyByte = Encoding.GetBytes(secret);
+            byte[] MessageBytes = Encoding.GetBytes(message);
+            using (var Hmacsha256 = new HMACSHA256(KeyByte))
             {
-                byte[] hashmessage = hmacsha256.ComputeHash(messageBytes);
-                return Convert.ToBase64String(hashmessage);
+                byte[] Hashmessage = Hmacsha256.ComputeHash(MessageBytes);
+                return Convert.ToBase64String(Hashmessage);
             }
         }
 
@@ -301,66 +288,65 @@ namespace Akamai.EdgeGrid
 
         private String GetCanonicalizedHeaders()
         {
-            StringBuilder customHeaders = new StringBuilder();
+            StringBuilder CustomHeaders = new StringBuilder();
 
-            if (apiHeaders != null)
+            if (ApiHeaders != null)
             {
-                List<string> headerNames = new List<string>(apiHeaders.Keys);
-                headerNames.Sort();
-                foreach (string key in headerNames)
+                List<string> HeaderNames = new List<string>(ApiHeaders.Keys);
+                HeaderNames.Sort();
+                foreach (string Key in HeaderNames)
                 {
-                    string value = apiHeaders[key];
-                    if (!string.IsNullOrEmpty(value))
-                        customHeaders.AppendFormat("{0}:{1}\t", key.ToLower(), Regex.Replace(value.Trim(), "\\s+", " ", RegexOptions.Compiled));
+                    string Value = ApiHeaders[Key];
+                    if (!string.IsNullOrEmpty(Value))
+                        CustomHeaders.AppendFormat("{0}:{1}\t", Key.ToLower(), Regex.Replace(Value.Trim(), "\\s+", " ", RegexOptions.Compiled));
                 }
             }
-            return customHeaders.ToString();
+            return CustomHeaders.ToString();
         }
 
         public void SetBodyContent(string bodyContent)
         {
-            this.HttpRequest.Content = new StringContent(bodyContent, System.Text.Encoding.UTF8, "application/json");
+            HttpRequest.Content = new StringContent(bodyContent, Encoding.UTF8, "application/json");
         }
 
         private string GetContentHash(HttpRequestMessage request)
         {
-            String data = "";
+            String Data = "";
 
             // only do hash for POSTs or PUTs
             if (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put)
             {
-
-                HttpContent content = request.Content;
+                HttpContent Content = request.Content;
                 try
                 {
-                    if (content != null)
+                    if (Content != null)
                     {
-                        var contentString = content.ReadAsStringAsync();
-                        contentString.Wait();
-                        byte[] contentBytes = Encoding.UTF8.GetBytes(contentString.Result);
+                        var ContentString = Content.ReadAsStringAsync();
+                        ContentString.Wait();
+                        byte[] ContentBytes = Encoding.UTF8.GetBytes(ContentString.Result);
 
-                        int lengthToHash = contentBytes.Length;
-                        if (lengthToHash > MaxBodySize)
+                        int LengthToHash = ContentBytes.Length;
+                        if (LengthToHash > MaxBodySize)
                         {
-                            lengthToHash = MaxBodySize;
+                            LengthToHash = MaxBodySize;
                         }
 
-                        byte[] hashmessage;
-                        using (var sha = SHA256.Create())
+                        byte[] Hashmessage;
+                        using (var Sha = SHA256.Create())
                         {
-                            hashmessage = sha.ComputeHash(contentBytes, 0, lengthToHash);
+                            Hashmessage = Sha.ComputeHash(ContentBytes, 0, LengthToHash);
                         }
-                        data = Convert.ToBase64String(hashmessage);
+                        Data = Convert.ToBase64String(Hashmessage);
                     }
                 }
-                catch (IOException ioe)
+                catch (IOException IoExecption)
                 {
-                    throw new Exception.EdgeGridSignerException("Failed to get content hash: failed to read content", ioe);
+                    throw new EdgeGridSignerException("Failed to get content hash: failed to read content", IoExecption);
                 }
 
             }
 
-            return data;
+            return Data;
         }
 
     }
