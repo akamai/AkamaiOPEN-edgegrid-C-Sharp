@@ -59,4 +59,12 @@ Global
 		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x86.ActiveCfg = Release|x86
 		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		description = @This library assists in the interaction with Akamai's {Open} API found at http://developer.akamai.com. \nThe API Spec can be found at: https://developer.akamai.com/api
+		version = 2.0.0
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+	EndGlobalSection
 EndGlobal

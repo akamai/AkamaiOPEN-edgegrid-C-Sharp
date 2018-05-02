@@ -1,6 +1,5 @@
 using System.Net.Http;
 using Akamai.EdgeGrid;
-using Akamai.EdgeGrid;
 using Akamai.EdgeGrid.Exception;
 using NUnit.Framework;
 
