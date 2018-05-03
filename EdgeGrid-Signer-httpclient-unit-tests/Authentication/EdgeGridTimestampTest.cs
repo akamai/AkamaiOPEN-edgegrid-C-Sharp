@@ -9,20 +9,20 @@ namespace Tests
         [Test]
         public void TestTimestampFormat()
         {
-            var timestamp = new EdgeGridTimestamp();
-            var check = DateTime.UtcNow.ToString("yyyyMMddTHH:mm:ss+0000");
-            Assert.AreEqual(check, timestamp.ToString());
+            var Timestamp = new EdgeGridTimestamp();
+            var Check = DateTime.UtcNow.ToString("yyyyMMddTHH:mm:ss+0000");
+            Assert.AreEqual(Check, Timestamp.ToString());
         }
 
         [Test]
         public void TestIsValid()
         {
-            var timestamp = new EdgeGridTimestamp();
-            Assert.IsTrue(timestamp.IsValid());
-            var timestampInterval = new TimeSpan(0, 0, 0);
-            timestamp.SetValidFor(timestampInterval);
+            var Timestamp = new EdgeGridTimestamp();
+            Assert.IsTrue(Timestamp.IsValid());
+            var TimestampInterval = new TimeSpan(0, 0, 0);
+            Timestamp.SetValidFor(TimestampInterval);
             System.Threading.Thread.Sleep(1000);
-            Assert.IsFalse(timestamp.IsValid());
+            Assert.IsFalse(Timestamp.IsValid());
         }
     }
 }
