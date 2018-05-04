@@ -1,5 +1,7 @@
 language: csharp
 solution: AkamaiEdgeGrid.sln
+script:
+  - xbuild /p:Configuration=Release AkamaiEdgeGrid.sln
 before_install:
   - sudo apt-get install nunit-console
 before_script:
