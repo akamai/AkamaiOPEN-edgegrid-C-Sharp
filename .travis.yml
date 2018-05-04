@@ -1,0 +1,8 @@
+language: csharp
+solution: AkamaiEdgeGrid.sln
+before_install:
+  - sudo apt-get install nunit-console
+before_script:
+  - nuget restore AkamaiEdgeGrid.sln
+after_script:
+  - nunit-console EdgeGrid-Signer-httpclient-unit-tests/bin/Debug/netcoreapp2.0/EdgeGrid-Signer-httpclient-unit-tests.dll
