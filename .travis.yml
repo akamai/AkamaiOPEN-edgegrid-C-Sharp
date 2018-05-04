@@ -5,4 +5,4 @@ before_install:
 before_script:
   - nuget restore AkamaiEdgeGrid.sln
 after_script:
-  - nunit-console EdgeGrid-Signer-httpclient-unit-tests/bin/Debug/netcoreapp2.0/EdgeGrid-Signer-httpclient-unit-tests.dll
+  - nunit-console EdgeGrid-Signer-httpclient-unit-tests/bin/Release/netcoreapp2.0/EdgeGrid-Signer-httpclient-unit-tests.dll
