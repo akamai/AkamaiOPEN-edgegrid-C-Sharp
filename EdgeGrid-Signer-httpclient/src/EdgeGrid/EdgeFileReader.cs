@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid
 {
@@ -27,7 +23,7 @@ namespace Akamai.EdgeGrid
             }
             else
             {
-                throw new Akamai.EdgeGrid.Exception.EdgeGridSignerException("edgerc file not found");
+                throw new Exception.EdgeGridSignerException(String.Format("edgerc file not found, into path {0}", path));
             }
             return FileCredential;
         }
