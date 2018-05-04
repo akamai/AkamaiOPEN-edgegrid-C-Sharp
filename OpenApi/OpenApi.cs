@@ -66,7 +66,6 @@ namespace OpenApi
                     Secret = CommandArgumentArray[OpenApiCommand.Argument.Secret];
                 }
 
-
                 if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Data))
                 {
                     Data = CommandArgumentArray[OpenApiCommand.Argument.Data];
@@ -216,6 +215,8 @@ namespace OpenApi
                     }
                 }
 
+                var Timestamp = new EdgeGridTimestamp();
+
                 #region TemporaryPatchCode
 
                 /*
@@ -229,14 +230,13 @@ namespace OpenApi
                  * In order to bypass this problem I had to add (or substract) the seconds to make the request valid for AKAMAI
                  * You can check your time offeset by doing "ntpdate" on an unix console
                  */
-                var Timestamp = new EdgeGridTimestamp();
                 var TimestampInterval = new TimeSpan(0, 0, -15);
                 Timestamp.SetValidFor(TimestampInterval);
-                Signer.Timestamp = Timestamp;
+                //Remove this lines if you don't need it
 
                 #endregion
 
-                //Remove this lines if you don't need it
+                Signer.Timestamp = Timestamp;
 
                 HttpRequestMessage Request;
                 try
@@ -269,7 +269,14 @@ namespace OpenApi
                 }
                 else
                 {
-                    System.IO.File.WriteAllText(OutputFile, Result);
+                    try
+                    {
+                        System.IO.File.WriteAllText(OutputFile, Result);
+                    }
+                    catch (System.Exception Ex)
+                    {
+                        throw new OpenApiException(Ex.Message);
+                    }
                 }
             }
             catch (System.Exception Ex)
