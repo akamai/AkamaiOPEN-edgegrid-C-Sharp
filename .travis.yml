@@ -1,7 +1,7 @@
 language: csharp
 solution: AkamaiEdgeGrid.sln
 mono: none
-dotnet: 2.0.3
+dotnet: 2.0.0
 script:
   - dotnet build
 before_script:
