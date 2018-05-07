@@ -19,10 +19,10 @@
     <RepositoryUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</RepositoryUrl>
     <PackageProjectUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</PackageProjectUrl>
     <Title>EdgeGridSigner</Title>
-    <Description>This library assists in the interaction with Akamai's {Open} API found at http://developer.akamai.com. The API Spec can be found at: https://developer.akamai.com/api</Description>
+    <Description>This library assists in the interaction with Akamai's Open API found at http://developer.akamai.com. The API Spec can be found at: https://developer.akamai.com/api</Description>
     <ReleaseVersion>2.0.0</ReleaseVersion>
     <PackageLicenseUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp/blob/master/LICENSE</PackageLicenseUrl>
-    <Summary>Library to assists you in the interaction with Akamai's {Open} API</Summary>
+    <Summary>Library to assists you in the interaction with Akamai's Open API</Summary>
     <PackageTags>akamai client library</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
