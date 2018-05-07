@@ -1,12 +1,9 @@
 ﻿using Akamai.EdgeGrid;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.Http;
+using OpenApi.Exception;
+using OpenApi.Model;
 
 namespace OpenApi
 {
@@ -14,232 +11,291 @@ namespace OpenApi
     /// Command Line sample application to demonstrate the utilization of the {Open} APIs. 
     /// This can be used for both command line invocation or reference on how to leverage the 
     /// Api. All supported commands are implemented in this sample for convience.
-    /// 
     /// </summary>
     class OpenAPI
     {
-        private readonly static HttpClient client = new HttpClient();  
-        
+        private static readonly HttpClient Client = new HttpClient();
+
         static void Main(string[] args)
         {
+            string Secret = null;
+            string ClientToken = null;
+            string AccessToken = null;
+            string ApiUrl = null;
+            List<string> Headers = new List<string>();
+            string StringHttpMethod = "GET";
+            HttpMethod RequestMethod = HttpMethod.Get;
+            bool LoadCredentialFromEnvironment = false;
+            bool LoadCredentialFromEdgerc = false;
+            bool UploadFromFile = false;
+            string EdgercFilePath = null;
+            string Section = "default";
+            string OutputFile = null;
+            string UploadFile = null;
+            string Data = null;
+            bool Verbose = false;
 
-            string secret = null;
-            string clientToken = null;
-            string accessToken = null;
-            string apiurl = null;
-            List<string> headers = new List<string>();
-            string httpMethod = "GET";
-            HttpMethod requestMethod = HttpMethod.Get;
-            bool loadCredFromEnvironment = false;
-            bool loadCredFromEdgerc = false;
-            bool uploadFromFile = false;
-            string envCredentials = "";
-            string edgercfilePath = null;
-            string section = "default";
-            string outputfile = null;
-            string uploadfile = null;
-            string data = null;
-
-            bool verbose = false;
-           
-            string firstarg = null;
-            foreach (string arg in args)
+            try
             {
-                if (firstarg != null)
-                {
-                    switch (firstarg)
-                    {
-                        case "--a":
-                            accessToken = arg;
-                            break;
-                        case "--c":
-                            clientToken = arg;
-                            break;
-                        case "--d":
-                            if (httpMethod == "GET"){
-                                httpMethod = "POST";
-                                requestMethod = HttpMethod.Post;
-                            } 
-                            data = arg;
-                            break;
-                        case "--e":
-                            envCredentials = arg;
-                            switch(envCredentials){
-                                case "false": loadCredFromEnvironment = false;
-                                break;
-                                default: loadCredFromEnvironment = true;
-                                break;
-                            }
-                            break;                    
-                        case "--f":
-                            if (httpMethod == "GET"){
-                                httpMethod = "POST";
-                                requestMethod = HttpMethod.Post;
-                            } 
-                            uploadfile = arg;
-                            uploadFromFile = true;
-                            break;
-                        case "--H":
-                            headers.Add(arg);
-                            break;
-                        case "--o":
-                            outputfile = arg;
-                            break;
-                        case "--r":
-                            edgercfilePath = arg;
-                            loadCredFromEnvironment = false;
-                            //loading credentials from edgerc file takes precedence over environment
-                            loadCredFromEdgerc = true;
-                            break;
-                        case "--s":
-                            secret = arg;
-                            break;
-                        case "--X":
-                            httpMethod = arg;
-                            switch(httpMethod) {
-                                case "POST": requestMethod = HttpMethod.Post; 
-                                break;
-                                case "DELETE": requestMethod = HttpMethod.Delete; 
-                                break;            
-                                case "PUT": requestMethod = HttpMethod.Put; 
-                                break;
-                                case "HEAD": requestMethod = HttpMethod.Head; 
-                                break; 
-                                default: requestMethod = HttpMethod.Get;  
-                                break;                       
-                            }
-                            break;
+                Dictionary<OpenApiCommand.Argument, string> CommandArgumentArray =
+                    OpenApiCommand.ExctratCommandArguments(args);
 
-                    }
-                    firstarg = null;
-                }
-                else if (arg == "-h" || arg == "--help" || arg == "/?")
+                if (
+                    CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Help) ||
+                    CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Help1) ||
+                    CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Help2) ||
+                    CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Help3)
+                )
                 {
-                    help();
+                    Help();
                     return;
                 }
-                else if (arg == "-v" || arg == "-vv")
-                    verbose = true;           
-                else if (!arg.StartsWith("-"))
-                    apiurl = arg;
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.ClientToken))
+                {
+                    ClientToken = CommandArgumentArray[OpenApiCommand.Argument.ClientToken];
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.AccessToken))
+                {
+                    AccessToken = CommandArgumentArray[OpenApiCommand.Argument.AccessToken];
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Secret))
+                {
+                    Secret = CommandArgumentArray[OpenApiCommand.Argument.Secret];
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Data))
+                {
+                    Data = CommandArgumentArray[OpenApiCommand.Argument.Data];
+                    RequestMethod = HttpMethod.Post;
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.EnvironmentCredential))
+                {
+                    LoadCredentialFromEnvironment =
+                        CommandArgumentArray[OpenApiCommand.Argument.EnvironmentCredential].ToUpper() ==
+                        Boolean.TrueString;
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.SourceFile))
+                {
+                    UploadFile = CommandArgumentArray[OpenApiCommand.Argument.SourceFile];
+                    UploadFromFile = true;
+                    RequestMethod = HttpMethod.Post;
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.HeaderLine))
+                {
+                    Headers.Add(
+                        CommandArgumentArray[
+                            OpenApiCommand.Argument.HeaderLine]); //TODO this need to be proccess as separated by coma
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.OutputFile))
+                {
+                    OutputFile = CommandArgumentArray[OpenApiCommand.Argument.OutputFile];
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.EdgercPath))
+                {
+                    EdgercFilePath = CommandArgumentArray[OpenApiCommand.Argument.EdgercPath];
+                    LoadCredentialFromEnvironment = false;
+                    LoadCredentialFromEdgerc = true;
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Method))
+                {
+                    switch (CommandArgumentArray[OpenApiCommand.Argument.Method].ToUpper())
+                    {
+                        case "POST":
+                            RequestMethod = HttpMethod.Post;
+                            break;
+                        case "DELETE":
+                            RequestMethod = HttpMethod.Delete;
+                            break;
+                        case "PUT":
+                            RequestMethod = HttpMethod.Put;
+                            break;
+                        case "HEAD":
+                            RequestMethod = HttpMethod.Head;
+                            break;
+                        default:
+                            RequestMethod = HttpMethod.Get;
+                            break;
+                    }
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Verbose) ||
+                    CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Verbose1))
+                {
+                    Verbose = true;
+                }
+
+                if (CommandArgumentArray.ContainsKey(OpenApiCommand.Argument.Url))
+                {
+                    ApiUrl = CommandArgumentArray[OpenApiCommand.Argument.Url];
+                }
+
+                /*
+                 * DEsde aqui es donde comienza a ejecutarse la libreria como tal, lo que hay antes es la extraccion de los comandos
+                 */
+
+                if (Verbose)
+                {
+                    Console.WriteLine("{0} {1}", StringHttpMethod, ApiUrl);
+                    Console.WriteLine("ClientToken: {0}", ClientToken);
+                    Console.WriteLine("AccessToken: {0}", AccessToken);
+                    Console.WriteLine("Secret: {0}", Secret);
+                    if (Data != null) Console.WriteLine("Data: [{0}]", Data);
+                    if (UploadFile != null) Console.WriteLine("UploadFile: {0}", UploadFile);
+                    if (OutputFile != null) Console.WriteLine("OutputFile: {0}", OutputFile);
+                    foreach (string Header in Headers)
+                    {
+                        Console.WriteLine("{0}", Header);
+                    }
+                }
+
+                EdgeGridSigner Signer = new EdgeGridSigner(RequestMethod, ApiUrl);
+
+                if (!string.IsNullOrWhiteSpace(ClientToken) && !string.IsNullOrWhiteSpace(AccessToken) &&
+                    !string.IsNullOrWhiteSpace(Secret) && !string.IsNullOrWhiteSpace(ApiUrl))
+                {
+                    Signer.SetCredential(ClientToken, AccessToken, Secret);
+                }
                 else
-                    firstarg = arg;
-            }
-
-            if (verbose)
-            {
-                Console.WriteLine("{0} {1}", httpMethod, apiurl);
-                Console.WriteLine("ClientToken: {0}", clientToken);
-                Console.WriteLine("AccessToken: {0}", accessToken);
-                Console.WriteLine("Secret: {0}", secret);
-                if (data != null) Console.WriteLine("Data: [{0}]", data);
-                if (uploadfile != null) Console.WriteLine("UploadFile: {0}", uploadfile);
-                if (outputfile != null) Console.WriteLine("OutputFile: {0}", outputfile);
-                foreach (string header in headers)
-                Console.WriteLine("{0}", header);
-            }
-
-            if(apiurl == null){
-                Console.WriteLine("No URL defined");
-                help();
-                return;
-            }
-            if ((clientToken == null || accessToken == null || secret == null) && (loadCredFromEdgerc == false) && (loadCredFromEnvironment == false))
-            {
-                Console.WriteLine("No credentials defined");
-                help();
-                return;
-            }
-
-            EdgeGridSigner signer = new EdgeGridSigner( requestMethod, apiurl);
-
-            if (!string.IsNullOrWhiteSpace(clientToken) && !string.IsNullOrWhiteSpace(accessToken) && !string.IsNullOrWhiteSpace(secret) && !string.IsNullOrWhiteSpace(apiurl)){
-                signer.SetCredential(clientToken, accessToken, secret);            
-            }else{
-                if (loadCredFromEnvironment){
-                    signer.GetCredentialsFromEnvironment(section);            
-                }
-                if (loadCredFromEdgerc){
-                    signer.GetCredentialsFromEdgerc(section, edgercfilePath);            
-                }
-            }
-            
-            if(requestMethod == HttpMethod.Post || requestMethod == HttpMethod.Put){
-                if(!string.IsNullOrWhiteSpace(data) ){
-                    signer.SetBodyContent(data);
-                }
-
-                if(uploadFromFile){
-                    string bodyContent = "";
-                    try{    
-                       bodyContent = System.IO.File.ReadAllText(uploadfile);
-                    }catch(Exception io){
-                        Console.WriteLine(io.Message);
-                        return;
+                {
+                    if (LoadCredentialFromEnvironment)
+                    {
+                        Signer.GetCredentialsFromEnvironment(Section);
                     }
-                    signer.SetBodyContent(bodyContent);
-                }
-            }
 
-            if(headers != null){
-                if (headers.Count > 0){
-                    Dictionary<string,string> dictionaryHeader = new Dictionary<string,string>();
-                    foreach (string header in headers){
-                       string[] keyAndValue = header.Split(':',2);
-                       dictionaryHeader.Add(keyAndValue[0], keyAndValue[1]);
+                    if (LoadCredentialFromEdgerc)
+                    {
+                        Signer.GetCredentialsFromEdgerc(Section, EdgercFilePath);
                     }
-                signer.SetApiCustomHeaders(dictionaryHeader);
+                }
+
+                if (RequestMethod == HttpMethod.Post || RequestMethod == HttpMethod.Put)
+                {
+                    if (!string.IsNullOrWhiteSpace(Data))
+                    {
+                        Signer.SetBodyContent(Data);
+                    }
+
+                    if (UploadFromFile)
+                    {
+                        string BodyContent;
+                        try
+                        {
+                            BodyContent = System.IO.File.ReadAllText(UploadFile);
+                        }
+                        catch (System.Exception Ex)
+                        {
+                            throw new OpenApiException(Ex.Message);
+                        }
+
+                        Signer.SetBodyContent(BodyContent);
+                    }
+                }
+
+                if (Headers != null)
+                {
+                    if (Headers.Count > 0)
+                    {
+                        Dictionary<string, string> DictionaryHeader = new Dictionary<string, string>();
+                        foreach (string Header in Headers)
+                        {
+                            string[] KeyAndValue = Header.Split(':', 2);
+                            DictionaryHeader.Add(KeyAndValue[0], KeyAndValue[1]);
+                        }
+
+                        Signer.SetApiCustomHeaders(DictionaryHeader);
+                    }
+                }
+
+                var Timestamp = new EdgeGridTimestamp();
+
+                #region TemporaryPatchCode
+
+                /*
+                 * ***** IMPORTANT ******
+                 *
+                 * This part is usually not required, the signer library automatically gets the latest datetime from your system in UTC format
+                 * but sometimes the date of your NTP may have an offset higher thant 30 seconds and that's when you will probably be hit with the infamous:
+                 *  --> 400 Bad Request: Invalid Timestamp
+                 * This happens because the timestamp of your local machine differs from the AKAMAI NTP server by more than 30 seconds 
+                 * (30 seconds is the MAX amount of time a request can differ from the AKAMAI API NTP in order to be accepted)
+                 * In order to bypass this problem I had to add (or substract) the seconds to make the request valid for AKAMAI
+                 * You can check your time offeset by doing "ntpdate" on an unix console
+                 */
+                var TimestampInterval = new TimeSpan(0, 0, -15);
+                Timestamp.SetValidFor(TimestampInterval);
+                //Remove this lines if you don't need it
+
+                #endregion
+
+                Signer.Timestamp = Timestamp;
+
+                HttpRequestMessage Request;
+                try
+                {
+                    Request = Signer.GetRequestMessage();
+                }
+                catch (System.Exception Ex)
+                {
+                    throw new OpenApiException(Ex.Message);
+                }
+
+                if (Verbose)
+                {
+                    Console.WriteLine("Authorization: {0}", Request.Headers.Authorization);
+                    Console.WriteLine();
+                }
+
+                var Response = Client.SendAsync(Request);
+                Response.Wait();
+
+
+                var ResponseContent = Response.Result.Content.ReadAsStringAsync();
+                ResponseContent.Wait();
+
+                string Result = ResponseContent.Result;
+
+                if (string.IsNullOrWhiteSpace(OutputFile))
+                {
+                    Console.WriteLine("Request response: {0}", Result);
+                }
+                else
+                {
+                    try
+                    {
+                        System.IO.File.WriteAllText(OutputFile, Result);
+                    }
+                    catch (System.Exception Ex)
+                    {
+                        throw new OpenApiException(Ex.Message);
+                    }
                 }
             }
-
-            ///IMPORTANT///
-            ///*This part is usually not required, the signer library automatically gets the latest datetime from your system in UTC format
-            /// but sometimes the date of your NTP may have an offset higher thant 30 seconds and that's when you will probably be hit with the infamous:
-            ///         400 Bad Request: Invalid Timestamp
-            ///*This happens because the timestamp of your local machine differs from the AKAMAI NTP server by more than 30 seconds 
-            ///(30 seconds is the MAX amount of time a request can differ from the AKAMAI API NTP in order to be accepted)
-            ///*In order to bypass this problem I had to add (or substract) the seconds to make the request valid for AKAMAI
-            ///*You can check your time offeset by doing "ntpdate" on an unix console
-            DateTime currentDate = DateTime.Now;
-            signer.Timestamp.Timestamp = currentDate.AddSeconds(-15).ToUniversalTime();
-            ///End of the temporary patch code   
-            ///Remove this lines if you don't need it
-
-            HttpRequestMessage request;
-            try{
-                request = signer.GetRequestMessage();
-            }catch(Exception ex){
-                Console.WriteLine(ex.Message);
-                return;
-            }
-
-            if (verbose)
+            catch (System.Exception Ex)
             {
-                Console.WriteLine("Authorization: {0}", request.Headers.Authorization);
-                Console.WriteLine();
-            }
-            var response = client.SendAsync(request);
-            response.Wait();
-            
+                Console.WriteLine("OpenApi error. Type {0} with message {1}", Ex.GetType(), Ex.Message);
+                if (Verbose)
+                {
+                    Console.WriteLine(Ex.StackTrace);
+                }
 
-            var responseContent = response.Result.Content.ReadAsStringAsync();
-            responseContent.Wait();
-
-            string result = responseContent.Result;
-
-            if(string.IsNullOrWhiteSpace(outputfile)){
-                Console.WriteLine("Request response: {0}" , result);
-            }else{
-                try{
-                    System.IO.File.WriteAllText(outputfile, result);
-                }catch(Exception ex){
-                    Console.WriteLine(ex.Message);
+                if (Ex.GetType() == typeof(OpenApiArgumentException) ||
+                    Ex.GetType() == typeof(OpenApiCredentialException))
+                {
+                    Help();
                 }
             }
-
         }
 
-        static void help()
+        public static void Help()
         {
             Console.Error.WriteLine(@"
 Usage: openapi <--c client-token> <--a access-token> <--s secret>
