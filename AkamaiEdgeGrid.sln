@@ -1,0 +1,76 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkamaiEdgeGrid", "EdgeGrid-Signer-httpclient\AkamaiEdgeGrid.csproj", "{D00FF54A-0408-4567-923C-20C3AD40D091}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeGrid-Signer-httpclient-unit-tests", "EdgeGrid-Signer-httpclient-unit-tests\EdgeGrid-Signer-httpclient-unit-tests.csproj", "{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenApi", "OpenApi\OpenApi.csproj", "{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6135F9D9-0466-4398-B602-6AD1209E272A}"
+	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|x64.ActiveCfg = Debug|x64
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|x64.Build.0 = Debug|x64
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|x86.ActiveCfg = Debug|x86
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Debug|x86.Build.0 = Debug|x86
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|x64.ActiveCfg = Release|x64
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|x64.Build.0 = Release|x64
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|x86.ActiveCfg = Release|x86
+		{D00FF54A-0408-4567-923C-20C3AD40D091}.Release|x86.Build.0 = Release|x86
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|x64.ActiveCfg = Debug|x64
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|x64.Build.0 = Debug|x64
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|x86.ActiveCfg = Debug|x86
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Debug|x86.Build.0 = Debug|x86
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|x64.ActiveCfg = Release|x64
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|x64.Build.0 = Release|x64
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|x86.ActiveCfg = Release|x86
+		{1C05165A-2AE5-4A3B-8345-FDBCD269CB55}.Release|x86.Build.0 = Release|x86
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|x64.ActiveCfg = Debug|x64
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|x64.Build.0 = Debug|x64
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|x86.ActiveCfg = Debug|x86
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Debug|x86.Build.0 = Debug|x86
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x64.ActiveCfg = Release|x64
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x64.Build.0 = Release|x64
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x86.ActiveCfg = Release|x86
+		{0F31209A-0DCD-42AE-B5EB-8C96D33E6C41}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		description = @This library assists in the interaction with Akamai's {Open} API found at http://developer.akamai.com. \nThe API Spec can be found at: https://developer.akamai.com/api
+		version = 2.0.0
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+	EndGlobalSection
+EndGlobal

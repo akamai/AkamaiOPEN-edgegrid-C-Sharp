@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+      <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+      <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+      <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
+   </ItemGroup> 
+
+   <ItemGroup>
+     <Folder Include="src\EdgeGrid\Authentication\" />
+   </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <PackageId>EdgeGridSigner</PackageId>
+    <PackageVersion>2.0.0</PackageVersion>
+    <Authors>Akamai's Dev Team</Authors>
+    <PackageIconUrl>https://www.infosecurityeurope.com/__novaimages/3073189?v=636347652956770000</PackageIconUrl>
+    <Owners>Akamai</Owners>
+    <RepositoryUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</PackageProjectUrl>
+    <Title>EdgeGridSigner</Title>
+    <Description>This library assists in the interaction with Akamai's Open API found at http://developer.akamai.com. The API Spec can be found at: https://developer.akamai.com/api</Description>
+    <ReleaseVersion>2.0.0</ReleaseVersion>
+    <PackageLicenseUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp/blob/master/LICENSE</PackageLicenseUrl>
+    <Summary>Library to assists you in the interaction with Akamai's Open API</Summary>
+    <PackageTags>akamai client library</PackageTags>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType></DebugType>
+  </PropertyGroup>
+</Project>

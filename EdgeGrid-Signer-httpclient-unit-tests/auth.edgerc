@@ -1,0 +1,11 @@
+[default]
+client_secret = default_client_secret
+host = default_host
+access_token = default_access_token
+client_token = default_client_token
+
+[test]
+client_secret = test_client_secret
+host = test_host
+access_token = test_access_token
+client_token = test_client_token
