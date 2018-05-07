@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gfirem/AkamaiOPEN-edgegrid-C-Sharp.svg?branch=master)](https://travis-ci.org/gfirem/AkamaiOPEN-edgegrid-C-Sharp)
+
 # EdgeGridSigner (for .NET/c#)
 
 This library assists in the interaction with Akamai's {Open} API found at http://developer.akamai.com. 
