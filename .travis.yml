@@ -1,10 +1,11 @@
 language: csharp
 solution: AkamaiEdgeGrid.sln
+mono: none
+dotnet: 2.+
 script:
-  - xbuild /p:Configuration=Release AkamaiEdgeGrid.sln
-before_install:
-  - sudo apt-get install nunit-console
+  - dotnet build
 before_script:
-  - nuget restore AkamaiEdgeGrid.sln
+  - dotnet restore
 after_script:
-  - nunit-console EdgeGrid-Signer-httpclient-unit-tests/bin/Release/netcoreapp2.0/EdgeGrid-Signer-httpclient-unit-tests.dll
+  - cd EdgeGrid-Signer-httpclient-unit-tests
+  - dotnet test
