@@ -7,5 +7,4 @@ script:
 before_script:
   - dotnet restore
 after_script:
-  - cd EdgeGrid-Signer-httpclient-unit-tests
   - dotnet test
