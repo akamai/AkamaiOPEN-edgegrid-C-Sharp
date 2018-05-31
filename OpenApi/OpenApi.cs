@@ -1,7 +1,8 @@
-﻿using Akamai.EdgeGrid;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using Akamai.EdgeGrid;
 using OpenApi.Exception;
 using OpenApi.Model;
 
@@ -189,7 +190,7 @@ namespace OpenApi
                         string BodyContent;
                         try
                         {
-                            BodyContent = System.IO.File.ReadAllText(UploadFile);
+                            BodyContent = File.ReadAllText(UploadFile);
                         }
                         catch (System.Exception Ex)
                         {
@@ -207,7 +208,7 @@ namespace OpenApi
                         Dictionary<string, string> DictionaryHeader = new Dictionary<string, string>();
                         foreach (string Header in Headers)
                         {
-                            string[] KeyAndValue = Header.Split(':', 2);
+                            string[] KeyAndValue = Header.Split(new[] { ':' }, 2, StringSplitOptions.None);
                             DictionaryHeader.Add(KeyAndValue[0], KeyAndValue[1]);
                         }
 
@@ -271,7 +272,7 @@ namespace OpenApi
                 {
                     try
                     {
-                        System.IO.File.WriteAllText(OutputFile, Result);
+                        File.WriteAllText(OutputFile, Result);
                     }
                     catch (System.Exception Ex)
                     {

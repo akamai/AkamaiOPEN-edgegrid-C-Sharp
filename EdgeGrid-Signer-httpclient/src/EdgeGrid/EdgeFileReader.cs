@@ -85,7 +85,7 @@ namespace Akamai.EdgeGrid
                 if (TrimmedLine.Contains(TextToMatch))
                 {
                     Key = Property;
-                    Value = TrimmedLine.Split(TextToMatch)[1];
+                    Value = TrimmedLine.Split(new[] { TextToMatch }, StringSplitOptions.None)[1];
                     if (!dictionaryCredentials.ContainsKey(Key))
                     {
                         dictionaryCredentials.Add(Key, Value);
