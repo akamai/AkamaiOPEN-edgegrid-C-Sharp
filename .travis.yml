@@ -1,0 +1,10 @@
+language: csharp
+solution: AkamaiEdgeGrid.sln
+mono: none
+dotnet: 2.0.0
+script:
+  - dotnet build
+before_script:
+  - dotnet restore
+after_script:
+  - dotnet test
