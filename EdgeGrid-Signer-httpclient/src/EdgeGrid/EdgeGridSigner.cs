@@ -307,8 +307,8 @@ namespace Akamai.EdgeGrid
         {
             String Data = "";
 
-            // only do hash for POSTs or PUTs
-            if (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put)
+            // only do hash for POSTs
+            if (request.Method == HttpMethod.Post)
             {
                 HttpContent Content = request.Content;
                 try
