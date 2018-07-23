@@ -14,7 +14,7 @@
 //
 // Author: colinb@akamai.com  (Colin Bendell)
 //
-using Akamai.Utils;
+using Akamai.EdgeGrid.Auth.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -26,9 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-// Make internal visible to the test.
-[assembly:InternalsVisibleTo("EdgeGridAuthTest")]
 
 namespace Akamai.EdgeGrid.Auth
 {
@@ -50,7 +47,6 @@ namespace Akamai.EdgeGrid.Auth
     /// </summary>
     public class EdgeGridV1Signer: IRequestSigner
     {
-
         public class SignType
         {
             public static SignType HMACSHA256 = new SignType("EG1-HMAC-SHA256", KeyedHashAlgorithm.HMACSHA256);
@@ -80,22 +76,22 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The SignVersion enum value
         /// </summary>
-        internal SignType SignVersion { get; }
+        public SignType SignVersion { get; }
 
         /// <summary>
         /// The checksum mechanism to hash the request body
         /// </summary>
-        internal HashType HashVersion { get; }
+        public HashType HashVersion { get; }
 
         /// <summary>
         /// The ordered list of header names to include in the signature.
         /// </summary>
-        internal IList<string> HeadersToInclude { get; }
+        public IList<string> HeadersToInclude { get; }
 
         /// <summary>
         /// The maximum body size used for computing the POST body hash (in bytes).
         /// </summary>
-	    internal long? MaxBodyHashSize { get; }
+	    public long? MaxBodyHashSize { get; }
 
         public EdgeGridV1Signer(IList<string> headers = null, long? maxBodyHashSize = 2048)
         {
@@ -105,7 +101,7 @@ namespace Akamai.EdgeGrid.Auth
             this.HashVersion = HashType.SHA256;
         }
 
-        internal string GetAuthDataValue(ClientCredential credential, DateTime timestamp)
+        public string GetAuthDataValue(ClientCredential credential, DateTime timestamp)
         {
             if (timestamp == null)
                 throw new ArgumentNullException("timestamp cannot be null");
@@ -119,7 +115,7 @@ namespace Akamai.EdgeGrid.Auth
                 nonce.ToString().ToLower());
         }
 
-        internal string GetRequestData(string method, Uri uri, NameValueCollection requestHeaders = null, Stream requestStream = null)
+        public string GetRequestData(string method, Uri uri, NameValueCollection requestHeaders = null, Stream requestStream = null)
         {
             if (string.IsNullOrEmpty(method))
                 throw new ArgumentNullException("Invalid request: empty request method");
@@ -139,7 +135,7 @@ namespace Akamai.EdgeGrid.Auth
                 bodyHash);
         }
 
-        internal string GetRequestHeaders(NameValueCollection requestHeaders)
+        public string GetRequestHeaders(NameValueCollection requestHeaders)
         {
             if (requestHeaders == null) return string.Empty;
 
@@ -154,7 +150,7 @@ namespace Akamai.EdgeGrid.Auth
             return headers.ToString();
         }
 
-        internal string GetRequestStreamHash(Stream requestStream)
+        public string GetRequestStreamHash(Stream requestStream)
         {
             if (requestStream == null) return string.Empty;
 
@@ -169,7 +165,7 @@ namespace Akamai.EdgeGrid.Auth
             return streamHash;
         }
 
-        internal string GetAuthorizationHeaderValue(ClientCredential credential, DateTime timestamp, string authData, string requestData)
+        public string GetAuthorizationHeaderValue(ClientCredential credential, DateTime timestamp, string authData, string requestData)
         {
             string signingKey = timestamp.ToISO8601().ToByteArray().ComputeKeyedHash(credential.Secret, this.SignVersion.Algorithm).ToBase64();
             string authSignature = string.Format("{0}{1}", requestData, authData).ToByteArray().ComputeKeyedHash(signingKey, this.SignVersion.Algorithm).ToBase64();
@@ -293,6 +289,5 @@ namespace Akamai.EdgeGrid.Auth
 
             return response.GetResponseStream();
         }
-
     }
 }

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdgeGridAuth", "EdgeGridAut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdgeGridAuthTest", "EdgeGridAuthTest\EdgeGridAuthTest.csproj", "{29E067D5-38E9-460A-B4AB-4F967C51FE2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAPI", "OpenAPI\OpenAPI.csproj", "{4B3A20E4-346E-4824-8C59-E65AF942E061}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAPI", "OpenAPI\OpenAPI.csproj", "{7755B727-9A52-454F-9B3E-56CA9C5061C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7755B727-9A52-454F-9B3E-56CA9C5061C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7755B727-9A52-454F-9B3E-56CA9C5061C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7755B727-9A52-454F-9B3E-56CA9C5061C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7755B727-9A52-454F-9B3E-56CA9C5061C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

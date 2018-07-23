@@ -24,25 +24,10 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Akamai.EdgeGrid.Auth;
 
-namespace Akamai.Utils
+namespace Akamai.EdgeGrid.Auth.Utils
 {
-    /// <summary>
-    /// An enum of the hash algorithms supported by <see cref="#ExtensionMethods.ComputeHash(Stream, ChecksumAlgorithm"/>
-    /// Currently supported hashes include MD5; SHA1; SHA256
-    ///
-    /// The string representation matches the <see cref="System.Security.Cryptography.HashAlgorithm"/> canonical names.
-    /// </summary>
-    public enum ChecksumAlgorithm { SHA256, SHA1, MD5 };
-
-    /// <summary>
-    /// An enum of the hash algorithms supported by <see cref="#ExtensionMethods.ComputeKeyedHash(Stream, KeyedHashAlgorithm"/>
-    /// Currently supported hashes include MD5; SHA1; SHA256
-    ///
-    /// The string representation matches the <see cref="System.Security.Cryptography.HMAC"/> canonical names.
-    /// </summary>
-    public enum KeyedHashAlgorithm { HMACSHA256, HMACSHA1, HMACMD5 };
-
     /// <summary>
     /// General utility functions needed to implement the NetStorageKit.  Many of these functions are also
     /// available as standard parts of other libraries, but this package strives to operate without any
@@ -51,9 +36,7 @@ namespace Akamai.Utils
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
     public static class ExtensionMethods
-    {
-
-       
+    {       
         /// <summary>
         /// Computes the hash of a given InputStream. This is a wrapper over the HashAlgorithm crypto functions.
         /// </summary>
@@ -65,7 +48,7 @@ namespace Akamai.Utils
         {
             if (stream == null) return null;
 
-            using (var algorithm = HashAlgorithm.Create(hashType.ToString()))
+            using (var algorithm = HashTypeFactory.Create(hashType))
                 if (maxBodySize != null && maxBodySize > 0)
                     return algorithm.ComputeHash(stream.ReadExactly((long) maxBodySize));
                 else
@@ -86,7 +69,7 @@ namespace Akamai.Utils
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentNullException("key");
 
-            using (var algorithm = HMAC.Create(hashType.ToString()))
+            using (var algorithm = HashTypeFactory.Create(hashType))
             {
                 algorithm.Key = key.ToByteArray();
                 return algorithm.ComputeHash(data);

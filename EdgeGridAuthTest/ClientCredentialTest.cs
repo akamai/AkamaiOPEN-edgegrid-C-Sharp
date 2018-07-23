@@ -16,7 +16,7 @@
 //
 
 using System;
-using Akamai.Utils;
+using Akamai.EdgeGrid.Auth;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Collections.Specialized;
@@ -24,7 +24,7 @@ using System.IO;
 using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Akamai.EdgeGrid.Auth
+namespace Akamai.EdgeGrid.Auth.Test
 {
     [TestClass]
     public class ClientCredentialTest

@@ -15,7 +15,7 @@
 // Author: colinb@akamai.com  (Colin Bendell)
 //
 using System;
-using Akamai.Utils;
+using Akamai.EdgeGrid.Auth.Utils;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Collections.Specialized;
