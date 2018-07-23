@@ -24,7 +24,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Akamai.EdgeGrid.Auth
+namespace Akamai.EdgeGrid.Auth.Test
 {
 
     public class WebRequestTestCreate : IWebRequestCreate

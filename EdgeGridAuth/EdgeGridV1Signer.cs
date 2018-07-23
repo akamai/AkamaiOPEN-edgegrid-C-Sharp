@@ -22,10 +22,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("EdgeGridAuthTest")]
 
 namespace Akamai.EdgeGrid.Auth
 {
@@ -47,12 +49,13 @@ namespace Akamai.EdgeGrid.Auth
     /// </summary>
     public class EdgeGridV1Signer: IRequestSigner
     {
+
         public class SignType
         {
             public static SignType HMACSHA256 = new SignType("EG1-HMAC-SHA256", KeyedHashAlgorithm.HMACSHA256);
 
-            public string Name { get; }
-            public KeyedHashAlgorithm Algorithm { get; }
+            public string Name { get; private set; }
+            public KeyedHashAlgorithm Algorithm { get; private set; }
             private SignType(string name, KeyedHashAlgorithm algorithm)
             {
                 this.Name = name;
@@ -64,7 +67,7 @@ namespace Akamai.EdgeGrid.Auth
         {
             public static HashType SHA256 = new HashType(ChecksumAlgorithm.SHA256);
 
-            public ChecksumAlgorithm Checksum { get; }
+            public ChecksumAlgorithm Checksum { get; private set; }
             private HashType(ChecksumAlgorithm checksum)
             {
                 this.Checksum = checksum;
@@ -76,22 +79,22 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The SignVersion enum value
         /// </summary>
-        public SignType SignVersion { get; }
+        internal SignType SignVersion {get; private set;}
 
         /// <summary>
         /// The checksum mechanism to hash the request body
         /// </summary>
-        public HashType HashVersion { get; }
+        internal HashType HashVersion {get; private set;}
 
         /// <summary>
         /// The ordered list of header names to include in the signature.
         /// </summary>
-        public IList<string> HeadersToInclude { get; }
+        internal IList<string> HeadersToInclude { get; private set; }
 
         /// <summary>
         /// The maximum body size used for computing the POST body hash (in bytes).
         /// </summary>
-	    public long? MaxBodyHashSize { get; }
+	    internal long? MaxBodyHashSize {get; private set; }
 
         public EdgeGridV1Signer(IList<string> headers = null, long? maxBodyHashSize = 2048)
         {
@@ -101,7 +104,7 @@ namespace Akamai.EdgeGrid.Auth
             this.HashVersion = HashType.SHA256;
         }
 
-        public string GetAuthDataValue(ClientCredential credential, DateTime timestamp)
+        internal string GetAuthDataValue(ClientCredential credential, DateTime timestamp)
         {
             if (timestamp == null)
                 throw new ArgumentNullException("timestamp cannot be null");
@@ -115,7 +118,7 @@ namespace Akamai.EdgeGrid.Auth
                 nonce.ToString().ToLower());
         }
 
-        public string GetRequestData(string method, Uri uri, NameValueCollection requestHeaders = null, Stream requestStream = null)
+        internal string GetRequestData(string method, Uri uri, NameValueCollection requestHeaders = null, Stream requestStream = null)
         {
             if (string.IsNullOrEmpty(method))
                 throw new ArgumentNullException("Invalid request: empty request method");
@@ -135,7 +138,7 @@ namespace Akamai.EdgeGrid.Auth
                 bodyHash);
         }
 
-        public string GetRequestHeaders(NameValueCollection requestHeaders)
+        internal string GetRequestHeaders(NameValueCollection requestHeaders)
         {
             if (requestHeaders == null) return string.Empty;
 
@@ -150,7 +153,7 @@ namespace Akamai.EdgeGrid.Auth
             return headers.ToString();
         }
 
-        public string GetRequestStreamHash(Stream requestStream)
+        internal string GetRequestStreamHash(Stream requestStream)
         {
             if (requestStream == null) return string.Empty;
 
@@ -165,7 +168,7 @@ namespace Akamai.EdgeGrid.Auth
             return streamHash;
         }
 
-        public string GetAuthorizationHeaderValue(ClientCredential credential, DateTime timestamp, string authData, string requestData)
+        internal string GetAuthorizationHeaderValue(ClientCredential credential, DateTime timestamp, string authData, string requestData)
         {
             string signingKey = timestamp.ToISO8601().ToByteArray().ComputeKeyedHash(credential.Secret, this.SignVersion.Algorithm).ToBase64();
             string authSignature = string.Format("{0}{1}", requestData, authData).ToByteArray().ComputeKeyedHash(signingKey, this.SignVersion.Algorithm).ToBase64();
@@ -289,5 +292,6 @@ namespace Akamai.EdgeGrid.Auth
 
             return response.GetResponseStream();
         }
+
     }
 }

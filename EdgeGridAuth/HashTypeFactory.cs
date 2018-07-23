@@ -21,8 +21,16 @@ namespace Akamai.EdgeGrid.Auth
     /// </summary>
     public enum ChecksumAlgorithm { SHA256, SHA1, MD5 };
 
+    /// <summary>
+    /// Responsible for creating hash algoritm implementations.
+    /// </summary>
     internal static class HashTypeFactory
     {
+        /// <summary>
+        /// Creata a new keyed hash algorithm from an enum.
+        /// </summary>
+        /// <param name="hashType">The implementation to request.</param>
+        /// <returns>An implementation of the algorithm.</returns>
         public static HMAC Create(KeyedHashAlgorithm hashType)
         {
             switch (hashType)
@@ -38,6 +46,11 @@ namespace Akamai.EdgeGrid.Auth
             }
         }
 
+        /// <summary>
+        /// Creata a new checksum algorithm from an enum.
+        /// </summary>
+        /// <param name="hashType">The implementation to request.</param>
+        /// <returns>An implementation of the algorithm.</returns>
         public static HashAlgorithm Create(ChecksumAlgorithm hashType)
         {
             switch (hashType)

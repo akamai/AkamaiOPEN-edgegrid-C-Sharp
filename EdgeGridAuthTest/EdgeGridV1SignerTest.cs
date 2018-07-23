@@ -24,7 +24,7 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Akamai.EdgeGrid.Auth
+namespace Akamai.EdgeGrid.Auth.Test
 {
     [TestClass]
     public class EdgeGridV1SignerTest
