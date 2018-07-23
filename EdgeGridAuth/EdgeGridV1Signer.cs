@@ -14,7 +14,7 @@
 //
 // Author: colinb@akamai.com  (Colin Bendell)
 //
-using Akamai.Utils;
+using Akamai.EdgeGrid.Auth.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -25,6 +25,9 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("EdgeGridAuthTest")]
 
 namespace Akamai.EdgeGrid.Auth
 {

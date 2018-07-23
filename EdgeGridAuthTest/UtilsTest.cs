@@ -20,8 +20,9 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Akamai.EdgeGrid.Auth.Utils;
 
-namespace Akamai.Utils
+namespace Akamai.EdgeGrid.Auth.Utils.Test
 {
     [TestClass]
     public class UtilsTest

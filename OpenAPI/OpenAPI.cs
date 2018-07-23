@@ -16,7 +16,7 @@
 //
 
 using Akamai.EdgeGrid.Auth;
-using Akamai.Utils;
+using Akamai.EdgeGrid.Auth.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
