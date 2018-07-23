@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeGridAuth", "EdgeGridAuth\EdgeGridAuth.csproj", "{ADAB1DDB-1494-4D67-B220-486183043BED}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdgeGridAuth", "EdgeGridAuth\EdgeGridAuth.csproj", "{233C6D15-DFBC-4D35-89D6-F47C5C696BC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeGridAuthTest", "EdgeGridAuthTest\EdgeGridAuthTest.csproj", "{90305710-83BC-4A0A-A51F-D784A293CD60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdgeGridAuthTest", "EdgeGridAuthTest\EdgeGridAuthTest.csproj", "{29E067D5-38E9-460A-B4AB-4F967C51FE2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAPI", "OpenAPI\OpenAPI.csproj", "{29FD8214-D06D-4D51-A7F5-AF850C9EE5F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAPI", "OpenAPI\OpenAPI.csproj", "{4B3A20E4-346E-4824-8C59-E65AF942E061}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,20 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ADAB1DDB-1494-4D67-B220-486183043BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADAB1DDB-1494-4D67-B220-486183043BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADAB1DDB-1494-4D67-B220-486183043BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADAB1DDB-1494-4D67-B220-486183043BED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90305710-83BC-4A0A-A51F-D784A293CD60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90305710-83BC-4A0A-A51F-D784A293CD60}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90305710-83BC-4A0A-A51F-D784A293CD60}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90305710-83BC-4A0A-A51F-D784A293CD60}.Release|Any CPU.Build.0 = Release|Any CPU
-		{29FD8214-D06D-4D51-A7F5-AF850C9EE5F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{29FD8214-D06D-4D51-A7F5-AF850C9EE5F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{29FD8214-D06D-4D51-A7F5-AF850C9EE5F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{29FD8214-D06D-4D51-A7F5-AF850C9EE5F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{233C6D15-DFBC-4D35-89D6-F47C5C696BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{233C6D15-DFBC-4D35-89D6-F47C5C696BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{233C6D15-DFBC-4D35-89D6-F47C5C696BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{233C6D15-DFBC-4D35-89D6-F47C5C696BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29E067D5-38E9-460A-B4AB-4F967C51FE2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B3A20E4-346E-4824-8C59-E65AF942E061}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1935812B-F0C2-4CCA-94B0-52D431FF4F18}
 	EndGlobalSection
 EndGlobal
