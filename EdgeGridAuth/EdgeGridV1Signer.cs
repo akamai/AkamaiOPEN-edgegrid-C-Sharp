@@ -55,8 +55,8 @@ namespace Akamai.EdgeGrid.Auth
         {
             public static SignType HMACSHA256 = new SignType("EG1-HMAC-SHA256", KeyedHashAlgorithm.HMACSHA256);
 
-            public string Name { get; private set; }
-            public KeyedHashAlgorithm Algorithm { get; private set; }
+            public string Name { get; }
+            public KeyedHashAlgorithm Algorithm { get; }
             private SignType(string name, KeyedHashAlgorithm algorithm)
             {
                 this.Name = name;
@@ -68,7 +68,7 @@ namespace Akamai.EdgeGrid.Auth
         {
             public static HashType SHA256 = new HashType(ChecksumAlgorithm.SHA256);
 
-            public ChecksumAlgorithm Checksum { get; private set; }
+            public ChecksumAlgorithm Checksum { get; }
             private HashType(ChecksumAlgorithm checksum)
             {
                 this.Checksum = checksum;
@@ -80,22 +80,22 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The SignVersion enum value
         /// </summary>
-        internal SignType SignVersion {get; private set;}
+        internal SignType SignVersion { get; }
 
         /// <summary>
         /// The checksum mechanism to hash the request body
         /// </summary>
-        internal HashType HashVersion {get; private set;}
+        internal HashType HashVersion { get; }
 
         /// <summary>
         /// The ordered list of header names to include in the signature.
         /// </summary>
-        internal IList<string> HeadersToInclude { get; private set; }
+        internal IList<string> HeadersToInclude { get; }
 
         /// <summary>
         /// The maximum body size used for computing the POST body hash (in bytes).
         /// </summary>
-	    internal long? MaxBodyHashSize {get; private set; }
+	    internal long? MaxBodyHashSize { get; }
 
         public EdgeGridV1Signer(IList<string> headers = null, long? maxBodyHashSize = 2048)
         {

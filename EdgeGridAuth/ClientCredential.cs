@@ -35,17 +35,17 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The client token
         /// </summary>
-        public string ClientToken { get; private set; }
+        public string ClientToken { get; }
 
         /// <summary>
         /// The Access Token
         /// </summary>
-        public string AccessToken { get; private set; }
+        public string AccessToken { get; }
 
         /// <summary>
         /// The client secret
         /// </summary>
-        public string Secret { get; private set; }
+        public string Secret { get; }
 
         /// <summary>
         /// Default Constructor
