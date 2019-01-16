@@ -38,6 +38,7 @@ namespace Akamai.EdgeGrid
     {
         static void Main(string[] args)
         {
+            bool debug = false;
             string secret = null;
             string clientToken = null;
             string accessToken = null;
@@ -93,7 +94,6 @@ namespace Akamai.EdgeGrid
                         case "-X":
                             httpMethod = arg;
                             break;
-
                     }
                     firstarg = null;
                 }
@@ -102,8 +102,10 @@ namespace Akamai.EdgeGrid
                     help();
                     return;
                 }
+                else if (arg == "--debug")
+                    debug = true;
                 else if (arg == "-v" || arg == "-vv")
-                    verbose = true;           
+                    verbose = true;
                 else if (!arg.StartsWith("-"))
                     apiurl = arg;
                 else
@@ -124,6 +126,10 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("Content-Type: {0}", contentType);
             }
 
+            if (debug && !System.Diagnostics.Debugger.IsAttached)
+            {
+                System.Diagnostics.Debugger.Launch();
+            }
             execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, maxBodySize, contentType, verbose);
         }
 
@@ -192,6 +198,7 @@ Usage: openapi <-c client-token> <-a access-token> <-s secret>
            [-X method]
            [-H header-line]
            [-T content-type]
+           [-v] [--debug]
            <url>
 
 Where:
@@ -202,6 +209,8 @@ Where:
     -H header-line  Http Header 'Name: value'
     -X method       force HTTP PUT,POST,DELETE 
     -T content-type the HTTP content type (default = application/json)
+    -v              verbose output
+    --debug         attache the debugger
     url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations       
 
 ");
