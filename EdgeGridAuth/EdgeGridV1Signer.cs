@@ -237,7 +237,8 @@ namespace Akamai.EdgeGrid.Auth
         {
 
             //Make sure that this connection will behave nicely with multiple calls in a connection pool.
-            ServicePointManager.EnableDnsRoundRobin = true;
+            ServicePointManager.EnableDnsRoundRobin = true; 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             request = this.Sign(request, credential, uploadStream);
 
             if (request.Method == "PUT" || request.Method == "POST" || request.Method == "PATCH")
