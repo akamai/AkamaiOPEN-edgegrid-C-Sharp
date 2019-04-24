@@ -30,7 +30,7 @@ namespace Akamai.EdgeGrid.Auth
     /// 
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
-    interface IRequestSigner
+    public interface IRequestSigner
     {
         /// <summary>
         /// Signs a request with the client credential.
