@@ -14,15 +14,15 @@
 //
 // Author: colinb@akamai.com  (Colin Bendell)
 //
-using System;
 using Akamai.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text.RegularExpressions;
 
 namespace Akamai.EdgeGrid.Auth
 {
@@ -31,7 +31,9 @@ namespace Akamai.EdgeGrid.Auth
     {
         private class NonSeekMemoryStream : MemoryStream
         {
-            public NonSeekMemoryStream(byte[] data) : base(data) {}
+            public NonSeekMemoryStream(byte[] data) : base(data)
+            {
+            }
 
             public override bool CanSeek { get { return false; } }
         }
@@ -50,7 +52,7 @@ namespace Akamai.EdgeGrid.Auth
         [TestMethod]
         public void ConstructorTest()
         {
-            List<string> headers = new List<string>() {"test"};
+            List<string> headers = new List<string>() { "test" };
             EdgeGridV1Signer signer = new EdgeGridV1Signer(headers, 100);
             Assert.AreEqual(signer.HeadersToInclude.Count, 1);
             Assert.IsTrue(signer.HeadersToInclude.Contains("test"));
@@ -65,7 +67,6 @@ namespace Akamai.EdgeGrid.Auth
             string secret = "secret-shh";
             DateTime timestamp = new DateTime(1918, 11, 11, 11, 00, 00, DateTimeKind.Utc);
 
-            
             EdgeGridV1Signer signer = new EdgeGridV1Signer();
             ClientCredential credential = new ClientCredential(clientToken, accessToken, secret);
 
@@ -78,7 +79,7 @@ namespace Akamai.EdgeGrid.Auth
         [ExpectedException(typeof(ArgumentNullException))]
         public void GetRequestDataTest_EmptyMethod()
         {
-            EdgeGridV1Signer signer = new EdgeGridV1Signer(new List<string> () {"name1"});
+            EdgeGridV1Signer signer = new EdgeGridV1Signer(new List<string>() { "name1" });
             signer.GetRequestData("", new Uri("http://www.example.com/path.ext?name=value"));
         }
 
@@ -86,8 +87,8 @@ namespace Akamai.EdgeGrid.Auth
         [ExpectedException(typeof(ArgumentNullException))]
         public void GetRequestDataTest_NullMethod()
         {
-            EdgeGridV1Signer signer = new EdgeGridV1Signer(new List<string>() { "name1" }); 
-            signer.GetRequestData(null, new Uri("http://www.example.com/path.ext?name=value")); 
+            EdgeGridV1Signer signer = new EdgeGridV1Signer(new List<string>() { "name1" });
+            signer.GetRequestData(null, new Uri("http://www.example.com/path.ext?name=value"));
         }
 
         [TestMethod]
@@ -97,10 +98,9 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual("GET\thttp\twww.example.com\t/\t\t\t", signer.GetRequestData("GET", new Uri("http://www.example.com")));
             Assert.AreEqual("GET\thttp\twww.example.com\t/path.ext?name=value\t\t\t", signer.GetRequestData("GET", new Uri("http://www.example.com/path.ext?name=value")));
 
-            var headers = new NameValueCollection() {{ "name1", "value1"}};
-            Assert.AreEqual("GET\thttp\twww.example.com\t/path.ext?name=value\tname1:value1\t\t\t", 
+            var headers = new NameValueCollection() { { "name1", "value1" } };
+            Assert.AreEqual("GET\thttp\twww.example.com\t/path.ext?name=value\tname1:value1\t\t\t",
                 signer.GetRequestData("GET", new Uri("http://www.example.com/path.ext?name=value"), headers));
-
 
             var data = "Lorem ipsum dolor sit amet, an sea putant quaeque, homero aperiam te eos.".ToByteArray();
             var stream = new MemoryStream(data);
@@ -122,20 +122,20 @@ namespace Akamai.EdgeGrid.Auth
             var headers = new NameValueCollection() { };
             Assert.AreEqual(String.Empty, signer.GetRequestHeaders(null));
 
-            headers = new NameValueCollection() {{"name2", "value2"}};
+            headers = new NameValueCollection() { { "name2", "value2" } };
             Assert.AreEqual(String.Empty, signer.GetRequestHeaders(null));
 
-            headers = new NameValueCollection() 
-            { 
-                { "x-a", "value1" }, 
-                { "name2", "value2" } 
+            headers = new NameValueCollection()
+            {
+                { "x-a", "value1" },
+                { "name2", "value2" }
             };
             Assert.AreEqual("x-a:value1\t", signer.GetRequestHeaders(headers));
 
-            headers = new NameValueCollection() 
-            { 
-                { "x-a", "va" }, 
-                { "x-c", "\"     xc        \"" }, 
+            headers = new NameValueCollection()
+            {
+                { "x-a", "va" },
+                { "x-c", "\"     xc        \"" },
                 { "x-b", "   w         b" }
             };
             Assert.AreEqual("x-a:va\tx-b:w b\tx-c:\" xc \"\t", signer.GetRequestHeaders(headers));
@@ -203,7 +203,7 @@ namespace Akamai.EdgeGrid.Auth
             string clientToken = "akaa-275ca6de04b11b91-cf46074bf3b52950";
             string accessToken = "akaa-d6cfbdb2d0594ae4-ad000cf3a5473a08";
             string secret = "secret-shh";
-            DateTime timestamp = new DateTime(1918,11,11,11,00,00,DateTimeKind.Utc);
+            DateTime timestamp = new DateTime(1918, 11, 11, 11, 00, 00, DateTimeKind.Utc);
 
             EdgeGridV1Signer signer = new EdgeGridV1Signer();
             ClientCredential credential = new ClientCredential(clientToken, accessToken, secret);
@@ -217,7 +217,6 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual(string.Format("{0}signature=0iSbrT0ze1uDfJdodKOevZSSjYkXllt6VlLSghOiWtY=", authData), signer.GetAuthorizationHeaderValue(credential, timestamp, authData, authBody));
             //Assert.Catch<ArgumentNullException>(delegate { signer.GetAuthorizationHeaderValue(credential, null, authData, authBody); });
         }
-
 
         [TestMethod]
         public void SignTest()
@@ -240,7 +239,6 @@ namespace Akamai.EdgeGrid.Auth
 
             Assert.IsTrue(Regex.IsMatch(request.Headers.Get("Authorization"),
                 @"EG1-HMAC-SHA256 client_token=clientToken;access_token=accessToken;timestamp=\d{8}T\d\d:\d\d:\d\d\+0000;nonce=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12};signature=[A-Za-z0-9/+]{43}="));
-
         }
 
         [TestMethod]
@@ -249,7 +247,6 @@ namespace Akamai.EdgeGrid.Auth
             string TestURIProtocol = "asdf";
             WebRequest.RegisterPrefix(TestURIProtocol, new WebRequestTestCreate());
             var request = (HttpWebRequestTest)WebRequest.Create("asdf://www.example.com/");
-
 
             var signer = new EdgeGridV1Signer();
             var response = request.CreateResponse();
@@ -263,7 +260,6 @@ namespace Akamai.EdgeGrid.Auth
             string TestURIProtocol = "asdf";
             WebRequest.RegisterPrefix(TestURIProtocol, new WebRequestTestCreate());
             var request = (HttpWebRequestTest)WebRequest.Create("asdf://www.example.com/");
-
 
             var signer = new EdgeGridV1Signer();
             var response = request.CreateResponse(HttpStatusCode.ServiceUnavailable, "Server Unavailable");
@@ -281,7 +277,6 @@ namespace Akamai.EdgeGrid.Auth
             string TestURIProtocol = "asdf";
             WebRequest.RegisterPrefix(TestURIProtocol, new WebRequestTestCreate());
             var request = (HttpWebRequestTest)WebRequest.Create("asdf://www.example.com/");
-
 
             var signer = new EdgeGridV1Signer();
             var response = request.CreateResponse(HttpStatusCode.ServiceUnavailable, "Server Unavailable");
@@ -331,6 +326,5 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual(request.ContentLength, 73);
             CollectionAssert.AreEqual(request.RequestStream.ToArray(), data);
         }
-
     }
 }

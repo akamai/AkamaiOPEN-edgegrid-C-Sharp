@@ -25,7 +25,7 @@ namespace Akamai.EdgeGrid.Auth
 {
     /// <summary>
     /// Represents the client credential that is used in service requests.
-    /// 
+    ///
     /// It contains the client token that represents the service client, the client secret
     /// that is associated with the client token used for request signing, and the access token
     /// that represents the authorizations the client has for accessing the service.
