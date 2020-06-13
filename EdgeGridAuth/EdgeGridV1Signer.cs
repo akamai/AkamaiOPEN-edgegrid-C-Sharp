@@ -19,40 +19,37 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid.Auth
 {
-
     /// <summary>
-    /// The EdgeGrid Signer is responsible for brokering a requests.This class is responsible 
+    /// The EdgeGrid Signer is responsible for brokering a requests.This class is responsible
     /// for the core interaction logic given an API command and the associated set of parameters.
-    /// 
+    ///
     /// When event is executed, the 'Authorization' header is decorated
-    /// 
+    ///
     /// If connection is going to be reused, pass the persistent HttpWebRequest object when calling execute()
-    /// 
+    ///
     /// TODO: support rebinding on IO communication errors (eg: connection reset)
     /// TODO: support Async callbacks and Async IO
-    /// TODO: support multiplexing 
+    /// TODO: support multiplexing
     /// TODO: optimize and adapt throughput based on connection latency
-    /// 
+    ///
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
-    public class EdgeGridV1Signer: IRequestSigner
+    public class EdgeGridV1Signer : IRequestSigner
     {
-
         public class SignType
         {
             public static SignType HMACSHA256 = new SignType("EG1-HMAC-SHA256", KeyedHashAlgorithm.HMACSHA256);
 
             public string Name { get; private set; }
             public KeyedHashAlgorithm Algorithm { get; private set; }
+
             private SignType(string name, KeyedHashAlgorithm algorithm)
             {
                 this.Name = name;
@@ -65,6 +62,7 @@ namespace Akamai.EdgeGrid.Auth
             public static HashType SHA256 = new HashType(ChecksumAlgorithm.SHA256);
 
             public ChecksumAlgorithm Checksum { get; private set; }
+
             private HashType(ChecksumAlgorithm checksum)
             {
                 this.Checksum = checksum;
@@ -76,12 +74,12 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The SignVersion enum value
         /// </summary>
-        internal SignType SignVersion {get; private set;}
+        internal SignType SignVersion { get; private set; }
 
         /// <summary>
         /// The checksum mechanism to hash the request body
         /// </summary>
-        internal HashType HashVersion {get; private set;}
+        internal HashType HashVersion { get; private set; }
 
         /// <summary>
         /// The ordered list of header names to include in the signature.
@@ -91,7 +89,7 @@ namespace Akamai.EdgeGrid.Auth
         /// <summary>
         /// The maximum body size used for computing the POST body hash (in bytes).
         /// </summary>
-	    internal long? MaxBodyHashSize {get; private set; }
+	    internal long? MaxBodyHashSize { get; private set; }
 
         public EdgeGridV1Signer(IList<string> headers = null, long? maxBodyHashSize = 2048)
         {
@@ -107,7 +105,7 @@ namespace Akamai.EdgeGrid.Auth
                 throw new ArgumentNullException("timestamp cannot be null");
 
             Guid nonce = Guid.NewGuid();
-            return string.Format("{0} client_token={1};access_token={2};timestamp={3};nonce={4};", 
+            return string.Format("{0} client_token={1};access_token={2};timestamp={3};nonce={4};",
                 this.SignVersion.Name,
                 credential.ClientToken,
                 credential.AccessToken,
@@ -173,10 +171,10 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         /// <summary>
-        /// Validates the response and attempts to detect root causes for failures for non 200 responses. The most common cause is 
-        /// due to time synchronization of the local server. If the local server is more than 30seconds out of sync then the 
+        /// Validates the response and attempts to detect root causes for failures for non 200 responses. The most common cause is
+        /// due to time synchronization of the local server. If the local server is more than 30seconds out of sync then the
         /// API server will reject the request.
-        /// 
+        ///
         /// TODO: catch rate limitting errors. Should delay and retry.
         /// </summary>
         /// <param name="response">the active response object</param>
@@ -201,7 +199,7 @@ namespace Akamai.EdgeGrid.Auth
                     responseBody = reader.ReadToEnd();
                     // Do something with the value
                 }
-               
+
                 throw new HttpRequestException(string.Format("Unexpected Response from Server: {0} {1}\n{2}\n\n{3}", httpResponse.StatusCode, httpResponse.StatusDescription, response.Headers, responseBody));
             }
         }
@@ -235,9 +233,8 @@ namespace Akamai.EdgeGrid.Auth
         /// <returns> the output stream of the response</returns>
         public Stream Execute(WebRequest request, ClientCredential credential, Stream uploadStream = null)
         {
-
             //Make sure that this connection will behave nicely with multiple calls in a connection pool.
-            ServicePointManager.EnableDnsRoundRobin = true; 
+            ServicePointManager.EnableDnsRoundRobin = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             request = this.Sign(request, credential, uploadStream);
 
@@ -267,11 +264,11 @@ namespace Akamai.EdgeGrid.Auth
                 }
             }
 
-            if (request is HttpWebRequest) 
+            if (request is HttpWebRequest)
             {
                 var httpRequest = (HttpWebRequest)request;
                 httpRequest.Accept = "*/*";
-                if (String.IsNullOrEmpty(httpRequest.UserAgent)) 
+                if (String.IsNullOrEmpty(httpRequest.UserAgent))
                     httpRequest.UserAgent = "EdgeGrid.Net/v1";
             }
 
@@ -290,6 +287,5 @@ namespace Akamai.EdgeGrid.Auth
 
             return response.GetResponseStream();
         }
-
     }
 }

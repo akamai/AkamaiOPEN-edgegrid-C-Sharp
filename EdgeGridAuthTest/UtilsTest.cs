@@ -15,11 +15,10 @@
 // Author: colinb@akamai.com  (Colin Bendell)
 //
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Akamai.Utils
 {

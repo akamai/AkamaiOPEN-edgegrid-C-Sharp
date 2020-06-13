@@ -15,14 +15,8 @@
 // Author: colinb@akamai.com  (Colin Bendell)
 //
 
-using System;
-using Akamai.Utils;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Collections.Specialized;
-using System.IO;
-using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Akamai.EdgeGrid.Auth
 {
@@ -54,7 +48,6 @@ namespace Akamai.EdgeGrid.Auth
             string clientToken = "client-token";
             string secret = "secret";
             var credential = new ClientCredential(clientToken, null, secret);
-            
         }
 
         [TestMethod]
@@ -63,7 +56,7 @@ namespace Akamai.EdgeGrid.Auth
         {
             string accessToken = "access-token";
             string clientToken = "client-token";
-            var credential = new ClientCredential(clientToken, accessToken, null); 
+            var credential = new ClientCredential(clientToken, accessToken, null);
         }
 
         [TestMethod]
@@ -78,6 +71,5 @@ namespace Akamai.EdgeGrid.Auth
             Assert.AreEqual(credential.ClientToken, clientToken);
             Assert.AreEqual(credential.Secret, secret);
         }
-
     }
 }

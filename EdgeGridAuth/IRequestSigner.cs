@@ -15,22 +15,17 @@
 // Author: colinb@akamai.com  (Colin Bendell)
 //
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid.Auth
 {
     /// <summary>
     /// Interface describing a request signer that signs service requests.
-    /// 
+    ///
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
-    interface IRequestSigner
+    internal interface IRequestSigner
     {
         /// <summary>
         /// Signs a request with the client credential.

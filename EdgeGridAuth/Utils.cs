@@ -16,14 +16,9 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Akamai.Utils
 {
@@ -47,19 +42,17 @@ namespace Akamai.Utils
     /// General utility functions needed to implement the NetStorageKit.  Many of these functions are also
     /// available as standard parts of other libraries, but this package strives to operate without any
     /// external dependencies.
-    /// 
+    ///
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
     public static class ExtensionMethods
     {
-
-       
         /// <summary>
         /// Computes the hash of a given InputStream. This is a wrapper over the HashAlgorithm crypto functions.
         /// </summary>
         /// <param name="stream">the source stream. Use a MemoryStream if uncertain.</param>
         /// <param name="hashType">the Algorithm to use to compute the hash</param>
-        /// <returns>a byte[] representation of the hash. If the Stream is a null object 
+        /// <returns>a byte[] representation of the hash. If the Stream is a null object
         /// then null will be returned. If the Stream is empty an empty byte[] {} will be returned.</returns>
         public static byte[] ComputeHash(this Stream stream, ChecksumAlgorithm hashType = ChecksumAlgorithm.SHA256, long? maxBodySize = null)
         {
@@ -67,7 +60,7 @@ namespace Akamai.Utils
 
             using (var algorithm = HashAlgorithm.Create(hashType.ToString()))
                 if (maxBodySize != null && maxBodySize > 0)
-                    return algorithm.ComputeHash(stream.ReadExactly((long) maxBodySize));
+                    return algorithm.ComputeHash(stream.ReadExactly((long)maxBodySize));
                 else
                     return algorithm.ComputeHash(stream);
         }
@@ -94,7 +87,7 @@ namespace Akamai.Utils
         }
 
         /// <summary>
-        /// Reads a stream up to @maxCount number of bytes. Less bytes will be returned 
+        /// Reads a stream up to @maxCount number of bytes. Less bytes will be returned
         /// if the end of the file is reached.
         /// </summary>
         /// <param name="stream">the stream to read</param>
@@ -102,7 +95,6 @@ namespace Akamai.Utils
         /// <returns></returns>
         public static byte[] ReadExactly(this Stream stream, long maxCount)
         {
-
             using (MemoryStream result = new MemoryStream())
             {
                 byte[] buffer = new byte[1024 * 1024];
@@ -142,7 +134,7 @@ namespace Akamai.Utils
         /// <summary>
         /// Hex encoding wrapper for a byte array. The output will be 2 character padded string in lower case.
         /// </summary>
-        /// <param name="data">a byte array to encode. The assumption is that the string to encode 
+        /// <param name="data">a byte array to encode. The assumption is that the string to encode
         /// is small enough to be held in memory without streaming the encoding</param>
         /// <returns>a 2 character zero padded string in lower case</returns>
         public static string ToHex(this byte[] data)

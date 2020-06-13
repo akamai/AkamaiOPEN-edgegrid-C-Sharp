@@ -20,23 +20,20 @@ using Akamai.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Akamai.EdgeGrid
 {
     /// <summary>
-    /// Command Line sample application to demonstrate the utilization of the {Open} APIs. 
-    /// This can be used for both command line invocation or reference on how to leverage the 
+    /// Command Line sample application to demonstrate the utilization of the {Open} APIs.
+    /// This can be used for both command line invocation or reference on how to leverage the
     /// Api. All supported commands are implemented in this sample for convience.
-    /// 
+    ///
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
-    class OpenAPI
+    public class OpenAPI
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             string secret = null;
             string clientToken = null;
@@ -46,14 +43,13 @@ namespace Akamai.EdgeGrid
             string httpMethod = "GET";
             string contentType = "application/json";
 
-
             string outputfile = null;
             string uploadfile = null;
             string data = null;
             int maxBodySize = 2048;
 
             bool verbose = false;
-           
+
             string firstarg = null;
             foreach (string arg in args)
             {
@@ -64,36 +60,44 @@ namespace Akamai.EdgeGrid
                         case "-a":
                             accessToken = arg;
                             break;
+
                         case "-c":
                             clientToken = arg;
                             break;
+
                         case "-d":
                             if (httpMethod == "GET") httpMethod = "POST";
                             data = arg;
                             break;
+
                         case "-f":
                             if (httpMethod == "GET") httpMethod = "PUT";
                             uploadfile = arg;
                             break;
+
                         case "-H":
                             headers.Add(arg);
                             break;
+
                         case "-m":
                             maxBodySize = Convert.ToInt32(arg);
                             break;
+
                         case "-o":
                             outputfile = arg;
                             break;
+
                         case "-s":
                             secret = arg;
                             break;
+
                         case "-T":
                             contentType = arg;
                             break;
+
                         case "-X":
                             httpMethod = arg;
                             break;
-
                     }
                     firstarg = null;
                 }
@@ -103,7 +107,7 @@ namespace Akamai.EdgeGrid
                     return;
                 }
                 else if (arg == "-v" || arg == "-vv")
-                    verbose = true;           
+                    verbose = true;
                 else if (!arg.StartsWith("-"))
                     apiurl = arg;
                 else
@@ -127,14 +131,14 @@ namespace Akamai.EdgeGrid
             execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, maxBodySize, contentType, verbose);
         }
 
-        static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, int? maxBodySize, string contentType, bool verbose = false)
+        private static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, int? maxBodySize, string contentType, bool verbose = false)
         {
             if (apiurl == null || clientToken == null || accessToken == null || secret == null)
             {
                 help();
                 return;
             }
-            
+
             EdgeGridV1Signer signer = new EdgeGridV1Signer(null, maxBodySize);
             ClientCredential credential = new ClientCredential(clientToken, accessToken, secret);
 
@@ -146,7 +150,7 @@ namespace Akamai.EdgeGrid
 
             var uri = new Uri(apiurl);
             var request = WebRequest.Create(uri);
-            
+
             foreach (string header in headers) request.Headers.Add(header);
             request.Method = httpMethod;
 
@@ -160,14 +164,14 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("Authorization: {0}", request.Headers.Get("Authorization"));
                 Console.WriteLine();
             }
-              
+
             using (var result = signer.Execute(request, credential, uploadStream))
             {
                 using (output)
                 {
                     using (result)
                     {
-                        byte[] buffer = new byte[1024*1024];
+                        byte[] buffer = new byte[1024 * 1024];
                         int bytesRead = 0;
 
                         while ((bytesRead = result.Read(buffer, 0, buffer.Length)) != 0)
@@ -177,12 +181,9 @@ namespace Akamai.EdgeGrid
                     }
                 }
             }
-        
-
-
         }
 
-        static void help()
+        private static void help()
         {
             Console.Error.WriteLine(@"
 Usage: openapi <-c client-token> <-a access-token> <-s secret>
@@ -200,9 +201,9 @@ Where:
     -f srcfile      local file used as source when action=upload
     -m max-size     maximum amount of data to use in the signing hash. Default is 2048
     -H header-line  Http Header 'Name: value'
-    -X method       force HTTP PUT,POST,DELETE 
+    -X method       force HTTP PUT,POST,DELETE
     -T content-type the HTTP content type (default = application/json)
-    url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations       
+    url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations
 
 ");
         }
