@@ -1,21 +1,4 @@
-﻿// Copyright 2014 Akamai Technologies http://developer.akamai.com.
-//
-// Licensed under the Apache License, KitVersion 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Author: colinb@akamai.com  (Colin Bendell)
-//
-
-using Akamai.EdgeGrid.Auth;
+﻿using Akamai.EdgeGrid.Auth;
 using Akamai.Utils;
 using System;
 using System.Collections.Generic;
@@ -31,8 +14,7 @@ namespace Akamai.EdgeGrid
     /// Command Line sample application to demonstrate the utilization of the {Open} APIs. 
     /// This can be used for both command line invocation or reference on how to leverage the 
     /// Api. All supported commands are implemented in this sample for convience.
-    /// 
-    /// Author: colinb@akamai.com  (Colin Bendell)
+    ///
     /// </summary>
     class OpenAPI
     {
@@ -202,7 +184,7 @@ Where:
     -H header-line  Http Header 'Name: value'
     -X method       force HTTP PUT,POST,DELETE 
     -T content-type the HTTP content type (default = application/json)
-    url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations       
+    url             fully qualified api url such as https://{your-host}.luna.akamaiapis.net/identity-management/v3/user-profile       
 
 ");
         }
