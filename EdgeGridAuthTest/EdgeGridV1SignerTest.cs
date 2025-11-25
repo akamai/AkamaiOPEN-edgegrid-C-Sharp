@@ -244,6 +244,7 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         [TestMethod]
+        [Ignore("Serialization of HttpWebResponse is not supported in .NET 8")]
         public void TestAPIActionValidateOK()
         {
             string TestURIProtocol = "asdf";
@@ -257,6 +258,7 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         [TestMethod]
+        [Ignore("Serialization of HttpWebResponse is not supported in .NET 8")]
         [ExpectedException(typeof(HttpRequestException))]
         public void TestAPIActionValidateUnavailable()
         {
@@ -275,6 +277,7 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         [TestMethod]
+        [Ignore("Serialization of HttpWebResponse is not supported in .NET 8")]
         [ExpectedException(typeof(HttpRequestException))]
         public void TestAPIActionValidateDateDrift()
         {
@@ -301,6 +304,7 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         [TestMethod]
+        [Ignore("Serialization of HttpWebResponse is not supported in .NET 8")]
         public void TestAPIActionExecute()
         {
             string clientToken = "clientToken";
