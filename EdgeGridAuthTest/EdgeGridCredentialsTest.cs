@@ -9,7 +9,7 @@ namespace Akamai.EdgeGrid.AuthTest
     public class EdgeGridCredentialsTest
     {
         [TestMethod]
-        public void TestConstructor_WithAllParameters()
+        public void Test_Constructor_WithAllParameters()
         {
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
@@ -26,7 +26,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestConstructor_NullHost()
+        public void Test_Constructor_NullHost()
         {
             var credentials = new EdgeGridCredentials(
                 host: null,
@@ -38,7 +38,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestConstructor_NullClientToken()
+        public void Test_Constructor_NullClientToken()
         {
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
@@ -50,7 +50,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestConstructor_NullClientSecret()
+        public void Test_Constructor_NullClientSecret()
         {
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
@@ -62,7 +62,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestConstructor_NullAccessToken()
+        public void Test_Constructor_NullAccessToken()
         {
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
@@ -73,14 +73,16 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        public void TestConstructor_FromFile_DefaultSection()
+        public void Test_Constructor_FromFile_DefaultSection()
         {
+            // Based on Python test: test_edgerc_default
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
-client_secret = file-secret
-client_token = file-client-token
-host = file.example.com
-access_token = file-access-token
+client_secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
+client_token = akab-client-token-xxx-xxxxxxxxxxxxxxxx
+host = akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net
+access_token = akab-access-token-xxx-xxxxxxxxxxxxxxxx
+max_body = 131072
 ";
             File.WriteAllText(tempFile, edgercContent);
 
@@ -88,10 +90,10 @@ access_token = file-access-token
             {
                 var credentials = new EdgeGridCredentials(tempFile);
 
-                Assert.AreEqual("file.example.com", credentials.Host);
-                Assert.AreEqual("file-client-token", credentials.ClientToken);
-                Assert.AreEqual("file-secret", credentials.ClientSecret);
-                Assert.AreEqual("file-access-token", credentials.AccessToken);
+                Assert.AreEqual("akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net", credentials.Host);
+                Assert.AreEqual("akab-client-token-xxx-xxxxxxxxxxxxxxxx", credentials.ClientToken);
+                Assert.AreEqual("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=", credentials.ClientSecret);
+                Assert.AreEqual("akab-access-token-xxx-xxxxxxxxxxxxxxxx", credentials.AccessToken);
             }
             finally
             {
@@ -100,7 +102,7 @@ access_token = file-access-token
         }
 
         [TestMethod]
-        public void TestConstructor_FromFile_CustomSection()
+        public void Test_Constructor_FromFile_CustomSection()
         {
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
@@ -133,8 +135,46 @@ access_token = staging-access-token
         }
 
         [TestMethod]
+        public void Test_Constructor_FromFile_BrokenSection()
+        {
+            // Based on Python test: test_edgerc_broken - section with partial credentials
+            string tempFile = Path.GetTempFileName();
+            string edgercContent = @"[default]
+client_secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
+client_token = akab-client-token-xxx-xxxxxxxxxxxxxxxx
+host = akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net
+access_token = akab-access-token-xxx-xxxxxxxxxxxxxxxx
+
+[broken]
+client_secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
+access_token = akab-access-token-xxx-xxxxxxxxxxxxxxxx
+";
+            File.WriteAllText(tempFile, edgercContent);
+
+            try
+            {
+                // Should throw because client_token and host are missing
+                bool exceptionThrown = false;
+                try
+                {
+                    var credentials = new EdgeGridCredentials(tempFile, "broken");
+                }
+                catch (InvalidOperationException)
+                {
+                    exceptionThrown = true;
+                }
+
+                Assert.IsTrue(exceptionThrown, "Expected InvalidOperationException for incomplete credentials");
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void TestConstructor_FromFile_MissingCredentials()
+        public void Test_Constructor_FromFile_MissingCredentials()
         {
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
@@ -154,8 +194,37 @@ host = file.example.com
         }
 
         [TestMethod]
+        public void Test_Constructor_FromFile_DefaultSectionWhenNull()
+        {
+            // Based on Python behavior: null/empty section defaults to "default"
+            string tempFile = Path.GetTempFileName();
+            string edgercContent = @"[default]
+client_secret = default-secret
+client_token = default-token
+host = default.example.com
+access_token = default-access
+";
+            File.WriteAllText(tempFile, edgercContent);
+
+            try
+            {
+                var credentials1 = new EdgeGridCredentials(tempFile, null);
+                var credentials2 = new EdgeGridCredentials(tempFile, "");
+                var credentials3 = new EdgeGridCredentials(tempFile, "   ");
+
+                Assert.AreEqual("default.example.com", credentials1.Host);
+                Assert.AreEqual("default.example.com", credentials2.Host);
+                Assert.AreEqual("default.example.com", credentials3.Host);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
         [Ignore("Environment variable tests skipped - file reading takes precedence over env vars in current implementation")]
-        public void TestConstructor_FromEnvironment()
+        public void Test_Constructor_FromEnvironment()
         {
             // This test is skipped because the current implementation always reads from file
             // even after successfully loading from environment variables
@@ -163,7 +232,7 @@ host = file.example.com
 
         [TestMethod]
         [Ignore("Environment variable tests skipped - file reading takes precedence over env vars in current implementation")]
-        public void TestConstructor_FromEnvironment_CustomSection()
+        public void Test_Constructor_FromEnvironment_CustomSection()
         {
             // This test is skipped because the current implementation always reads from file
             // even after successfully loading from environment variables
