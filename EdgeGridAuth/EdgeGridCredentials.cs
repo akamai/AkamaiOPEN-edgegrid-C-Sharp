@@ -14,6 +14,14 @@ namespace Akamai.EdgeGrid.Auth
         public string? ClientSecret { get; private set; } = "";
         public string? AccessToken { get; private set; } = "";
 
+        // Constructor for direct credential assignment (useful for testing)
+        public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken)
+        {
+            Host = host ?? throw new ArgumentNullException(nameof(host));
+            ClientToken = clientToken ?? throw new ArgumentNullException(nameof(clientToken));
+            ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
+            AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+        }
 
         public EdgeGridCredentials(string? edgeRCFile = null, string? section = "default")
         {
