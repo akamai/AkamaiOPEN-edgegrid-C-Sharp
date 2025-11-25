@@ -1,26 +1,37 @@
-﻿﻿using System;
-using System.Runtime.CompilerServices;
+﻿﻿#nullable enable
+using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks.Dataflow;
+using System.Linq;
 
 namespace Akamai.EdgeGrid.Auth
 {
     public class EdgeGridCredentials
     {
+        /// <summary>
+        /// Default maximum body size for POST request hashing (128 KB).
+        /// </summary>
+        public const int DefaultMaxBody = 131072;
+
         internal string? EdgeRCFile { get; set; }
         internal string? Section { get; set; }
         public string? Host { get; private set; } = "";
         public string? ClientToken { get; private set; } = "";
         public string? ClientSecret { get; private set; } = "";
         public string? AccessToken { get; private set; } = "";
+        public List<string> HeadersToSign { get; private set; } = new List<string>();
+        public int MaxBody { get; private set; } = DefaultMaxBody;
 
         // Constructor for direct credential assignment (useful for testing)
-        public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken)
+        public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken, 
+            List<string>? headersToSign = null, int maxBody = DefaultMaxBody)
         {
             Host = host ?? throw new ArgumentNullException(nameof(host));
             ClientToken = clientToken ?? throw new ArgumentNullException(nameof(clientToken));
             ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
             AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+            HeadersToSign = headersToSign?.Select(h => h.ToLower()).ToList() ?? new List<string>();
+            MaxBody = maxBody;
         }
 
         public EdgeGridCredentials(string? edgeRCFile = null, string? section = "default")
@@ -122,6 +133,15 @@ namespace Akamai.EdgeGrid.Auth
                                 break;
                             case "access_token":
                                 this.AccessToken = value;
+                                break;
+                            case "headers_to_sign":
+                                this.HeadersToSign = value.Split(',').Select(h => h.Trim().ToLower()).ToList();
+                                break;
+                            case "max_body":
+                                if (int.TryParse(value, out int maxBodyValue))
+                                {
+                                    this.MaxBody = maxBodyValue;
+                                }
                                 break;
                         }
                     }

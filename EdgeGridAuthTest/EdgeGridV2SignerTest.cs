@@ -1,6 +1,8 @@
+#nullable enable
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Akamai.EdgeGrid.Auth;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
@@ -237,6 +239,143 @@ namespace Akamai.EdgeGrid.AuthTest
 
             Assert.IsNotNull(signedRequest);
             Assert.IsTrue(signedRequest.Headers.Contains("Authorization"));
+        }
+
+        [TestMethod]
+        public void Test_HeadersToSign()
+        {
+            // Test custom headers in signature
+            var credential = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: ClientToken,
+                clientSecret: ClientSecret,
+                accessToken: AccessToken,
+                headersToSign: new List<string> { "X-Test1", "X-Test2" }
+            );
+
+            var signer = new EdgeGridV2Signer();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/test");
+            request.Headers.Add("X-Test1", "value1");
+            request.Headers.Add("X-Test2", "value2");
+
+            var signedRequest = signer.Sign(request, credential);
+
+            Assert.IsNotNull(signedRequest);
+            Assert.IsTrue(signedRequest.Headers.Contains("Authorization"));
+        }
+
+        [TestMethod]
+        public void Test_MaxBodyFromCredentials()
+        {
+            // Test that max_body from credentials is used
+            var credential = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: ClientToken,
+                clientSecret: ClientSecret,
+                accessToken: AccessToken,
+                maxBody: 1024
+            );
+
+            Assert.AreEqual(1024, credential.MaxBody);
+
+            var signer = new EdgeGridV2Signer();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/testapi/v1/test");
+            request.Content = new StringContent(new string('d', 2000), Encoding.UTF8, "application/octet-stream");
+
+            var signedRequest = signer.Sign(request, credential);
+
+            Assert.IsNotNull(signedRequest);
+            Assert.IsTrue(signedRequest.Headers.Contains("Authorization"));
+        }
+
+        [TestMethod]
+        public void Test_UserAgentVersionHeaders()
+        {
+            // Test that Akamai CLI version headers are added
+            Environment.SetEnvironmentVariable("AKAMAI_CLI", "test");
+            Environment.SetEnvironmentVariable("AKAMAI_CLI_VERSION", "1.0.0");
+
+            try
+            {
+                var signer = new EdgeGridV2Signer();
+                var credential = GetTestCredentials();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/");
+
+                var signedRequest = signer.Sign(request, credential);
+
+                Assert.IsNotNull(signedRequest);
+                var userAgent = signedRequest.Headers.UserAgent.ToString();
+                Assert.IsTrue(userAgent.Contains("AkamaiCLI/1.0.0"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_CLI", null);
+                Environment.SetEnvironmentVariable("AKAMAI_CLI_VERSION", null);
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Test_HeaderCanonicalization_LeadingWhitespace()
+        {
+            // Test that headers with leading whitespace throw exception
+            var credential = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: ClientToken,
+                clientSecret: ClientSecret,
+                accessToken: AccessToken,
+                headersToSign: new List<string> { "X-Test1" }
+            );
+
+            var signer = new EdgeGridV2Signer();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/test");
+            request.Headers.Add("X-Test1", "     invalid-leading-space");
+
+            signer.Sign(request, credential);
+        }
+
+        [TestMethod]
+        public void Test_SigningWithPathParameters()
+        {
+            // Test that path parameters (semicolon-separated) are included in signature
+            // This matches Python's behavior: parsed_url.path + (';' + parsed_url.params if parsed_url.params else "")
+            var signer = new EdgeGridV2Signer();
+            var credential = GetTestCredentials();
+
+            // Create request with path parameters
+            var request = new HttpRequestMessage(HttpMethod.Get, 
+                $"{BaseUrl}/testapi/v1/resource;param1=value1;param2=value2");
+
+            var signedRequest = signer.Sign(request, credential);
+
+            Assert.IsNotNull(signedRequest);
+            Assert.IsTrue(signedRequest.Headers.Contains("Authorization"));
+            
+            // Verify signature was generated
+            var authHeader = string.Join("", signedRequest.Headers.GetValues("Authorization"));
+            Assert.IsTrue(authHeader.StartsWith("EG1-HMAC-SHA256"));
+            Assert.IsTrue(authHeader.Contains("signature="));
+        }
+
+        [TestMethod]
+        public void Test_SigningWithPathParametersAndQuery()
+        {
+            // Test path parameters combined with query string
+            var signer = new EdgeGridV2Signer();
+            var credential = GetTestCredentials();
+
+            // Create request with both path parameters and query string
+            var request = new HttpRequestMessage(HttpMethod.Get, 
+                $"{BaseUrl}/testapi/v1/resource;param=value?query=test&foo=bar");
+
+            var signedRequest = signer.Sign(request, credential);
+
+            Assert.IsNotNull(signedRequest);
+            Assert.IsTrue(signedRequest.Headers.Contains("Authorization"));
+            
+            var authHeader = string.Join("", signedRequest.Headers.GetValues("Authorization"));
+            Assert.IsTrue(authHeader.StartsWith("EG1-HMAC-SHA256"));
+            Assert.IsTrue(authHeader.Contains("signature="));
         }
     }
 }

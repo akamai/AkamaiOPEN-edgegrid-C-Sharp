@@ -1,3 +1,4 @@
+#nullable enable
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Akamai.EdgeGrid.Auth;
 using System;

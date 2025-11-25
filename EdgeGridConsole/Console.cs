@@ -190,7 +190,7 @@ namespace Akamai.EdgeGrid
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.Send(request);
 
-            Console.WriteLine("{0} {1}", (int) response.StatusCode, response.ReasonPhrase.ToString());
+            Console.WriteLine("{0} {1}", (int) response.StatusCode, response.ReasonPhrase ?? "No Reason");
             Console.WriteLine(response.Headers.ToString());
             string responseBody = response.Content.ReadAsStringAsync().Result;
             Console.WriteLine(responseBody);

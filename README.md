@@ -78,6 +78,59 @@ client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
 
 If you do not specify otherwise, the default location of the file is `~/.edgerc` and the section is `default`.
 
+## Advanced Features
+
+### Redirect Handling with Automatic Resigning
+
+The library supports automatic redirect following with request resigning. When an API returns a redirect (3xx status), the `EdgeGridRedirectHandler` will automatically:
+- Follow the redirect
+- Resign the new request with fresh EdgeGrid authentication headers
+- Preserve request headers and content
+
+```c#
+using Akamai.EdgeGrid.Auth;
+using System.Net.Http;
+
+var credentials = new EdgeGridCredentials("~/.edgerc", "default");
+var redirectHandler = new EdgeGridRedirectHandler(credentials, maxRedirects: 10);
+
+using var client = new HttpClient(redirectHandler);
+var request = new HttpRequestMessage(HttpMethod.Get, "https://akaa-baseurl.luna.akamaiapis.net/api/endpoint");
+
+var signer = new EdgeGridV2Signer();
+signer.Sign(request, credentials);
+
+var response = await client.SendAsync(request);
+```
+
+See [REDIRECT_HANDLING.md](REDIRECT_HANDLING.md) for detailed documentation and examples.
+
+### Custom Headers in Signature
+
+You can include specific headers in the authentication signature:
+
+```c#
+// Via .edgerc file
+[default]
+client_secret = C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=
+host = akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net
+access_token = akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij
+client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
+headers_to_sign = X-Custom-Header,X-Another-Header
+max_body = 131072
+```
+
+```c#
+// Or programmatically
+var credentials = new EdgeGridCredentials(
+    host: "akab-baseurl.luna.akamaiapis.net",
+    clientToken: "akab-client-token-xxx",
+    clientSecret: "client-secret-xxx",
+    accessToken: "akab-access-token-xxx",
+    headersToSign: new List<string> { "X-Custom-Header", "X-Another-Header" },
+    maxBody: 131072
+);
+```
 
 ## Sample application (EdgeGridConsole.exe)
 * A sample application has been created that can take command line parameters.
