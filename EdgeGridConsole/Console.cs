@@ -16,12 +16,13 @@
 //
 
 using Akamai.EdgeGrid.Auth;
-using Akamai.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,64 +35,63 @@ namespace Akamai.EdgeGrid
     /// 
     /// Author: colinb@akamai.com  (Colin Bendell)
     /// </summary>
-    class OpenAPI
+    class EdgeGridConsole
     {
         static void Main(string[] args)
         {
-            string secret = null;
-            string clientToken = null;
-            string accessToken = null;
-            string apiurl = null;
-            List<string> headers = new List<string>();
-            string httpMethod = "GET";
+            string edgeRCFile = "";
+            string section = "";
+            string ask = "";
+            string path = "";
+            List<string> headers = [];
+            string method = "GET";
             string contentType = "application/json";
 
 
-            string outputfile = null;
-            string uploadfile = null;
-            string data = null;
-            int maxBodySize = 2048;
+            string outputfile = "";
+            string uploadfile = "";
+            string data = "";
 
             bool verbose = false;
            
-            string firstarg = null;
+            string? firstarg = null;
             foreach (string arg in args)
             {
                 if (firstarg != null)
                 {
                     switch (firstarg)
                     {
-                        case "-a":
-                            accessToken = arg;
+                        case "-p":
+                            path = arg;
                             break;
-                        case "-c":
-                            clientToken = arg;
+                        case "-e":
+                            edgeRCFile = arg;
+                            break;
+                        case "-s":
+                            section = arg;
+                            break;
+                        case "-a":
+                            ask = arg;
                             break;
                         case "-d":
-                            if (httpMethod == "GET") httpMethod = "POST";
+                            if (method == "GET") method = "POST";
                             data = arg;
                             break;
                         case "-f":
-                            if (httpMethod == "GET") httpMethod = "PUT";
+                            if (method == "GET") method = "PUT";
                             uploadfile = arg;
                             break;
                         case "-H":
                             headers.Add(arg);
                             break;
-                        case "-m":
-                            maxBodySize = Convert.ToInt32(arg);
-                            break;
                         case "-o":
                             outputfile = arg;
-                            break;
-                        case "-s":
-                            secret = arg;
                             break;
                         case "-T":
                             contentType = arg;
                             break;
                         case "-X":
-                            httpMethod = arg;
+                            method = arg;
                             break;
 
                     }
@@ -99,23 +99,22 @@ namespace Akamai.EdgeGrid
                 }
                 else if (arg == "-h" || arg == "--help" || arg == "/?")
                 {
-                    help();
+                    Help();
                     return;
                 }
                 else if (arg == "-v" || arg == "-vv")
                     verbose = true;           
                 else if (!arg.StartsWith("-"))
-                    apiurl = arg;
+                    path = arg;
                 else
                     firstarg = arg;
             }
 
             if (verbose)
             {
-                Console.WriteLine("{0} {1}", httpMethod, apiurl);
-                Console.WriteLine("ClientToken: {0}", clientToken);
-                Console.WriteLine("AccessToken: {0}", accessToken);
-                Console.WriteLine("Secret: {0}", secret);
+                Console.WriteLine("{0} {1}", method, path);
+                Console.WriteLine("EdgeRCFile: {0}", edgeRCFile);
+                Console.WriteLine("Section: {0}", section);
                 if (data != null) Console.WriteLine("Data: [{0}]", data);
                 if (uploadfile != null) Console.WriteLine("UploadFile: {0}", uploadfile);
                 if (outputfile != null) Console.WriteLine("OutputFile: {0}", outputfile);
@@ -124,68 +123,83 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("Content-Type: {0}", contentType);
             }
 
-            execute(httpMethod, apiurl, headers, clientToken, accessToken, secret, data, uploadfile, outputfile, maxBodySize, contentType, verbose);
+            Execute(method: method, path: path, headers: headers, edgeRCFile:edgeRCFile, section: section, accountSwitchKey: ask, data: data, uploadfile: uploadfile, outputfile: outputfile, contentType: contentType, verbose: verbose);
         }
 
-        static void execute(string httpMethod, string apiurl, List<string> headers, string clientToken, string accessToken, string secret, string data, string uploadfile, string outputfile, int? maxBodySize, string contentType, bool verbose = false)
+        static void Execute(string method, string path, List<string> headers, string edgeRCFile, string section, string accountSwitchKey, string? data, string? uploadfile, string? outputfile, string contentType, bool verbose = false)
         {
-            if (apiurl == null || clientToken == null || accessToken == null || secret == null)
+            if (path == null)
             {
-                help();
+                Help();
                 return;
             }
             
-            EdgeGridV1Signer signer = new EdgeGridV1Signer(null, maxBodySize);
-            ClientCredential credential = new ClientCredential(clientToken, accessToken, secret);
+            EdgeGridV2Signer signer = new();
+            EdgeGridCredentials credentials = new(edgeRCFile, section);
 
-            Stream uploadStream = null;
-            if (uploadfile != null)
-                uploadStream = new FileInfo(uploadfile).OpenRead();
-            else if (data != null)
-                uploadStream = new MemoryStream(data.ToByteArray());
-
-            var uri = new Uri(apiurl);
-            var request = WebRequest.Create(uri);
-            
-            foreach (string header in headers) request.Headers.Add(header);
-            request.Method = httpMethod;
-
-            Stream output = Console.OpenStandardOutput();
-            if (outputfile != null)
-                output = new FileInfo(outputfile).OpenWrite();
-
-            if (verbose)
+            // Add Account Switch Key to path if provided
+            if (!string.IsNullOrEmpty(accountSwitchKey))
             {
-                signer.Sign(request, credential, uploadStream);
-                Console.WriteLine("Authorization: {0}", request.Headers.Get("Authorization"));
-                Console.WriteLine();
-            }
-              
-            using (var result = signer.Execute(request, credential, uploadStream))
-            {
-                using (output)
+                if(path.Contains("?"))
                 {
-                    using (result)
-                    {
-                        byte[] buffer = new byte[1024*1024];
-                        int bytesRead = 0;
-
-                        while ((bytesRead = result.Read(buffer, 0, buffer.Length)) != 0)
-                        {
-                            output.Write(buffer, 0, bytesRead);
-                        }
-                    }
+                    path += "&accountSwitchKey=" + accountSwitchKey;
+                }
+                else
+                {
+                    path += "?accountSwitchKey=" + accountSwitchKey;
                 }
             }
-        
 
+            var uri = new Uri($"https://{credentials.Host}{path}");
+            var request = new HttpRequestMessage(new HttpMethod(method), uri);
 
+            if (uploadfile != null && uploadfile != "")
+            {
+                FileStream stream = File.OpenRead(uploadfile);
+                request.Content = new StreamContent(stream);
+            }
+                
+            else if (data != null && data != "")
+            {
+                HttpContent content = new StringContent(data, Encoding.UTF8, "application/json");
+                request.Content = content;
+            }
+
+            foreach (string header in headers)
+            {
+                var components = header.Split(':', 2);
+                request.Headers.Add(components[0], components[1]);
+            }
+
+            // Default Headers
+            if(request.Headers.Accept == null || !request.Headers.Accept.Any())
+            {
+                request.Headers.Add("accept", "application/json");
+            }
+            if (request.Headers.UserAgent == null || !request.Headers.UserAgent.Any())
+            {
+                request.Headers.TryAddWithoutValidation("user-agent", "EdgeGridConsoleV2");
+            }
+
+            // Sign request
+            signer.Sign(request, credentials);
+            Console.WriteLine("Authorization: {0}", request.Headers.Authorization);
+            Console.WriteLine();
+
+            // Make request
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = client.Send(request);
+
+            Console.WriteLine("{0} {1}", (int) response.StatusCode, response.ReasonPhrase.ToString());
+            Console.WriteLine(response.Headers.ToString());
+            string responseBody = response.Content.ReadAsStringAsync().Result;
+            Console.WriteLine(responseBody);
         }
 
-        static void help()
+        static void Help()
         {
             Console.Error.WriteLine(@"
-Usage: openapi <-c client-token> <-a access-token> <-s secret>
+Usage: openapi <-e edgerc-file> <-s section> <-a account-switch-key>
            [-d data] [-f srcfile]
            [-o outfile]
            [-m max-size]
