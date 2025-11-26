@@ -30,7 +30,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_Constructor_NullHost()
         {
             var credentials = new EdgeGridCredentials(
-                host: null,
+                host: null!,
                 clientToken: "test-client-token",
                 clientSecret: "test-secret",
                 accessToken: "test-access-token"
@@ -43,7 +43,7 @@ namespace Akamai.EdgeGrid.AuthTest
         {
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
-                clientToken: null,
+                clientToken: null!,
                 clientSecret: "test-secret",
                 accessToken: "test-access-token"
             );
@@ -56,7 +56,7 @@ namespace Akamai.EdgeGrid.AuthTest
             var credentials = new EdgeGridCredentials(
                 host: "test.example.com",
                 clientToken: "test-client-token",
-                clientSecret: null,
+                clientSecret: null!,
                 accessToken: "test-access-token"
             );
         }
@@ -69,7 +69,7 @@ namespace Akamai.EdgeGrid.AuthTest
                 host: "test.example.com",
                 clientToken: "test-client-token",
                 clientSecret: "test-secret",
-                accessToken: null
+                accessToken: null!
             );
         }
 

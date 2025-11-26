@@ -17,8 +17,8 @@ All notable changes to this project will be documented in this file.
 • Added `max_body` configuration with default of 131072 bytes for request body signing.
 • Added automatic User-Agent header with library version information.
 • Implemented proper header canonicalization for security.
-• Added redirect handling with automatic request resigning via `EdgeGridRedirectHandler`.
 • Added support for URL path parameters (semicolon-separated parameters).
+• Added automatic redirect handling with request resigning, matching Python's default behavior via `EdgeGridV2Signer.CreateHttpClient()` factory method.
 • Enabled nullable reference types across entire codebase for improved null safety.
 • Optimized string building operations using `StringBuilder`.
 • Implemented proper `IDisposable` resource management with using statements.
@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-• `EdgeGridRedirectHandler` - DelegatingHandler for automatic redirect following with resigning.
+• `EdgeGridV2Signer.CreateHttpClient()` - Factory method that creates an HttpClient with automatic redirect handling and resigning, matching Python's default behavior where `EdgeGridAuth` automatically handles redirects.
+• `EdgeGridRedirectHandler` - Low-level DelegatingHandler for advanced scenarios requiring custom configuration.
 • Full feature parity with Python EdgeGrid implementation v2.0.3.
-• Comprehensive test suite with 36 tests covering all functionality.
+• Comprehensive test suite.

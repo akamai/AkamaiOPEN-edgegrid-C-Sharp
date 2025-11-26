@@ -1,5 +1,4 @@
-﻿﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,7 +22,7 @@ namespace Akamai.EdgeGrid.Auth
         public int MaxBody { get; private set; } = DefaultMaxBody;
 
         // Constructor for direct credential assignment (useful for testing)
-        public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken, 
+        public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken,
             List<string>? headersToSign = null, int maxBody = DefaultMaxBody)
         {
             Host = host ?? throw new ArgumentNullException(nameof(host));
@@ -45,7 +44,7 @@ namespace Akamai.EdgeGrid.Auth
                 EdgeRCFile = edgeRCFile;
             }
 
-            if(section == null || section.Trim() == "")
+            if (section == null || section.Trim() == "")
             {
                 Section = "default";
             }

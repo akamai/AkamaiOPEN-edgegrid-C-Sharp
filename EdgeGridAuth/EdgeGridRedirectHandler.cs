@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Net;
 using System.Net.Http;
@@ -30,13 +29,18 @@ namespace Akamai.EdgeGrid.Auth
         }
 
         /// <summary>
-        /// Sends an HTTP request with automatic redirect handling and resigning.
+        /// Sends an HTTP request with automatic signing and redirect handling.
+        /// The initial request is automatically signed, and any redirects are followed
+        /// with re-signed authentication headers.
         /// </summary>
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
             int redirectCount = 0;
             HttpResponseMessage? response = null;
+
+            // Sign the initial request (transparent to the user)
+            _signer.Sign(request, _credentials);
 
             while (redirectCount <= _maxRedirects)
             {
@@ -56,7 +60,7 @@ namespace Akamai.EdgeGrid.Auth
                 }
 
                 Uri redirectUri = response.Headers.Location;
-                
+
                 // Make absolute if relative
                 if (!redirectUri.IsAbsoluteUri)
                 {
@@ -77,16 +81,17 @@ namespace Akamai.EdgeGrid.Auth
                     }
                 }
 
-                // Copy content for POST/PUT/PATCH requests
-                if (request.Content != null && 
-                    (request.Method == HttpMethod.Post || 
-                     request.Method == HttpMethod.Put || 
-                     request.Method == HttpMethod.Patch))
+                // Copy content for POST/PUT/PATCH/DELETE requests (DELETE can have body too)
+                if (request.Content != null &&
+                    (request.Method == HttpMethod.Post ||
+                     request.Method == HttpMethod.Put ||
+                     request.Method == HttpMethod.Patch ||
+                     request.Method == HttpMethod.Delete))
                 {
                     // Clone the content
                     var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
                     redirectRequest.Content = new ByteArrayContent(contentBytes);
-                    
+
                     // Copy content headers
                     foreach (var header in request.Content.Headers)
                     {
@@ -119,6 +124,90 @@ namespace Akamai.EdgeGrid.Auth
                    statusCode == HttpStatusCode.SeeOther ||             // 303
                    statusCode == HttpStatusCode.TemporaryRedirect ||    // 307
                    statusCode == HttpStatusCode.PermanentRedirect;      // 308 (.NET Core 2.0+)
+        }
+
+        /// <summary>
+        /// Sends an HTTP request synchronously with automatic signing and redirect handling.
+        /// </summary>
+        protected override HttpResponseMessage Send(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            int redirectCount = 0;
+            HttpResponseMessage? response = null;
+
+            // Sign the initial request (transparent to the user)
+            _signer.Sign(request, _credentials);
+
+            while (redirectCount <= _maxRedirects)
+            {
+                // Send the request synchronously
+                response = base.Send(request, cancellationToken);
+
+                // Check if response is a redirect
+                if (!IsRedirect(response.StatusCode))
+                {
+                    return response;
+                }
+
+                // Get redirect location
+                if (response.Headers.Location == null)
+                {
+                    return response; // No location header, return as-is
+                }
+
+                Uri redirectUri = response.Headers.Location;
+
+                // Make absolute if relative
+                if (!redirectUri.IsAbsoluteUri)
+                {
+                    redirectUri = new Uri(request.RequestUri!, redirectUri);
+                }
+
+                Console.WriteLine($"Following redirect to: {redirectUri}");
+
+                // Create new request for redirect location
+                var redirectRequest = new HttpRequestMessage(request.Method, redirectUri);
+
+                // Copy headers from original request (except Authorization)
+                foreach (var header in request.Headers)
+                {
+                    if (header.Key != "Authorization" && header.Key != "Host")
+                    {
+                        redirectRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    }
+                }
+
+                // Copy content for POST/PUT/PATCH/DELETE requests (DELETE can have body too)
+                if (request.Content != null &&
+                    (request.Method == HttpMethod.Post ||
+                     request.Method == HttpMethod.Put ||
+                     request.Method == HttpMethod.Patch ||
+                     request.Method == HttpMethod.Delete))
+                {
+                    // Clone the content synchronously
+                    var contentBytes = request.Content.ReadAsByteArrayAsync(cancellationToken).GetAwaiter().GetResult();
+                    redirectRequest.Content = new ByteArrayContent(contentBytes);
+
+                    // Copy content headers
+                    foreach (var header in request.Content.Headers)
+                    {
+                        redirectRequest.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    }
+                }
+
+                // Sign the redirect request with new auth header
+                _signer.Sign(redirectRequest, _credentials);
+
+                // Dispose previous response
+                response.Dispose();
+
+                // Update request for next iteration
+                request = redirectRequest;
+                redirectCount++;
+            }
+
+            throw new InvalidOperationException(
+                $"Maximum number of redirects ({_maxRedirects}) exceeded.");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Akamai Technologies http://developer.akamai.com.
+// Copyright 2014 Akamai Technologies http://developer.akamai.com.
 //
 // Licensed under the Apache License, KitVersion 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 // Author: colinb@akamai.com  (Colin Bendell)
 //
 
-using Akamai.EdgeGrid.Auth;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +24,7 @@ using System.Net.Http;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using Akamai.EdgeGrid.Auth;
 
 namespace Akamai.EdgeGrid
 {
@@ -53,7 +53,7 @@ namespace Akamai.EdgeGrid
             string data = "";
 
             bool verbose = false;
-           
+
             string? firstarg = null;
             foreach (string arg in args)
             {
@@ -74,11 +74,13 @@ namespace Akamai.EdgeGrid
                             ask = arg;
                             break;
                         case "-d":
-                            if (method == "GET") method = "POST";
+                            if (method == "GET")
+                                method = "POST";
                             data = arg;
                             break;
                         case "-f":
-                            if (method == "GET") method = "PUT";
+                            if (method == "GET")
+                                method = "PUT";
                             uploadfile = arg;
                             break;
                         case "-H":
@@ -103,7 +105,7 @@ namespace Akamai.EdgeGrid
                     return;
                 }
                 else if (arg == "-v" || arg == "-vv")
-                    verbose = true;           
+                    verbose = true;
                 else if (!arg.StartsWith("-"))
                     path = arg;
                 else
@@ -115,15 +117,18 @@ namespace Akamai.EdgeGrid
                 Console.WriteLine("{0} {1}", method, path);
                 Console.WriteLine("EdgeRCFile: {0}", edgeRCFile);
                 Console.WriteLine("Section: {0}", section);
-                if (data != null) Console.WriteLine("Data: [{0}]", data);
-                if (uploadfile != null) Console.WriteLine("UploadFile: {0}", uploadfile);
-                if (outputfile != null) Console.WriteLine("OutputFile: {0}", outputfile);
+                if (data != null)
+                    Console.WriteLine("Data: [{0}]", data);
+                if (uploadfile != null)
+                    Console.WriteLine("UploadFile: {0}", uploadfile);
+                if (outputfile != null)
+                    Console.WriteLine("OutputFile: {0}", outputfile);
                 foreach (string header in headers)
                     Console.WriteLine("{0}", header);
                 Console.WriteLine("Content-Type: {0}", contentType);
             }
 
-            Execute(method: method, path: path, headers: headers, edgeRCFile:edgeRCFile, section: section, accountSwitchKey: ask, data: data, uploadfile: uploadfile, outputfile: outputfile, contentType: contentType, verbose: verbose);
+            Execute(method: method, path: path, headers: headers, edgeRCFile: edgeRCFile, section: section, accountSwitchKey: ask, data: data, uploadfile: uploadfile, outputfile: outputfile, contentType: contentType, verbose: verbose);
         }
 
         static void Execute(string method, string path, List<string> headers, string edgeRCFile, string section, string accountSwitchKey, string? data, string? uploadfile, string? outputfile, string contentType, bool verbose = false)
@@ -133,14 +138,13 @@ namespace Akamai.EdgeGrid
                 Help();
                 return;
             }
-            
-            EdgeGridV2Signer signer = new();
+
             EdgeGridCredentials credentials = new(edgeRCFile, section);
 
             // Add Account Switch Key to path if provided
             if (!string.IsNullOrEmpty(accountSwitchKey))
             {
-                if(path.Contains("?"))
+                if (path.Contains("?"))
                 {
                     path += "&accountSwitchKey=" + accountSwitchKey;
                 }
@@ -158,7 +162,7 @@ namespace Akamai.EdgeGrid
                 FileStream stream = File.OpenRead(uploadfile);
                 request.Content = new StreamContent(stream);
             }
-                
+
             else if (data != null && data != "")
             {
                 HttpContent content = new StringContent(data, Encoding.UTF8, "application/json");
@@ -172,7 +176,7 @@ namespace Akamai.EdgeGrid
             }
 
             // Default Headers
-            if(request.Headers.Accept == null || !request.Headers.Accept.Any())
+            if (request.Headers.Accept == null || !request.Headers.Accept.Any())
             {
                 request.Headers.Add("accept", "application/json");
             }
@@ -181,16 +185,11 @@ namespace Akamai.EdgeGrid
                 request.Headers.TryAddWithoutValidation("user-agent", "EdgeGridConsoleV2");
             }
 
-            // Sign request
-            signer.Sign(request, credentials);
-            Console.WriteLine("Authorization: {0}", request.Headers.Authorization);
-            Console.WriteLine();
-
-            // Make request
-            HttpClient client = new HttpClient();
+            // Create client with automatic signing and redirect handling
+            HttpClient client = EdgeGridV2Signer.CreateHttpClient(credentials);
             HttpResponseMessage response = client.Send(request);
 
-            Console.WriteLine("{0} {1}", (int) response.StatusCode, response.ReasonPhrase ?? "No Reason");
+            Console.WriteLine("{0} {1}", (int)response.StatusCode, response.ReasonPhrase ?? "No Reason");
             Console.WriteLine(response.Headers.ToString());
             string responseBody = response.Content.ReadAsStringAsync().Result;
             Console.WriteLine(responseBody);

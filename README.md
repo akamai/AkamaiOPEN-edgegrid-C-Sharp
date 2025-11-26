@@ -5,19 +5,39 @@ API specs can be found at: https://techdocs.akamai.com/
 
 ## Project organization
 * /EdgeGridAuth - core auth signer project
-* /OpenAPI - generic Windows tool to demonstrate using the signer 
+* /OpenAPI - generic Windows tool to demonstrate using the signer
 * /Akamai.EdgeGrid.Auth.sln - root VisualStudio solution
 
 ## Install
 * Open the Akamai.EdgeGrid.Auth.sln in Visual Studio; Rebuild All
-* Copy the Akamai.EdgeGrid.Auth.dll to your application or solution. 
+* Copy the Akamai.EdgeGrid.Auth.dll to your application or solution.
 
 ## Getting Started
-* Create an instance of the `EdgeGridCredentials` class (see below for details)
-* Create an instance of the `EdgeGridV2Signer` and call either `Sign()` (if you wish to provider a `HttpRequestMessage`)
-* or call `GetAuthHeader()` to provide the request elements directly.
 
-For example:
+### Basic Usage
+
+The simplest way to make authenticated requests:
+
+```c#
+using Akamai.EdgeGrid.Auth;
+using System.Net.Http;
+
+var credentials = new EdgeGridCredentials("~/.edgerc", "default");
+
+// Create an HttpClient with automatic signing and redirect handling
+using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
+
+// Just create and send the request - signing is handled automatically
+var request = new HttpRequestMessage(HttpMethod.Get,
+    $"https://{credentials.Host}/papi/v1/contracts");
+
+var response = await client.SendAsync(request);
+```
+
+### Manual Request Signing
+
+If you need more control over the HttpClient configuration or want to sign requests manually:
+
 ```c#
 using Akamai.EdgeGrid.Auth;
 
@@ -26,10 +46,17 @@ EdgeGridCredentials credential = new EdgeGridCredentials();
 
 Uri uri = new Uri($"https://{credentials.Host}/papi/v1/contracts");
 HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("get"), uri);
-signer.Sign(httpcredentialRequest, credential);
+signer.Sign(request, credential);
+
+// Use your own HttpClient
+using var client = new HttpClient();
+var response = await client.SendAsync(request);
 ```
 
-alternatively, you can use the GetAuthHeader() method to construct the request without using HttpRequestMessage
+### Using GetAuthHeader Directly
+
+Alternatively, you can use the GetAuthHeader() method to construct the request without using HttpRequestMessage:
+
 ```c#
 using Akamai.EdgeGrid.Auth;
 
@@ -80,30 +107,48 @@ If you do not specify otherwise, the default location of the file is `~/.edgerc`
 
 ## Advanced Features
 
-### Redirect Handling with Automatic Resigning
+### Automatic Signing and Redirect Handling (Default Behavior)
 
-The library supports automatic redirect following with request resigning. When an API returns a redirect (3xx status), the `EdgeGridRedirectHandler` will automatically:
-- Follow the redirect
-- Resign the new request with fresh EdgeGrid authentication headers
-- Preserve request headers and content
+The library provides automatic request signing and redirect following. Use the `CreateHttpClient()` factory method:
 
 ```c#
 using Akamai.EdgeGrid.Auth;
 using System.Net.Http;
 
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
-var redirectHandler = new EdgeGridRedirectHandler(credentials, maxRedirects: 10);
 
-using var client = new HttpClient(redirectHandler);
-var request = new HttpRequestMessage(HttpMethod.Get, "https://akaa-baseurl.luna.akamaiapis.net/api/endpoint");
+// Creates HttpClient with automatic signing and redirect handling
+using var client = EdgeGridV2Signer.CreateHttpClient(credentials, maxRedirects: 10);
 
-var signer = new EdgeGridV2Signer();
-signer.Sign(request, credentials);
+// Just send requests - signing and redirects are handled transparently
+var request = new HttpRequestMessage(HttpMethod.Get,
+    $"https://{credentials.Host}/api/endpoint");
 
 var response = await client.SendAsync(request);
 ```
 
-See [REDIRECT_HANDLING.md](REDIRECT_HANDLING.md) for detailed documentation and examples.
+For advanced scenarios requiring custom configuration, you can use `EdgeGridRedirectHandler` directly:
+
+```c#
+using Akamai.EdgeGrid.Auth;
+using System.Net.Http;
+
+var credentials = new EdgeGridCredentials("~/.edgerc", "default");
+var redirectHandler = new EdgeGridRedirectHandler(credentials, maxRedirects: 10)
+{
+    InnerHandler = new HttpClientHandler
+    {
+        // Custom configuration here
+    }
+};
+
+using var client = new HttpClient(redirectHandler);
+var request = new HttpRequestMessage(HttpMethod.Get,
+    $"https://{credentials.Host}/api/endpoint");
+
+// Signing is automatic - just send the request
+var response = await client.SendAsync(request);
+```
 
 ### Custom Headers in Signature
 

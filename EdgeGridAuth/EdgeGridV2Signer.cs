@@ -1,4 +1,3 @@
-﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace Akamai.EdgeGrid.Auth
         /// <param name="pathAndQuery">The path and query string of the current HTTP request</param>
         /// <param name="requestBody">The body of the HTTP request, if any</param>
         /// <param name="request">The full HTTP request message for header access</param>
-        internal string GetStringToSign(EdgeGridCredentials credential, string method, string pathAndQuery, 
+        internal string GetStringToSign(EdgeGridCredentials credential, string method, string pathAndQuery,
             Byte[]? requestBody = null, HttpRequestMessage? request = null)
         {
             string bodyHash = "";
@@ -100,7 +99,7 @@ namespace Akamai.EdgeGrid.Auth
         {
             string path = uri.AbsolutePath;
             string query = uri.Query;
-            
+
             // Extract path parameters if present (semicolon-separated portion)
             // Example: /path;param1=value1;param2=value2?query=value
             // .NET's Uri class doesn't parse these, so we need to extract manually
@@ -123,7 +122,7 @@ namespace Akamai.EdgeGrid.Auth
                     path = path.Substring(0, semicolonIndex);
                 }
             }
-            
+
             return path + pathParams + query;
         }
 
@@ -134,7 +133,8 @@ namespace Akamai.EdgeGrid.Auth
         /// <param name="maxBody">Maximum body size to hash</param>
         internal string GetRequestBodyHash(Byte[] requestBody, int maxBody)
         {
-            if (requestBody.Length == 0) return string.Empty;
+            if (requestBody.Length == 0)
+                return string.Empty;
 
             if (requestBody.Length > maxBody)
             {
@@ -155,26 +155,26 @@ namespace Akamai.EdgeGrid.Auth
         internal string CanonicalizeHeaders(System.Net.Http.Headers.HttpRequestHeaders headers, List<string> headersToSign)
         {
             var canonicalized = new List<string>();
-            
+
             foreach (var headerName in headersToSign)
             {
                 if (headers.TryGetValues(headerName, out var values))
                 {
                     var headerValue = string.Join(",", values);
-                    
+
                     // Validate no leading whitespace (unless quoted)
                     if (!headerValue.StartsWith("\"") && headerValue.TrimStart() != headerValue)
                     {
                         throw new InvalidOperationException(
                             $"Invalid leading whitespace, reserved character(s), or return character(s) in header value: '{headerValue}'");
                     }
-                    
+
                     // Normalize whitespace
                     var normalized = WhitespaceRegex.Replace(headerValue.Trim(), " ");
                     canonicalized.Add($"{headerName}:{normalized}");
                 }
             }
-            
+
             return string.Join("\t", canonicalized);
         }
 
@@ -184,21 +184,21 @@ namespace Akamai.EdgeGrid.Auth
         internal void AddVersionHeaders(HttpRequestMessage request)
         {
             var versionBuilder = new StringBuilder();
-            
+
             var akamaiCli = Environment.GetEnvironmentVariable("AKAMAI_CLI");
             var akamaiCliVersion = Environment.GetEnvironmentVariable("AKAMAI_CLI_VERSION");
             if (!string.IsNullOrEmpty(akamaiCli) && !string.IsNullOrEmpty(akamaiCliVersion))
             {
                 versionBuilder.Append(" AkamaiCLI/").Append(akamaiCliVersion);
             }
-            
+
             var akamaiCliCommand = Environment.GetEnvironmentVariable("AKAMAI_CLI_COMMAND");
             var akamaiCliCommandVersion = Environment.GetEnvironmentVariable("AKAMAI_CLI_COMMAND_VERSION");
             if (!string.IsNullOrEmpty(akamaiCliCommand) && !string.IsNullOrEmpty(akamaiCliCommandVersion))
             {
                 versionBuilder.Append(" AkamaiCLI-").Append(akamaiCliCommand).Append('/').Append(akamaiCliCommandVersion);
             }
-            
+
             if (versionBuilder.Length > 0)
             {
                 string versionHeader = versionBuilder.ToString();
@@ -222,7 +222,7 @@ namespace Akamai.EdgeGrid.Auth
         /// <param name="secret">Optional secret to use when creating HMAC</param>
         internal string HashByteArray(byte[] data, string? secret = null)
         {
-            using var hmac = secret != null 
+            using var hmac = secret != null
                 ? new HMACSHA256(Encoding.UTF8.GetBytes(secret))
                 : new HMACSHA256();
 
@@ -243,6 +243,27 @@ namespace Akamai.EdgeGrid.Auth
             using var sha256Hash = new HMACSHA256(secretBytes);
             byte[] hashBytes = sha256Hash.ComputeHash(messageBytes);
             return Convert.ToBase64String(hashBytes);
+        }
+
+        /// <summary>
+        /// Creates an HttpClient with automatic redirect handling and EdgeGrid authentication.
+        /// This matches the Python implementation's default behavior where redirects are automatically
+        /// followed and requests are resigned.
+        /// </summary>
+        /// <param name="credential">EdgeGrid credentials for signing</param>
+        /// <param name="maxRedirects">Maximum number of redirects to follow (default: 10)</param>
+        /// <returns>An HttpClient configured with EdgeGrid redirect handling</returns>
+        public static HttpClient CreateHttpClient(EdgeGridCredentials credential, int maxRedirects = 10)
+        {
+            var redirectHandler = new EdgeGridRedirectHandler(credential, maxRedirects)
+            {
+                InnerHandler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = false // We handle redirects manually
+                }
+            };
+
+            return new HttpClient(redirectHandler);
         }
 
         /// <summary>
@@ -267,7 +288,7 @@ namespace Akamai.EdgeGrid.Auth
             else
                 requestBodyByteArray = request.Content.ReadAsByteArrayAsync().Result;
 
-            string AuthHeader = GetAuthHeader(credential: credential, method: request.Method.ToString().ToUpperInvariant(), 
+            string AuthHeader = GetAuthHeader(credential: credential, method: request.Method.ToString().ToUpperInvariant(),
                 pathAndQuery: request.RequestUri.PathAndQuery, requestBodyByteArray, request);
             request.Headers.Add("Authorization", AuthHeader);
             return request;
@@ -282,7 +303,7 @@ namespace Akamai.EdgeGrid.Auth
         /// <param name="requestBody">The body of the HTTP request, if any</param>
         /// <param name="request">The full HTTP request message for header access</param>
         /// <returns>the signed request</returns>
-        public string GetAuthHeader(EdgeGridCredentials credential, string method, string pathAndQuery, 
+        public string GetAuthHeader(EdgeGridCredentials credential, string method, string pathAndQuery,
             Byte[] requestBody, HttpRequestMessage? request = null)
         {
             // Throw an exception if the credential is null
@@ -296,7 +317,7 @@ namespace Akamai.EdgeGrid.Auth
             string ISOTimestamp = Timestamp.ToUniversalTime().ToString("yyyyMMddTHH:mm:sszz00");
 
             // Construct signing string from request elements
-            string RequestData = GetStringToSign(credential: credential, method: method, 
+            string RequestData = GetStringToSign(credential: credential, method: method,
                 pathAndQuery: pathAndQuery, requestBody: requestBody, request: request);
             Console.WriteLine("Request Data: {0}", RequestData);
 

@@ -172,7 +172,7 @@ namespace Akamai.EdgeGrid.AuthTest
         {
             var signer = new EdgeGridV2Signer();
             var credential = GetTestCredentials();
-            var request = new HttpRequestMessage(HttpMethod.Get, (Uri)null);
+            var request = new HttpRequestMessage(HttpMethod.Get, (Uri)null!);
 
             signer.Sign(request, credential);
         }
