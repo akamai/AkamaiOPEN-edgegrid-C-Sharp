@@ -77,7 +77,6 @@ namespace Akamai.EdgeGrid.Auth
                 host = request.Headers.Host;
             }
 
-            // Get canonicalized URI (path + params + query) to match Python implementation
             string canonicalizedUri = request != null ? GetCanonicalizedUri(request.RequestUri!) : pathAndQuery;
 
             return string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t",
@@ -91,7 +90,6 @@ namespace Akamai.EdgeGrid.Auth
 
         /// <summary>
         /// Gets the canonicalized URI including path, parameters (semicolon-separated), and query string.
-        /// Matches Python's: parsed_url.path + (';' + parsed_url.params if parsed_url.params else "") + ('?' + parsed_url.query if parsed_url.query else "")
         /// </summary>
         /// <param name="uri">The request URI</param>
         /// <returns>Canonicalized URI string</returns>
@@ -247,8 +245,6 @@ namespace Akamai.EdgeGrid.Auth
 
         /// <summary>
         /// Creates an HttpClient with automatic redirect handling and EdgeGrid authentication.
-        /// This matches the Python implementation's default behavior where redirects are automatically
-        /// followed and requests are resigned.
         /// </summary>
         /// <param name="credential">EdgeGrid credentials for signing</param>
         /// <param name="maxRedirects">Maximum number of redirects to follow (default: 10)</param>

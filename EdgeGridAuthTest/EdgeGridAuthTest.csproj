@@ -25,4 +25,13 @@
     <ProjectReference Include="..\EdgeGridAuth\EdgeGridAuth.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="sample_edgerc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

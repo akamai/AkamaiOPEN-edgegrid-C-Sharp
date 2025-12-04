@@ -5,12 +5,12 @@ API specs can be found at: https://techdocs.akamai.com/
 
 ## Project organization
 * /EdgeGridAuth - core auth signer project
-* /OpenAPI - generic Windows tool to demonstrate using the signer
-* /Akamai.EdgeGrid.Auth.sln - root VisualStudio solution
+* /EdgeGridAuthTest - unit tests for core auth signer project
+* /EdgeGridConsole - generic command line tool to demonstrate using the signer
+* /Akamai.EdgeGrid.Auth.sln - root project solution
 
 ## Install
-* Open the Akamai.EdgeGrid.Auth.sln in Visual Studio; Rebuild All
-* Copy the Akamai.EdgeGrid.Auth.dll to your application or solution.
+* Open the Akamai.EdgeGrid.Auth.sln in Visual Studio Code.
 
 ## Getting Started
 
@@ -79,6 +79,7 @@ Environment variables are checked first, and the variables below are checked for
 - client_secret - AKAMAI_CLIENT_SECRET
 - host - AKAMAI_HOST
 - access_token - AKAMAI_ACCESS_TOKEN
+- max_body - AKAMAI_MAX_BODY
 - account_key - AKAMAI_ACCOUNT_KEY
 
 > Note: The `account_key` is only commonly used by Akamai internal staff, so if you've never seen it, don't worry about it.
@@ -89,6 +90,7 @@ If you specify a `section` parameter when instantiating the EdgeGridCredentials 
 - AKAMAI_APPSEC_CLIENT_SECRET
 - AKAMAI_APPSEC_HOST
 - AKAMAI_APPSEC_ACCESS_TOKEN
+- AKAMAI_APPSEC_MAX_BODY
 - AKAMAI_APPSEC_ACCOUNT_KEY
 
 ### EdgeRC File

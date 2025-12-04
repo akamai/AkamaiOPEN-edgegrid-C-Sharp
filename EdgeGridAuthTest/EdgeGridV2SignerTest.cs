@@ -338,7 +338,6 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_SigningWithPathParameters()
         {
             // Test that path parameters (semicolon-separated) are included in signature
-            // This matches Python's behavior: parsed_url.path + (';' + parsed_url.params if parsed_url.params else "")
             var signer = new EdgeGridV2Signer();
             var credential = GetTestCredentials();
 

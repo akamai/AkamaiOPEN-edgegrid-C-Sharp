@@ -76,7 +76,6 @@ namespace Akamai.EdgeGrid.AuthTest
         [TestMethod]
         public void Test_Constructor_FromFile_DefaultSection()
         {
-            // Based on Python test: test_edgerc_default
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
 client_secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
@@ -138,7 +137,6 @@ access_token = staging-access-token
         [TestMethod]
         public void Test_Constructor_FromFile_BrokenSection()
         {
-            // Based on Python test: test_edgerc_broken - section with partial credentials
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
 client_secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
@@ -197,7 +195,6 @@ host = file.example.com
         [TestMethod]
         public void Test_Constructor_FromFile_DefaultSectionWhenNull()
         {
-            // Based on Python behavior: null/empty section defaults to "default"
             string tempFile = Path.GetTempFileName();
             string edgercContent = @"[default]
 client_secret = default-secret
@@ -224,19 +221,378 @@ access_token = default-access
         }
 
         [TestMethod]
-        [Ignore("Environment variable tests skipped - file reading takes precedence over env vars in current implementation")]
-        public void Test_Constructor_FromEnvironment()
+        public void Test_Constructor_FromEnvironment_DefaultSection()
         {
-            // This test is skipped because the current implementation always reads from file
-            // even after successfully loading from environment variables
+            // Set environment variables for default section
+            // For default section, Go uses AKAMAI_HOST (not AKAMAI_DEFAULT_HOST)
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_ACCESS_TOKEN") ?? "";
+            string originalMaxBody = Environment.GetEnvironmentVariable("AKAMAI_MAX_BODY") ?? "";
+            string originalAccountKey = Environment.GetEnvironmentVariable("AKAMAI_ACCOUNT_KEY") ?? "";
+
+            try
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", "env-host.example.com");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", "env-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", "env-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", "env-access-token");
+                Environment.SetEnvironmentVariable("AKAMAI_MAX_BODY", "65536");
+                Environment.SetEnvironmentVariable("AKAMAI_ACCOUNT_KEY", "env-account-key");
+
+                var credentials = new EdgeGridCredentials(null, "default");
+
+                Assert.AreEqual("env-host.example.com", credentials.Host);
+                Assert.AreEqual("env-client-token", credentials.ClientToken);
+                Assert.AreEqual("env-client-secret", credentials.ClientSecret);
+                Assert.AreEqual("env-access-token", credentials.AccessToken);
+                Assert.AreEqual(65536, credentials.MaxBody);
+                Assert.AreEqual("env-account-key", credentials.AccountKey);
+            }
+            finally
+            {
+                // Restore original environment variables
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+                Environment.SetEnvironmentVariable("AKAMAI_MAX_BODY", string.IsNullOrEmpty(originalMaxBody) ? null : originalMaxBody);
+                Environment.SetEnvironmentVariable("AKAMAI_ACCOUNT_KEY", string.IsNullOrEmpty(originalAccountKey) ? null : originalAccountKey);
+            }
         }
 
         [TestMethod]
-        [Ignore("Environment variable tests skipped - file reading takes precedence over env vars in current implementation")]
         public void Test_Constructor_FromEnvironment_CustomSection()
         {
-            // This test is skipped because the current implementation always reads from file
-            // even after successfully loading from environment variables
+            // Set environment variables for custom section "staging"
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_STAGING_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_STAGING_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_STAGING_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_STAGING_ACCESS_TOKEN") ?? "";
+            string originalMaxBody = Environment.GetEnvironmentVariable("AKAMAI_STAGING_MAX_BODY") ?? "";
+            string originalAccountKey = Environment.GetEnvironmentVariable("AKAMAI_STAGING_ACCOUNT_KEY") ?? "";
+
+            try
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_HOST", "staging-env-host.example.com");
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_CLIENT_TOKEN", "staging-env-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_CLIENT_SECRET", "staging-env-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_ACCESS_TOKEN", "staging-env-access-token");
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_MAX_BODY", "32768");
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_ACCOUNT_KEY", "staging-account-key");
+
+                var credentials = new EdgeGridCredentials(null, "staging");
+
+                Assert.AreEqual("staging-env-host.example.com", credentials.Host);
+                Assert.AreEqual("staging-env-client-token", credentials.ClientToken);
+                Assert.AreEqual("staging-env-client-secret", credentials.ClientSecret);
+                Assert.AreEqual("staging-env-access-token", credentials.AccessToken);
+                Assert.AreEqual(32768, credentials.MaxBody);
+                Assert.AreEqual("staging-account-key", credentials.AccountKey);
+            }
+            finally
+            {
+                // Restore original environment variables
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_MAX_BODY", string.IsNullOrEmpty(originalMaxBody) ? null : originalMaxBody);
+                Environment.SetEnvironmentVariable("AKAMAI_STAGING_ACCOUNT_KEY", string.IsNullOrEmpty(originalAccountKey) ? null : originalAccountKey);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_FallbackFromEnvToFile()
+        {
+            // Set partial environment variables (missing some required fields)
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_DEFAULT_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_DEFAULT_ACCESS_TOKEN") ?? "";
+
+            string tempFile = Path.GetTempFileName();
+            string originalEdgeRcPath = Environment.GetEnvironmentVariable("HOME") ?? "";
+
+            try
+            {
+                // Set only host in env - missing other required fields
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_HOST", "env-host.example.com");
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_TOKEN", null);
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_SECRET", null);
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_ACCESS_TOKEN", null);
+
+                // Create a temp edgerc file with complete credentials
+                string edgercContent = @"[default]
+client_secret = file-secret
+client_token = file-client-token
+host = file-host.example.com
+access_token = file-access-token
+";
+                File.WriteAllText(tempFile, edgercContent);
+
+                // The constructor with null edgeRCFile will try env first, then fall back to file
+                // Since env vars are incomplete, it should fall back and read from file
+                // The file credentials should override the partial env vars
+                var credentials = new EdgeGridCredentials(tempFile, "default");
+
+                // When explicit file is provided, it reads from file only
+                Assert.AreEqual("file-host.example.com", credentials.Host);
+                Assert.AreEqual("file-client-token", credentials.ClientToken);
+                Assert.AreEqual("file-secret", credentials.ClientSecret);
+                Assert.AreEqual("file-access-token", credentials.AccessToken);
+            }
+            finally
+            {
+                // Restore original environment variables
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_DEFAULT_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_EnvVariablesTakePrecedenceOverFile()
+        {
+            // This test verifies that when edgeRCFile is null and env vars are complete,
+            // environment variables are used (not the file).
+            // Since env vars are complete, the code should not attempt to read from ~/.edgerc
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_ACCESS_TOKEN") ?? "";
+
+            try
+            {
+                // Set complete environment variables
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", "env-host.example.com");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", "env-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", "env-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", "env-access-token");
+
+                // Create credentials without specifying file (should use env first)
+                // Since all env vars are set, it should NOT attempt to read from ~/.edgerc
+                var credentials = new EdgeGridCredentials(null, "default");
+
+                // Environment variables should be used
+                Assert.AreEqual("env-host.example.com", credentials.Host);
+                Assert.AreEqual("env-client-token", credentials.ClientToken);
+                Assert.AreEqual("env-client-secret", credentials.ClientSecret);
+                Assert.AreEqual("env-access-token", credentials.AccessToken);
+            }
+            finally
+            {
+                // Restore original environment variables
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_MaxBodyDefaultValue()
+        {
+            // When max_body is not specified, it should default to 131072
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_ACCESS_TOKEN") ?? "";
+            string originalMaxBody = Environment.GetEnvironmentVariable("AKAMAI_MAX_BODY") ?? "";
+
+            try
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", "env-host.example.com");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", "env-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", "env-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", "env-access-token");
+                Environment.SetEnvironmentVariable("AKAMAI_MAX_BODY", null); // Not set
+
+                var credentials = new EdgeGridCredentials(null, "default");
+
+                Assert.AreEqual(131072, credentials.MaxBody); // Default value
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+                Environment.SetEnvironmentVariable("AKAMAI_MAX_BODY", string.IsNullOrEmpty(originalMaxBody) ? null : originalMaxBody);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_AccountKeyFromFile()
+        {
+            string tempFile = Path.GetTempFileName();
+            string edgercContent = @"[default]
+client_secret = test-secret
+client_token = test-client-token
+host = test.example.com
+access_token = test-access-token
+account_key = F-AC-1234567
+";
+            File.WriteAllText(tempFile, edgercContent);
+
+            try
+            {
+                var credentials = new EdgeGridCredentials(tempFile, "default");
+
+                Assert.AreEqual("F-AC-1234567", credentials.AccountKey);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_MaxBodyFromFile()
+        {
+            string tempFile = Path.GetTempFileName();
+            string edgercContent = @"[default]
+client_secret = test-secret
+client_token = test-client-token
+host = test.example.com
+access_token = test-access-token
+max_body = 262144
+";
+            File.WriteAllText(tempFile, edgercContent);
+
+            try
+            {
+                var credentials = new EdgeGridCredentials(tempFile, "default");
+
+                Assert.AreEqual(262144, credentials.MaxBody);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_FromEnvironment_MissingHost()
+        {
+            // Test that missing HOST causes fallback to file (and fails if file doesn't exist)
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN") ?? "";
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_TEST_HOST") ?? "";
+
+            try
+            {
+                // Set all except HOST
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", null);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", "test-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", "test-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", "test-access-token");
+
+                // Should throw because HOST is missing and no valid file exists
+                Assert.ThrowsException<InvalidOperationException>(() => 
+                    new EdgeGridCredentials(null, "test"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_FromEnvironment_MissingClientToken()
+        {
+            // Test that missing CLIENT_TOKEN causes fallback to file (and fails if file doesn't exist)
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_TEST_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN") ?? "";
+
+            try
+            {
+                // Set all except CLIENT_TOKEN
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", "test-host");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", null);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", "test-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", "test-access-token");
+
+                // Should throw because CLIENT_TOKEN is missing and no valid file exists
+                Assert.ThrowsException<InvalidOperationException>(() => 
+                    new EdgeGridCredentials(null, "test"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_FromEnvironment_MissingClientSecret()
+        {
+            // Test that missing CLIENT_SECRET causes fallback to file (and fails if file doesn't exist)
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_TEST_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN") ?? "";
+
+            try
+            {
+                // Set all except CLIENT_SECRET
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", "test-host");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", "test-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", null);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", "test-access-token");
+
+                // Should throw because CLIENT_SECRET is missing and no valid file exists
+                Assert.ThrowsException<InvalidOperationException>(() => 
+                    new EdgeGridCredentials(null, "test"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Constructor_FromEnvironment_MissingAccessToken()
+        {
+            // Test that missing ACCESS_TOKEN causes fallback to file (and fails if file doesn't exist)
+            string originalHost = Environment.GetEnvironmentVariable("AKAMAI_TEST_HOST") ?? "";
+            string originalClientToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN") ?? "";
+            string originalClientSecret = Environment.GetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET") ?? "";
+            string originalAccessToken = Environment.GetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN") ?? "";
+
+            try
+            {
+                // Set all except ACCESS_TOKEN
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", "test-host");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", "test-client-token");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", "test-client-secret");
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", null);
+
+                // Should throw because ACCESS_TOKEN is missing and no valid file exists
+                Assert.ThrowsException<InvalidOperationException>(() => 
+                    new EdgeGridCredentials(null, "test"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_HOST", string.IsNullOrEmpty(originalHost) ? null : originalHost);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_TOKEN", string.IsNullOrEmpty(originalClientToken) ? null : originalClientToken);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_CLIENT_SECRET", string.IsNullOrEmpty(originalClientSecret) ? null : originalClientSecret);
+                Environment.SetEnvironmentVariable("AKAMAI_TEST_ACCESS_TOKEN", string.IsNullOrEmpty(originalAccessToken) ? null : originalAccessToken);
+            }
         }
     }
 }

@@ -1,10 +1,10 @@
 # EdgeGrid Redirect Handling
 
-The EdgeGrid library supports automatic redirect handling with request resigning, matching Python's default behavior.
+The EdgeGrid library supports automatic redirect handling with request resigning.
 
 ## Quick Start (Recommended)
 
-### Automatic Signing and Redirect Handling (Python-like Default)
+### Automatic Signing and Redirect Handling
 ```csharp
 using Akamai.EdgeGrid.Auth;
 using System.Net.Http;
@@ -21,7 +21,7 @@ var request = new HttpRequestMessage(HttpMethod.Get,
 var response = await client.SendAsync(request);
 ```
 
-This matches Python's behavior where `EdgeGridAuth` automatically handles signing and redirects via response hooks.
+`EdgeGridAuth` automatically handles signing and redirects via response hooks.
 
 ## Basic Usage
 
@@ -135,39 +135,6 @@ catch (InvalidOperationException ex) when (ex.Message.Contains("Maximum number o
     Console.WriteLine("Redirect limit exceeded");
 }
 ```
-
-## Python Implementation Comparison
-
-This implementation matches the Python library's default behavior where `EdgeGridAuth` automatically handles redirects.
-
-**Python:**
-```python
-def handle_redirect(self, res, **_):
-    if res.is_redirect:
-        redirect_location = res.headers['location']
-        logger.debug("signing the redirected url: %s", redirect_location)
-        request_to_sign = res.request.copy()
-        request_to_sign.url = redirect_location
-        res.request.headers['Authorization'] = self.ah.make_auth_header(
-            request_to_sign, eg_timestamp(), new_nonce())
-
-def __call__(self, r):
-    # ... signing code ...
-    r.register_hook('response', self.handle_redirect)  # Automatic redirect handling
-    return r
-```
-
-**C#:**
-```csharp
-// Python-equivalent default behavior
-using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
-
-// Or manual configuration for advanced scenarios
-var redirectHandler = new EdgeGridRedirectHandler(credentials);
-using var client = new HttpClient(redirectHandler);
-```
-
-The `EdgeGridV2Signer.CreateHttpClient()` factory method provides the same automatic redirect handling as Python's `EdgeGridAuth`, while `EdgeGridRedirectHandler` is available for advanced customization.
 
 ## Notes
 
