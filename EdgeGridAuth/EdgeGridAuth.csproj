@@ -6,7 +6,21 @@
     <AssemblyName>Akamai.EdgeGrid.Auth</AssemblyName>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>Akamai.EdgeGrid.Auth</PackageId>
+    <Version>2.0.1</Version>
+    <Title>Akamai EdgeGrid Authentication Library</Title>
+    <Authors>Akamai Technologies</Authors>
+    <Description>Official Akamai EdgeGrid authentication library for .NET 8.0. Provides signing and authentication for Akamai APIs with automatic redirect handling and environment variable credential support.</Description>
+    <PackageProjectUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>akamai;edgegrid;authentication;api;http</PackageTags>
+    <PackageReleaseNotes>Major version 2.0.0 - Migrated to .NET 8.0 with comprehensive improvements including automatic redirect handling, environment variable credential loading, and extensive test coverage.</PackageReleaseNotes>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
 </Project>

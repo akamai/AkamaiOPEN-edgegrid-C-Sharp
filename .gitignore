@@ -134,3 +134,6 @@ _NCrunch*
 
 # Additional directories
 .vs
+/nupkg/*
+/.idea/*
+

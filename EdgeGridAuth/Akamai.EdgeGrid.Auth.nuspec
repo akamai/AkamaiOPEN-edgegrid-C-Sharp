@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Akamai.EdgeGrid.Auth</id>
+    <version>2.0.0</version>
+    <title>Akamai EdgeGrid Authentication Library</title>
+    <authors>Akamai Technologies</authors>
+    <owners>Akamai</owners>
+    <licenseExpression>Apache-2.0</licenseExpression>
+    <projectUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Official Akamai EdgeGrid authentication library for .NET 8.0. Provides signing and authentication for Akamai APIs with automatic redirect handling and environment variable credential support.</description>
+    <releaseNotes>Major version 2.0.0 - Migrated to .NET 8.0 with comprehensive improvements including:
+    - Automatic transparent redirect handling with request resigning
+    - Environment variable credential loading support
+    - Support for max_body and account_key configuration
+    - Improved null safety with nullable reference types
+    - Full Apache 2.0 license compliance
+    
+    Breaking Changes:
+    - Minimum supported version is now .NET 8.0
+    - ClientCredential replaced with EdgeGridCredentials
+    - EdgeGridV1Signer replaced with EdgeGridV2Signer
+    - WebRequest API removed, now uses HttpClient exclusively
+    - Environment variable naming convention changed (AKAMAI_HOST for default section)
+    </releaseNotes>
+    <copyright>Copyright © 2025 Akamai Technologies</copyright>
+    <tags>akamai edgegrid authentication api http signing</tags>
+    <repository type="git" url="https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp" branch="main" />
+  </metadata>
+  <files>
+    <file src="bin/Release/net8.0/Akamai.EdgeGrid.Auth.dll" target="lib/net8.0" />
+    <file src="bin/Release/net8.0/Akamai.EdgeGrid.Auth.pdb" target="lib/net8.0" />
+  </files>
+</package>
