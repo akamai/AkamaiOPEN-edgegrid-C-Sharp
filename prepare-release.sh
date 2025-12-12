@@ -17,7 +17,7 @@ echo ""
 # Check if version argument is provided
 if [ -z "$1" ]; then
     echo "Usage: ./prepare-release.sh <version>"
-    echo "Example: ./prepare-release.sh 2.0.0"
+    echo "Example: ./prepare-release.sh 1.0.0"
     exit 1
 fi
 
@@ -25,7 +25,7 @@ VERSION=$1
 
 # Validate version format (semantic versioning)
 if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
-    echo "Error: Invalid version format. Use semantic versioning (e.g., 2.0.0 or 2.0.0-beta)"
+    echo "Error: Invalid version format. Use semantic versioning (e.g., 1.0.0 or 1.0.0-beta)"
     exit 1
 fi
 

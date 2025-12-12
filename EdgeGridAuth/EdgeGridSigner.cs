@@ -12,7 +12,7 @@ namespace Akamai.EdgeGrid.Auth
     /// The EdgeGrid Signer is responsible for brokering a requests.This class is responsible
     /// for the core interaction logic given an API command and the associated set of parameters.
     /// </summary>
-    public class EdgeGridV2Signer
+    public class EdgeGridSigner
     {
         /// <summary>
         /// Name of the authorization header for signing.

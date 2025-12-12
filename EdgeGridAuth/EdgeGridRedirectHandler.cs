@@ -13,7 +13,7 @@ namespace Akamai.EdgeGrid.Auth
     public class EdgeGridRedirectHandler : DelegatingHandler
     {
         private readonly EdgeGridCredentials _credentials;
-        private readonly EdgeGridV2Signer _signer;
+        private readonly EdgeGridSigner _signer;
         private readonly int _maxRedirects;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Akamai.EdgeGrid.Auth
         public EdgeGridRedirectHandler(EdgeGridCredentials credentials, int maxRedirects = 10)
         {
             _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
-            _signer = new EdgeGridV2Signer();
+            _signer = new EdgeGridSigner();
             _maxRedirects = maxRedirects;
         }
 

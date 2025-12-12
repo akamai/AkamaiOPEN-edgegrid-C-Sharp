@@ -250,7 +250,7 @@ Examples:
 - `1.0.0` – Initial release
 - `1.1.0` – New features added
 - `1.1.1` – Bug fixes
-- `2.0.0` – Breaking changes
+- `1.0.0` – Initial release
 
 ## Package signing (recommended)
 

@@ -22,9 +22,9 @@ An automated script that prepares the library for release:
 **Usage:**
 
 ```bash
-./prepare-release.sh 2.0.0
-./prepare-release.sh 2.1.0
-./prepare-release.sh 2.0.0-beta
+./prepare-release.sh 1.0.0
+./prepare-release.sh 1.1.0
+./prepare-release.sh 1.0.0-beta
 ```
 
 **Location:** `/Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp/prepare-release.sh`
@@ -47,7 +47,7 @@ An automated script that publishes the package to NuGet.org:
 **Usage:**
 
 ```bash
-./publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_API_KEY
+./publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_API_KEY
 ```
 
 **Location:** `/Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp/publish-nuget.sh`
@@ -80,13 +80,13 @@ Comprehensive guide for the entire release process:
 
 ```bash
 cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
-bash prepare-release.sh 2.0.0
+bash prepare-release.sh 1.0.0
 ```
 
 ### For publishing:
 ```bash
 cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
-bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
+bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_NUGET_API_KEY
 ```
 
 ---
@@ -106,8 +106,8 @@ bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
 
 ## Current package status
 
-- **Version:** 2.0.0
-- **Location:** `nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg` (11 KB)
+- **Version:** 1.0.0
+- **Location:** `nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg` (11 KB)
 - **Tests:** 54/54 passing ✓
 - **Ready for:** Ownership transfer and NuGet publishing
 
@@ -128,14 +128,14 @@ bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
    - Generate a new API key.
 
 4. **Publish the package**
-   - Run: `bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_API_KEY`.
+   - Run: `bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_API_KEY`.
 
 5. **Verify on NuGet**
-   - Check https://www.nuget.org/packages/Akamai.EdgeGrid.Auth/2.0.0.
+   - Check https://www.nuget.org/packages/Akamai.EdgeGrid.Auth/1.0.0.
 
 6. **Create GitHub Release**
-   - Tag the release: `git tag -a v2.0.0 -m "Release version 2.0.0"`.
-   - Push the tag: `git push origin v2.0.0`.
+   - Tag the release: `git tag -a v1.0.0 -m "Release version 1.0.0"`.
+   - Push the tag: `git push origin v1.0.0`.
    - Create a GitHub release with notes from `CHANGELOG.md`.
 
 ---

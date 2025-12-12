@@ -9,7 +9,7 @@ using System.Text;
 namespace Akamai.EdgeGrid.AuthTest
 {
     [TestClass]
-    public class EdgeGridV2SignerTest
+    public class EdgeGridSignerTest
     {
         private const string BaseUrl = "https://akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net";
         private const string ClientToken = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
@@ -32,7 +32,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_SimpleGET()
         {
             // Test case: "simple GET"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/");
 
@@ -50,7 +50,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_GET_WithQueryString()
         {
             // Test case: "GET with querystring"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/t1?p1=1&p2=2");
 
@@ -64,7 +64,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_POST_InsideLimit()
         {
             // Test case: "POST inside limit"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/testapi/v1/t3");
             request.Content = new StringContent("datadatadatadatadatadatadatadata", Encoding.UTF8, "application/octet-stream");
@@ -79,7 +79,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_POST_TooLarge()
         {
             // Test case: "POST too large" - body exceeds max_body limit
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             
             // Create a large body that exceeds the max body size
@@ -97,7 +97,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_POST_EmptyBody()
         {
             // Test case: "POST empty body"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/testapi/v1/t6");
             request.Content = new StringContent("", Encoding.UTF8, "application/octet-stream");
@@ -112,7 +112,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_PUT_Request()
         {
             // Test case: "PUT test"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Put, $"{BaseUrl}/testapi/v1/t6");
             request.Content = new StringContent("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", Encoding.UTF8, "application/octet-stream");
@@ -127,7 +127,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_PATCH_Request()
         {
             // Test case: "PATCH test"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BaseUrl}/testapi/v1/t6");
             request.Content = new StringContent("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", Encoding.UTF8, "application/octet-stream");
@@ -142,7 +142,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_GET_WithQueryParams()
         {
             // Test case: "GET with query params"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/configs/111?from=12345&limit=200000");
 
@@ -156,7 +156,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_GET_WithQueryParamsAndSeparatorInPath()
         {
             // Test case: "GET with query params and separator in path"
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/configs/111;222;333?from=12345&limit=200000");
 
@@ -170,7 +170,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_Sign_NullRequestUri()
         {
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Get, (Uri)null!);
 
@@ -180,7 +180,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [TestMethod]
         public void Test_GetAuthHeader_POST()
         {
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             byte[] requestBody = Encoding.UTF8.GetBytes("{\"test\":\"data\"}");
 
@@ -198,7 +198,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [TestMethod]
         public void Test_GetAuthHeader_GET()
         {
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             byte[] requestBody = new byte[0];
 
@@ -214,7 +214,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [ExpectedException(typeof(ArgumentException))]
         public void Test_GetAuthHeader_NullClientSecret()
         {
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = new EdgeGridCredentials(
                 host: "test.example.com",
                 clientToken: "test-token",
@@ -230,7 +230,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [TestMethod]
         public void Test_JSON_Request()
         {
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/testapi/v1/t3?extended=true");
             request.Content = new StringContent("{\"key\":\"value\"}", Encoding.UTF8, "application/json");
@@ -253,7 +253,7 @@ namespace Akamai.EdgeGrid.AuthTest
                 headersToSign: new List<string> { "X-Test1", "X-Test2" }
             );
 
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/test");
             request.Headers.Add("X-Test1", "value1");
             request.Headers.Add("X-Test2", "value2");
@@ -278,7 +278,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
             Assert.AreEqual(1024, credential.MaxBody);
 
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/testapi/v1/test");
             request.Content = new StringContent(new string('d', 2000), Encoding.UTF8, "application/octet-stream");
 
@@ -297,7 +297,7 @@ namespace Akamai.EdgeGrid.AuthTest
 
             try
             {
-                var signer = new EdgeGridV2Signer();
+                var signer = new EdgeGridSigner();
                 var credential = GetTestCredentials();
                 var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/");
 
@@ -327,7 +327,7 @@ namespace Akamai.EdgeGrid.AuthTest
                 headersToSign: new List<string> { "X-Test1" }
             );
 
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/testapi/v1/test");
             request.Headers.Add("X-Test1", "     invalid-leading-space");
 
@@ -338,7 +338,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_SigningWithPathParameters()
         {
             // Test that path parameters (semicolon-separated) are included in signature
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
 
             // Create request with path parameters
@@ -360,7 +360,7 @@ namespace Akamai.EdgeGrid.AuthTest
         public void Test_SigningWithPathParametersAndQuery()
         {
             // Test path parameters combined with query string
-            var signer = new EdgeGridV2Signer();
+            var signer = new EdgeGridSigner();
             var credential = GetTestCredentials();
 
             // Create request with both path parameters and query string

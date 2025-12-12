@@ -58,7 +58,7 @@ If environment variables can't be found, or you specify an `.edgerc` file in the
 
 To make an authenticated request, create an instance of the `EdgeGridCredentials` and pass the path to your `.edgerc` file and the credentials' section header.
 
-Then use the `EdgeGridV2Signer` to create an `HttpClient` with automatic signing and redirect handling.
+Then use the `EdgeGridSigner` to create an `HttpClient` with automatic signing and redirect handling.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -67,7 +67,7 @@ using System.Net.Http;
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 
 // Create an HttpClient with automatic signing and redirect handling
-using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
+using var client = EdgeGridSigner.CreateHttpClient(credentials);
 
 // Create and send the request – signing is handled automatically
 var request = new HttpRequestMessage(HttpMethod.Get,
@@ -83,7 +83,7 @@ You can also sign your request manually if you want to have more control over th
 ```c#
 using Akamai.EdgeGrid.Auth;
 
-EdgeGridV2Signer signer = new EdgeGridV2Signer();
+EdgeGridSigner signer = new EdgeGridSigner();
 EdgeGridCredentials credential = new EdgeGridCredentials();
 
 Uri uri = new Uri($"https://{credentials.Host}/identity-management/v3/user-profile");
@@ -102,7 +102,7 @@ Alternatively, you can use the `GetAuthHeader()` method to construct the request
 ```c#
 using Akamai.EdgeGrid.Auth;
 
-EdgeGridV2Signer signer = new EdgeGridV2Signer();
+EdgeGridSigner signer = new EdgeGridSigner();
 EdgeGridCredentials credential = new EdgeGridCredentials();
 
 string AuthHeader = GetAuthHeader(credential, "get", "identity-management/v3/user-profile");
@@ -122,7 +122,7 @@ using System.Net.Http;
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 
 // Create HttpClient with automatic signing and redirect handling
-using var client = EdgeGridV2Signer.CreateHttpClient(credentials, maxRedirects: 10);
+using var client = EdgeGridSigner.CreateHttpClient(credentials, maxRedirects: 10);
 
 // Send requests – signing and redirects are handled transparently
 var request = new HttpRequestMessage(HttpMethod.Get,

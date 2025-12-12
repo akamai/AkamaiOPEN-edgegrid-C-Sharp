@@ -167,7 +167,7 @@ namespace Akamai.EdgeGrid
             }
 
             // Create a client with automatic signing and redirect handling
-            HttpClient client = EdgeGridV2Signer.CreateHttpClient(credentials);
+            HttpClient client = EdgeGridSigner.CreateHttpClient(credentials);
             HttpResponseMessage response = client.Send(request);
 
             Console.WriteLine("{0} {1}", (int)response.StatusCode, response.ReasonPhrase ?? "No Reason");
