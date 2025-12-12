@@ -69,7 +69,7 @@ namespace Akamai.EdgeGrid.Auth
 
                 Console.WriteLine($"Following redirect to: {redirectUri}");
 
-                // Create new request for redirect location
+                // Create a new request for redirect location
                 var redirectRequest = new HttpRequestMessage(request.Method, redirectUri);
 
                 // Copy headers from original request (except Authorization)
@@ -102,10 +102,10 @@ namespace Akamai.EdgeGrid.Auth
                 // Sign the redirect request with new auth header
                 _signer.Sign(redirectRequest, _credentials);
 
-                // Dispose previous response
+                // Dispose a previous response
                 response.Dispose();
 
-                // Update request for next iteration
+                // Update the request for next iteration
                 request = redirectRequest;
                 redirectCount++;
             }
@@ -143,7 +143,7 @@ namespace Akamai.EdgeGrid.Auth
                 // Send the request synchronously
                 response = base.Send(request, cancellationToken);
 
-                // Check if response is a redirect
+                // Check if the response is a redirect
                 if (!IsRedirect(response.StatusCode))
                 {
                     return response;
@@ -165,7 +165,7 @@ namespace Akamai.EdgeGrid.Auth
 
                 Console.WriteLine($"Following redirect to: {redirectUri}");
 
-                // Create new request for redirect location
+                // Create a new request for redirect location
                 var redirectRequest = new HttpRequestMessage(request.Method, redirectUri);
 
                 // Copy headers from original request (except Authorization)
@@ -198,10 +198,10 @@ namespace Akamai.EdgeGrid.Auth
                 // Sign the redirect request with new auth header
                 _signer.Sign(redirectRequest, _credentials);
 
-                // Dispose previous response
+                // Dispose the previous response
                 response.Dispose();
 
-                // Update request for next iteration
+                // Update the request for next iteration
                 request = redirectRequest;
                 redirectCount++;
             }

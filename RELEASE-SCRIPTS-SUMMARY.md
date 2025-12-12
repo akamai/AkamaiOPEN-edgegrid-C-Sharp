@@ -1,23 +1,26 @@
-# Release Scripts and Documentation
+# Release scripts and documentation
 
 ## Summary
 
 Three new files have been created to facilitate the release and publishing process:
 
 ### 1. **prepare-release.sh** (Executable Script)
+
 An automated script that prepares the library for release:
 
 **Features:**
-- ✓ Validates semantic version format
-- ✓ Runs all unit tests (54+ tests)
-- ✓ Updates version in `EdgeGridAuth.csproj`
-- ✓ Cleans previous builds
-- ✓ Builds in Release mode
-- ✓ Creates NuGet package (.nupkg)
-- ✓ Verifies package contents
-- ✓ Provides next steps for Git tagging and publishing
+
+- ✓ Validates semantic version format.
+- ✓ Runs all unit tests (54+ tests).
+- ✓ Updates version in `EdgeGridAuth.csproj`.
+- ✓ Cleans previous builds.
+- ✓ Builds in release mode.
+- ✓ Creates the NuGet package (`.nupkg`).
+- ✓ Verifies package contents.
+- ✓ Provides next steps for git tagging and publishing.
 
 **Usage:**
+
 ```bash
 ./prepare-release.sh 2.0.0
 ./prepare-release.sh 2.1.0
@@ -28,18 +31,21 @@ An automated script that prepares the library for release:
 
 ---
 
-### 2. **publish-nuget.sh** (Executable Script)
+### 2. **publish-nuget.sh** (executable script)
+
 An automated script that publishes the package to NuGet.org:
 
 **Features:**
-- ✓ Validates package file existence
-- ✓ Checks if version already exists on NuGet
-- ✓ Confirms release before publishing
-- ✓ Uploads to NuGet.org using API key
-- ✓ Provides package URL and next steps
-- ✓ Handles errors gracefully
+
+- ✓ Validates the package file existence.
+- ✓ Checks if the version already exists on NuGet.
+- ✓ Confirms the release before publishing.
+- ✓ Uploads to NuGet.org using the API key.
+- ✓ Provides the package URL and next steps.
+- ✓ Handles errors gracefully.
 
 **Usage:**
+
 ```bash
 ./publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_API_KEY
 ```
@@ -48,10 +54,12 @@ An automated script that publishes the package to NuGet.org:
 
 ---
 
-### 3. **RELEASE.md** (Documentation)
+### 3. **RELEASE.md** (documentation)
+
 Comprehensive guide for the entire release process:
 
 **Sections:**
+
 - Overview of the release process
 - Prerequisites
 - Step-by-step release preparation
@@ -66,15 +74,16 @@ Comprehensive guide for the entire release process:
 
 ---
 
-## Quick Start Guide
+## Quick start guide
 
-### For Preparation:
+### For preparation:
+
 ```bash
 cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
 bash prepare-release.sh 2.0.0
 ```
 
-### For Publishing:
+### For publishing:
 ```bash
 cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
 bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
@@ -82,20 +91,20 @@ bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
 
 ---
 
-## Files Modified
+## Files modified
 
 1. **EdgeGridAuth.csproj**
-   - Added NuGet package metadata (PackageId, Version, Title, Authors, etc.)
-   - Set up for package publishing
+   - Added NuGet package metadata (PackageId, Version, Title, Authors, etc.).
+   - Set up for package publishing.
 
 2. **Akamai.EdgeGrid.Auth.nuspec** (New)
-   - Created .nuspec file for detailed package configuration
-   - Includes DLL and PDB file definitions
-   - Detailed release notes and breaking changes
+   - Created the `.nuspec` file for detailed package configuration.
+   - Includes DLL and PDB file definitions.
+   - Detailed release notes and breaking changes.
 
 ---
 
-## Current Package Status
+## Current package status
 
 - **Version:** 2.0.0
 - **Location:** `nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg` (11 KB)
@@ -104,80 +113,80 @@ bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_NUGET_API_KEY
 
 ---
 
-## Next Steps
+## Next steps
 
-1. **Get Official Akamai NuGet Account**
-   - Create or verify Akamai organization account on NuGet.org
+1. **Get Official Akamai NuGet account**
+   - Create or verify Akamai organization account on NuGet.org.
 
-2. **Request Ownership Transfer**
-   - Send email to NuGet support (use template from RELEASE.md)
-   - Request transfer from current owner (andreqb) or direct ownership
+2. **Request ownership transfer**
+   - Send an email to the NuGet support (use the template from `RELEASE.md`).
+   - Request transfer from the current owner (andreqb) or direct ownership.
 
-3. **Generate NuGet API Key**
-   - Sign in to NuGet.org
-   - Go to Account Settings > API Keys
-   - Generate new API key
+3. **Generate a NuGet API key**
+   - Sign in to NuGet.org.
+   - Go to **Account Settings** > **API Key**s.
+   - Generate a new API key.
 
-4. **Publish Package**
-   - Run: `bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_API_KEY`
+4. **Publish the package**
+   - Run: `bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.2.0.0.nupkg YOUR_API_KEY`.
 
 5. **Verify on NuGet**
-   - Check https://www.nuget.org/packages/Akamai.EdgeGrid.Auth/2.0.0
+   - Check https://www.nuget.org/packages/Akamai.EdgeGrid.Auth/2.0.0.
 
 6. **Create GitHub Release**
-   - Tag release: `git tag -a v2.0.0 -m "Release version 2.0.0"`
-   - Push tag: `git push origin v2.0.0`
-   - Create GitHub release with notes from CHANGELOG.md
+   - Tag the release: `git tag -a v2.0.0 -m "Release version 2.0.0"`.
+   - Push the tag: `git push origin v2.0.0`.
+   - Create a GitHub release with notes from `CHANGELOG.md`.
 
 ---
 
-## Release Workflow Diagram
+## Release workflow diagram
 
 ```
 ┌─────────────────────────────────────────┐
-│ prepare-release.sh <version>            │ Run preparation script
-│ - Validate version                      │
+│ prepare-release.sh <version>            │ Run the preparation script
+│ - Validate the version                  │
 │ - Run tests                             │
-│ - Update version                        │
-│ - Build Release                         │
-│ - Create .nupkg                         │
+│ - Update the version                    │
+│ - Build the release                     │
+│ - Create .`nupkg`                       │
 └──────────────┬──────────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────────┐
-│ Git Tagging (Optional)                  │
+│ Git tagging (pptional)                  │
 │ git tag -a v<version> -m "..."          │
 │ git push origin v<version>              │
 └──────────────┬──────────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────────┐
-│ publish-nuget.sh <package> <api-key>    │ Run publishing script
-│ - Validate package                      │
-│ - Check if version exists               │
-│ - Confirm with user                     │
+│ publish-nuget.sh <package> <api-key>    │ Run the publishing script
+│ - Validate the package                  │
+│ - Check if the version exists           │
+│ - Confirm with a user                   │
 │ - Upload to NuGet.org                   │
-│ - Provide package URL                   │
+│ - Provide the package URL               │
 └──────────────┬──────────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────────┐
-│ Post-Release                            │
+│ Post-release                            │
 │ - Verify on NuGet.org                   │
-│ - Create GitHub Release                 │
-│ - Announce release                      │
+│ - Create a GitHub Release               │
+│ - Announce the release                  │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-## Important Notes
+## Important notes
 
-- Always run tests before releasing
-- Use semantic versioning (MAJOR.MINOR.PATCH)
-- Update CHANGELOG.md before each release
-- Never hardcode API keys in scripts or version control
-- Keep NuGet API key secure
+- Always run tests before releasing.
+- Use semantic versioning (MAJOR.MINOR.PATCH).
+- Update `CHANGELOG.md` before each release.
+- Never hardcode API keys in scripts or version control.
+- Keep the NuGet API key secure.
 
 ---
 

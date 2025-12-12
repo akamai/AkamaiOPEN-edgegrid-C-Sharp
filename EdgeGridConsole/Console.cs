@@ -12,11 +12,9 @@ using Akamai.EdgeGrid.Auth;
 namespace Akamai.EdgeGrid
 {
     /// <summary>
-    /// Command Line sample application to demonstrate the utilization of the {Open} APIs. 
-    /// This can be used for both command line invocation or reference on how to leverage the 
-    /// Api. All supported commands are implemented in this sample for convience.
-    /// 
-    /// Author: colinb@akamai.com  (Colin Bendell)
+    /// Command-line sample application to demonstrate the use of the {Open} APIs. 
+    /// This can be used both for command-line invocation or as a reference on how to leverage the 
+    /// APIs. All supported commands are implemented in this sample for convenience.
     /// </summary>
     class EdgeGridConsole
     {
@@ -124,7 +122,7 @@ namespace Akamai.EdgeGrid
 
             EdgeGridCredentials credentials = new(edgeRCFile, section);
 
-            // Add Account Switch Key to path if provided
+            // Add an account switch key to a path if provided
             if (!string.IsNullOrEmpty(accountSwitchKey))
             {
                 if (path.Contains("?"))
@@ -158,7 +156,7 @@ namespace Akamai.EdgeGrid
                 request.Headers.Add(components[0], components[1]);
             }
 
-            // Default Headers
+            // Default headers
             if (request.Headers.Accept == null || !request.Headers.Accept.Any())
             {
                 request.Headers.Add("accept", "application/json");
@@ -168,7 +166,7 @@ namespace Akamai.EdgeGrid
                 request.Headers.Add("user-agent", "EdgeGridConsole");
             }
 
-            // Create client with automatic signing and redirect handling
+            // Create a client with automatic signing and redirect handling
             HttpClient client = EdgeGridV2Signer.CreateHttpClient(credentials);
             HttpResponseMessage response = client.Send(request);
 
@@ -191,14 +189,14 @@ Usage: openapi <-e edgerc-file> <-s section> <-a account-switch-key>
            <url>
 
 Where:
-    -o outfile      local file name to use to save response from the API
-    -d data         string of data to PUT to the API
-    -f srcfile      local file used as source when action=upload
-    -m max-size     maximum amount of data to use in the signing hash. Default is 2048
-    -H header-line  Http Header 'Name: value'
-    -X method       force HTTP PUT,POST,DELETE 
-    -T content-type the HTTP content type (default = application/json)
-    url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations       
+    -o outfile      Local file name to use to save the response from the API
+    -d data         String of data to PUT to the API
+    -f srcfile      Local file used as source when action=upload
+    -m max-size     Maximum amount of data to use in the signing hash. Default is 2048
+    -H header-line  HTTP Header 'Name: value'
+    -X method       Force HTTP PUT, POST, DELETE
+    -T content-type The HTTP content type (default = application/json)
+    url             Fully qualified API URL such as https://akab-1234.luna.akamaiapis.net/identity-management/v3/user-profile
 
 ");
         }

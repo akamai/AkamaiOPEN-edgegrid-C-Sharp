@@ -70,7 +70,7 @@ namespace Akamai.EdgeGrid.Auth
                 canonicalizedHeaders = CanonicalizeHeaders(request.Headers, credential.HeadersToSign);
             }
 
-            // Get host - check for custom Host header first
+            // Get host - check for a custom Host header first
             string host = credential.Host ?? "";
             if (request != null && request.Headers.Host != null)
             {
@@ -308,11 +308,11 @@ namespace Akamai.EdgeGrid.Auth
                 throw new ArgumentException("ClientSecret is required for signing.");
             }
 
-            // Get current epoch time in ISO 8601 format
+            // Get a current epoch time in ISO 8601 format
             DateTime Timestamp = DateTime.UtcNow;
             string ISOTimestamp = Timestamp.ToUniversalTime().ToString("yyyyMMddTHH:mm:sszz00");
 
-            // Construct signing string from request elements
+            // Construct a signing string from request elements
             string RequestData = GetStringToSign(credential: credential, method: method,
                 pathAndQuery: pathAndQuery, requestBody: requestBody, request: request);
             Console.WriteLine("Request Data: {0}", RequestData);

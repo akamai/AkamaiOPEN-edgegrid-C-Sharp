@@ -1,22 +1,64 @@
-# EdgeGridSigner (for .NET/c#)
+# EdgeGrid for .NET/C#
 
-This library assists in the interaction with Akamai APIs using the EdgeGrid signing method.
-API specs can be found at: https://techdocs.akamai.com/
+This library implements an Authentication handler for the Akamai EdgeGrid Authentication scheme in .NET/C#.
+
+You can find all Akamai APIs on [TechDocs](https://techdocs.akamai.com/home/page/apis).
 
 ## Project organization
-* /EdgeGridAuth - core auth signer project
-* /EdgeGridAuthTest - unit tests for core auth signer project
-* /EdgeGridConsole - generic command line tool to demonstrate using the signer
-* /Akamai.EdgeGrid.Auth.sln - root project solution
+
+| Folder | Description|
+| -------- | --------- |
+| `/EdgeGridAuth` | The core auth signer project. |
+| `/EdgeGridAuthTest` | The unit tests for the core auth signer project. |
+| `/EdgeGridConsole` | The  generic command-line tool to demonstrate using the signer. |
+| `/Akamai.EdgeGrid.Auth.sln` | The root project solution. |
+
 
 ## Install
-* Open the Akamai.EdgeGrid.Auth.sln in Visual Studio Code.
 
-## Getting Started
+Run `dotnet build` and then `dotnet test` in the root directory.
 
-### Basic Usage
+## Authentication
 
-The simplest way to make authenticated requests:
+You can obtain the authentication credentials through an API client. Requests to the API are timestamped, signed, and executed immediately.
+
+1. [Create authentication credentials](https://techdocs.akamai.com/developer/docs/edgegrid).
+2. Place your credentials in an EdgeGrid resource file (`.edgerc`) under the `[default]` heading in your local home directory.
+
+    ```
+    [default]
+    client_secret = C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=
+    host = akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net
+    access_token = akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij
+    client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
+    ```
+
+### Load credentials
+
+Use the `EdgeGridCredentials` class to load your credentials from either environment variables or an `.edgerc` file.
+
+The library will first check whether your credentials are defined in environment variables. By default, it uses these variables:
+
+* `AKAMAI_CLIENT_TOKEN`
+* `AKAMAI_CLIENT_SECRET`
+* `AKAMAI_HOST`
+* `AKAMAI_ACCESS_TOKEN`
+* `AKAMAI_MAX_BODY`
+* `AKAMAI_ACCOUNT_KEY`
+
+> **Note:** The `AKAMAI_ACCOUNT_KEY` is used only internally by Akamai staff.
+
+You can define multiple configurations by specifying the credentials' section header as an interfix that you insert between `AKAMAI_` and the credential name. For example, if you pass `appsec` as the credentials' section header in the `section` parameter when instantiating the `EdgeGridCredentials` class, the class will look for the `AKAMAI_APPSEC_CLIENT_TOKEN` environment variable.
+
+If environment variables can't be found, or you specify an `.edgerc` file in the constructor, the credentials will be read from the file. If you don't provide any credentials, the default location of the file is `~/.edgerc`, and the section is `default`.
+
+## Get started
+
+### Basic usage
+
+To make an authenticated request, create an instance of the `EdgeGridCredentials` and pass the path to your `.edgerc` file and the credentials' section header.
+
+Then use the `EdgeGridV2Signer` to create an `HttpClient` with automatic signing and redirect handling.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -27,16 +69,16 @@ var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 // Create an HttpClient with automatic signing and redirect handling
 using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
 
-// Just create and send the request - signing is handled automatically
+// Create and send the request – signing is handled automatically
 var request = new HttpRequestMessage(HttpMethod.Get,
-    $"https://{credentials.Host}/papi/v1/contracts");
+    $"https://{credentials.Host}/identity-management/v3/user-profile");
 
 var response = await client.SendAsync(request);
 ```
 
-### Manual Request Signing
+### Sign your request manually
 
-If you need more control over the HttpClient configuration or want to sign requests manually:
+You can also sign your request manually if you want to have more control over the `HttpClient` configuration.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -44,7 +86,7 @@ using Akamai.EdgeGrid.Auth;
 EdgeGridV2Signer signer = new EdgeGridV2Signer();
 EdgeGridCredentials credential = new EdgeGridCredentials();
 
-Uri uri = new Uri($"https://{credentials.Host}/papi/v1/contracts");
+Uri uri = new Uri($"https://{credentials.Host}/identity-management/v3/user-profile");
 HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("get"), uri);
 signer.Sign(request, credential);
 
@@ -53,9 +95,9 @@ using var client = new HttpClient();
 var response = await client.SendAsync(request);
 ```
 
-### Using GetAuthHeader Directly
+### Use `GetAuthHeader` directly
 
-Alternatively, you can use the GetAuthHeader() method to construct the request without using HttpRequestMessage:
+Alternatively, you can use the `GetAuthHeader()` method to construct the request without using `HttpRequestMessage`.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -63,55 +105,15 @@ using Akamai.EdgeGrid.Auth;
 EdgeGridV2Signer signer = new EdgeGridV2Signer();
 EdgeGridCredentials credential = new EdgeGridCredentials();
 
-string AuthHeader = GetAuthHeader(credential, "get", "/papi/v1/contracts");
+string AuthHeader = GetAuthHeader(credential, "get", "identity-management/v3/user-profile");
 # Add AuthHeader value to your request
 ```
 
-## Loading Credentials
+## Advanced features
 
-The EdgeGridCredentials class is configured to read Akamai credentials from either Environment Variables or a EdgeRCFile.
+### Automatic signing and redirect handling (default behavior)
 
-### Environment Variables
-
-Environment variables are checked first, and the variables below are checked for their corresponding authentication elements
-
-- client_token - AKAMAI_CLIENT_TOKEN
-- client_secret - AKAMAI_CLIENT_SECRET
-- host - AKAMAI_HOST
-- access_token - AKAMAI_ACCESS_TOKEN
-- max_body - AKAMAI_MAX_BODY
-- account_key - AKAMAI_ACCOUNT_KEY
-
-> Note: The `account_key` is only commonly used by Akamai internal staff, so if you've never seen it, don't worry about it.
-
-If you specify a `section` parameter when instantiating the EdgeGridCredentials class, the environment variables checked will difer in the form `AKAMAI_<SECTION>_<ELEMENT>`, e.g. if you specify a section of `appsec`, the following variables will be checked:
-
-- AKAMAI_APPSEC_CLIENT_TOKEN
-- AKAMAI_APPSEC_CLIENT_SECRET
-- AKAMAI_APPSEC_HOST
-- AKAMAI_APPSEC_ACCESS_TOKEN
-- AKAMAI_APPSEC_MAX_BODY
-- AKAMAI_APPSEC_ACCOUNT_KEY
-
-### EdgeRC File
-
-If environment variables cannot be found, or you specify an EdgeRCFile in the constructor, credentials will be read from a file, whose format is expected to be:
-
-```
-[default]
-client_secret = C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=
-host = akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net
-access_token = akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij
-client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
-```
-
-If you do not specify otherwise, the default location of the file is `~/.edgerc` and the section is `default`.
-
-## Advanced Features
-
-### Automatic Signing and Redirect Handling (Default Behavior)
-
-The library provides automatic request signing and redirect following. Use the `CreateHttpClient()` factory method:
+The library provides automatic request signing and redirect following. For this feature, use the `CreateHttpClient()` factory method.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -119,17 +121,17 @@ using System.Net.Http;
 
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 
-// Creates HttpClient with automatic signing and redirect handling
+// Create HttpClient with automatic signing and redirect handling
 using var client = EdgeGridV2Signer.CreateHttpClient(credentials, maxRedirects: 10);
 
-// Just send requests - signing and redirects are handled transparently
+// Send requests – signing and redirects are handled transparently
 var request = new HttpRequestMessage(HttpMethod.Get,
-    $"https://{credentials.Host}/api/endpoint");
+    $"https://{credentials.Host}/identity-management/v3/user-profile");
 
 var response = await client.SendAsync(request);
 ```
 
-For advanced scenarios requiring custom configuration, you can use `EdgeGridRedirectHandler` directly:
+For advanced scenarios requiring custom configuration, you can use `EdgeGridRedirectHandler` directly.
 
 ```c#
 using Akamai.EdgeGrid.Auth;
@@ -146,43 +148,46 @@ var redirectHandler = new EdgeGridRedirectHandler(credentials, maxRedirects: 10)
 
 using var client = new HttpClient(redirectHandler);
 var request = new HttpRequestMessage(HttpMethod.Get,
-    $"https://{credentials.Host}/api/endpoint");
+    $"https://{credentials.Host}/identity-management/v3/user-profile");
 
-// Signing is automatic - just send the request
+// Send the request – signing is automatic
 var response = await client.SendAsync(request);
 ```
 
-### Custom Headers in Signature
+### Custom headers in signature
 
-You can include specific headers in the authentication signature:
+You can include specific headers in the authentication signature.
 
-```c#
-// Via .edgerc file
-[default]
-client_secret = C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=
-host = akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net
-access_token = akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij
-client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
-headers_to_sign = X-Custom-Header,X-Another-Header
-max_body = 131072
-```
+* Via an `.edgerc` file.
 
-```c#
-// Or programmatically
-var credentials = new EdgeGridCredentials(
-    host: "akab-baseurl.luna.akamaiapis.net",
-    clientToken: "akab-client-token-xxx",
-    clientSecret: "client-secret-xxx",
-    accessToken: "akab-access-token-xxx",
-    headersToSign: new List<string> { "X-Custom-Header", "X-Another-Header" },
-    maxBody: 131072
-);
-```
+    ```c#
+    [default]
+    client_secret = C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=
+    host = akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net
+    access_token = akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij
+    client_token = akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj
+    headers_to_sign = X-Custom-Header,X-Another-Header
+    max_body = 131072
+    ```
 
-## Sample application (EdgeGridConsole.exe)
-* A sample application has been created that can take command line parameters.
+* Programmatically.
 
-```
+    ```c#
+    var credentials = new EdgeGridCredentials(
+        host: "akab-h05tnam3wl42son7nktnlnnx-kbob3i3v.luna.akamaiapis.net",
+        clientToken: "akab-c113ntt0k3n4qtari252bfxxbsl-yvsdj",
+        clientSecret: "C113nt53KR3TN6N90yVuAgICxIRwsObLi0E67/N8eRN=",
+        accessToken: "akab-acc35t0k3nodujqunph3w7hzp7-gtm6ij",
+        headersToSign: new List<string> { "X-Custom-Header", "X-Another-Header" },
+        maxBody: 131072
+    );
+    ```
+
+## Sample application (`EdgeGridConsole.exe`)
+
+The library offers a sample application that takes command-line parameters.
+
+```shell
 Usage: EdgeGridConeols <-e edgerc-file> <-s section> <-a account-switch-key>
            [-d data] [-f srcfile]
            [-o outfile]
@@ -193,18 +198,29 @@ Usage: EdgeGridConeols <-e edgerc-file> <-s section> <-a account-switch-key>
            <url>
 
 Where:
-    -o outfile      local file name to use to save response from the API
-    -d data         string of data to PUT to the API
-    -f srcfile      local file used as source when action=upload
-    -H header-line  Http Header 'Name: value'
-    -X method       force HTTP PUT,POST,DELETE
-    -T content-type the HTTP content type (default = application/json)
-    url             fully qualified api url such as https://akab-1234.luna.akamaiapis.net/diagnostic-tools/v1/locations
+    -o outfile      Local file name to use to save the response from the API
+    -d data         String of data to PUT to the API
+    -f srcfile      Local file used as source when action=upload
+    -H header-line  HTTP Header 'Name: value'
+    -X method       Force HTTP PUT, POST, DELETE
+    -T content-type The HTTP content type (default = application/json)
+    url             Fully qualified API URL such as https://akab-1234.luna.akamaiapis.net/identity-management/v3/user-profile
 ```
 
 Example:
 
 ```shell
-EdgeGridConsole.exe -e ~/.edgerc -s default /edge-diagnostics/v1/edge-locations
+EdgeGridConsole.exe -e ~/.edgerc -s default /identity-management/v3/user-profile
 ```
 
+## Reporting issues
+
+To report an issue or make a suggestion, create a new [GitHub issue](https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp/issues).
+
+## License
+
+Copyright 2026 Akamai Technologies, Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

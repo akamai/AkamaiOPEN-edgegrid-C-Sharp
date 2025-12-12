@@ -82,7 +82,7 @@ namespace Akamai.EdgeGrid.AuthTest
         [TestMethod]
         public async Task Test_RedirectHandler_MaxRedirectsExceeded()
         {
-            // Create handler that always redirects
+            // Create a handler that always redirects
             var mockHandler = new MockInfiniteRedirectHandler();
 
             var credentials = GetTestCredentials();
@@ -125,7 +125,7 @@ namespace Akamai.EdgeGrid.AuthTest
             Assert.AreEqual(1, mockHandler.RequestCount); // Only original request
         }
 
-        // Mock HTTP handler for testing redirects
+        // Mock an HTTP handler for testing redirects
         private class MockRedirectHttpMessageHandler : HttpMessageHandler
         {
             private readonly HttpResponseMessage _initialResponse;
@@ -170,7 +170,7 @@ namespace Akamai.EdgeGrid.AuthTest
             // Test the factory method that creates an HttpClient with redirect handling built-in
             var credentials = GetTestCredentials();
             
-            // Create HttpClient using factory method
+            // Create an HttpClient using the factory method
             using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
             
             // Verify that the client was created successfully

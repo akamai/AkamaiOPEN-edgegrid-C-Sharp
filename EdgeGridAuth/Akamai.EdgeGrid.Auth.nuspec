@@ -24,7 +24,7 @@
     - WebRequest API removed, now uses HttpClient exclusively
     - Environment variable naming convention changed (AKAMAI_HOST for default section)
     </releaseNotes>
-    <copyright>Copyright © 2025 Akamai Technologies</copyright>
+    <copyright>Copyright © 2026 Akamai Technologies</copyright>
     <tags>akamai edgegrid authentication api http signing</tags>
     <repository type="git" url="https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp" branch="main" />
   </metadata>
