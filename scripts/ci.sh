@@ -8,7 +8,6 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-TEST_PROJECT="$PROJECT_ROOT/EdgeGridAuthTest"
 MAIN_PROJECT="$PROJECT_ROOT/EdgeGridAuth"
 REPORTS_DIR="$PROJECT_ROOT/reports"
 COVERAGE_DIR="$REPORTS_DIR/coverage"
@@ -66,6 +65,7 @@ echo ""
 echo -e "${BLUE}Step 2: Cleaning previous builds...${NC}"
 rm -rf "$PROJECT_ROOT/EdgeGridAuth/bin" "$PROJECT_ROOT/EdgeGridAuth/obj"
 rm -rf "$PROJECT_ROOT/EdgeGridAuthTest/bin" "$PROJECT_ROOT/EdgeGridAuthTest/obj"
+rm -rf "$PROJECT_ROOT/EdgeGridConsoleTest/bin" "$PROJECT_ROOT/EdgeGridConsoleTest/obj"
 rm -rf "$REPORTS_DIR"
 mkdir -p "$COVERAGE_DIR" "$TEST_RESULTS_DIR"
 echo -e "${GREEN}✓ Cleaned${NC}"
@@ -111,9 +111,10 @@ echo -e "${BLUE}Step 6: Running unit tests...${NC}"
 
 if [ "$COVERAGE_ENABLED" = true ]; then
     echo "  (with code coverage collection)"
-    if ! dotnet test "$TEST_PROJECT" \
+    if ! dotnet test "$PROJECT_ROOT" \
         --configuration Release \
-        --logger "trx;LogFileName=$TEST_RESULTS_DIR/results.trx" \
+        --results-directory "$TEST_RESULTS_DIR" \
+        --logger "trx" \
         /p:CollectCoverage=true \
         /p:CoverletOutputFormat=cobertura \
         /p:CoverletOutput="$COVERAGE_DIR/"; then
@@ -121,21 +122,29 @@ if [ "$COVERAGE_ENABLED" = true ]; then
         exit 1
     fi
 else
-    if ! dotnet test "$TEST_PROJECT" \
+    if ! dotnet test "$PROJECT_ROOT" \
         --verbosity detailed \
         --configuration Release \
-        --logger "trx;LogFileName=$TEST_RESULTS_DIR/results.trx"; then
+        --results-directory "$TEST_RESULTS_DIR" \
+        --logger "trx"; then
         echo -e "${RED}✗ Tests failed${NC}"
         exit 1
     fi
 fi
 
-# Count test results
-TEST_RESULT_FILE=$(find "$TEST_RESULTS_DIR" -name "*.trx" -type f | head -1)
-if [ -n "$TEST_RESULT_FILE" ]; then
-    PASSED=$(grep -o 'outcome="Passed"' "$TEST_RESULT_FILE" | wc -l)
-    FAILED=$(grep -o 'outcome="Failed"' "$TEST_RESULT_FILE" | wc -l)
-    SKIPPED=$(grep -o 'outcome="Skipped"' "$TEST_RESULT_FILE" | wc -l)
+# Count test results from all TRX files
+TEST_RESULT_FILES=$(find "$TEST_RESULTS_DIR" -name "*.trx" -type f)
+if [ -n "$TEST_RESULT_FILES" ]; then
+    PASSED=0
+    FAILED=0
+    SKIPPED=0
+    
+    for TRX_FILE in $TEST_RESULT_FILES; do
+        PASSED=$((PASSED + $(grep -o 'outcome="Passed"' "$TRX_FILE" | wc -l)))
+        FAILED=$((FAILED + $(grep -o 'outcome="Failed"' "$TRX_FILE" | wc -l)))
+        SKIPPED=$((SKIPPED + $(grep -o 'outcome="Skipped"' "$TRX_FILE" | wc -l)))
+    done
+    
     TOTAL=$((PASSED + FAILED + SKIPPED))
     
     echo ""
@@ -161,41 +170,49 @@ echo ""
 
 # Convert TRX to JUnit format for Jenkins
 echo -e "${BLUE}Converting test results to JUnit format...${NC}"
-TRX_FILE="$TEST_RESULTS_DIR/results.trx"
 JUNIT_FILE="$TEST_RESULTS_DIR/junit-results.xml"
 
-if [ -f "$TRX_FILE" ]; then
-    # Simple TRX to JUnit conversion using XSLT-like approach
-    # Extract test data and create JUnit XML
-    TOTAL=$(grep -o 'outcome="[^"]*"' "$TRX_FILE" | wc -l | tr -d ' ')
-    PASSED=$(grep -o 'outcome="Passed"' "$TRX_FILE" | wc -l | tr -d ' ')
-    FAILED=$(grep -o 'outcome="Failed"' "$TRX_FILE" | wc -l | tr -d ' ')
-    SKIPPED=$(grep -o 'outcome="Skipped"' "$TRX_FILE" | wc -l | tr -d ' ')
+TEST_RESULT_FILES=$(find "$TEST_RESULTS_DIR" -name "*.trx" -type f)
+if [ -n "$TEST_RESULT_FILES" ]; then
+    # Calculate totals across all TRX files
+    TOTAL=0
+    PASSED=0
+    FAILED=0
+    SKIPPED=0
+    
+    for TRX_FILE in $TEST_RESULT_FILES; do
+        TOTAL=$((TOTAL + $(grep -o 'outcome="[^"]*"' "$TRX_FILE" | wc -l | tr -d ' ')))
+        PASSED=$((PASSED + $(grep -o 'outcome="Passed"' "$TRX_FILE" | wc -l | tr -d ' ')))
+        FAILED=$((FAILED + $(grep -o 'outcome="Failed"' "$TRX_FILE" | wc -l | tr -d ' ')))
+        SKIPPED=$((SKIPPED + $(grep -o 'outcome="Skipped"' "$TRX_FILE" | wc -l | tr -d ' ')))
+    done
     
     # Create basic JUnit XML
     cat > "$JUNIT_FILE" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="$TOTAL" failures="$FAILED" errors="0" skipped="$SKIPPED">
-  <testsuite name="Akamai.EdgeGrid.AuthTest" tests="$TOTAL" failures="$FAILED" errors="0" skipped="$SKIPPED" timestamp="$(date -u +"%Y-%m-%dT%H:%M:%S")">
+  <testsuite name="Akamai.EdgeGrid.Tests" tests="$TOTAL" failures="$FAILED" errors="0" skipped="$SKIPPED" timestamp="$(date -u +"%Y-%m-%dT%H:%M:%S")">
 EOF
     
-    # Extract test cases from TRX and add to JUnit
-    grep 'testName=' "$TRX_FILE" | while read -r line; do
-        TEST_NAME=$(echo "$line" | grep -o 'testName="[^"]*"' | sed 's/testName="\([^"]*\)"/\1/')
-        OUTCOME=$(echo "$line" | grep -o 'outcome="[^"]*"' | sed 's/outcome="\([^"]*\)"/\1/')
-        DURATION=$(echo "$line" | grep -o 'duration="[^"]*"' | sed 's/duration="\([^"]*\)"/\1/' | sed 's/00:00://g')
-        
-        if [ "$OUTCOME" = "Passed" ]; then
-            echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.AuthTest\" time=\"$DURATION\"/>" >> "$JUNIT_FILE"
-        elif [ "$OUTCOME" = "Failed" ]; then
-            echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.AuthTest\" time=\"$DURATION\">" >> "$JUNIT_FILE"
-            echo "      <failure message=\"Test failed\"/>" >> "$JUNIT_FILE"
-            echo "    </testcase>" >> "$JUNIT_FILE"
-        elif [ "$OUTCOME" = "Skipped" ]; then
-            echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.AuthTest\" time=\"$DURATION\">" >> "$JUNIT_FILE"
-            echo "      <skipped/>" >> "$JUNIT_FILE"
-            echo "    </testcase>" >> "$JUNIT_FILE"
-        fi
+    # Extract test cases from all TRX files and add to JUnit
+    for TRX_FILE in $TEST_RESULT_FILES; do
+        grep 'testName=' "$TRX_FILE" | while read -r line; do
+            TEST_NAME=$(echo "$line" | grep -o 'testName="[^"]*"' | sed 's/testName="\([^"]*\)"/\1/')
+            OUTCOME=$(echo "$line" | grep -o 'outcome="[^"]*"' | sed 's/outcome="\([^"]*\)"/\1/')
+            DURATION=$(echo "$line" | grep -o 'duration="[^"]*"' | sed 's/duration="\([^"]*\)"/\1/' | sed 's/00:00://g')
+            
+            if [ "$OUTCOME" = "Passed" ]; then
+                echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.Tests\" time=\"$DURATION\"/>" >> "$JUNIT_FILE"
+            elif [ "$OUTCOME" = "Failed" ]; then
+                echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.Tests\" time=\"$DURATION\">" >> "$JUNIT_FILE"
+                echo "      <failure message=\"Test failed\"/>" >> "$JUNIT_FILE"
+                echo "    </testcase>" >> "$JUNIT_FILE"
+            elif [ "$OUTCOME" = "Skipped" ]; then
+                echo "    <testcase name=\"$TEST_NAME\" classname=\"Akamai.EdgeGrid.Tests\" time=\"$DURATION\">" >> "$JUNIT_FILE"
+                echo "      <skipped/>" >> "$JUNIT_FILE"
+                echo "    </testcase>" >> "$JUNIT_FILE"
+            fi
+        done
     done
     
     cat >> "$JUNIT_FILE" << EOF
@@ -205,7 +222,7 @@ EOF
     
     echo -e "${GREEN}✓ JUnit format created: $JUNIT_FILE${NC}"
 else
-    echo -e "${YELLOW}⚠ TRX file not found, skipping JUnit conversion${NC}"
+    echo -e "${YELLOW}⚠ TRX files not found, skipping JUnit conversion${NC}"
 fi
 echo ""
 
@@ -233,7 +250,7 @@ echo ""
 echo -e "Status: ${GREEN}✓ PASSED${NC}"
 echo ""
 echo "Reports and artifacts:"
-echo "  Test Results (TRX):   $TEST_RESULTS_DIR/results.trx"
+echo "  Test Results (TRX):   $TEST_RESULTS_DIR/*.trx"
 echo "  Test Results (JUnit): $TEST_RESULTS_DIR/junit-results.xml"
 if [ "$COVERAGE_ENABLED" = true ]; then
     echo "  Coverage (Cobertura): $COVERAGE_FILE"

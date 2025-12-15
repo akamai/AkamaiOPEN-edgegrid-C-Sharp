@@ -12,30 +12,68 @@ using Akamai.EdgeGrid.Auth;
 namespace Akamai.EdgeGrid
 {
     /// <summary>
+    /// Command-line argument options
+    /// </summary>
+    public class CommandLineOptions
+    {
+        public string EdgeRCFile { get; set; } = "";
+        public string Section { get; set; } = "";
+        public string AccountSwitchKey { get; set; } = "";
+        public string Path { get; set; } = "";
+        public List<string> Headers { get; set; } = [];
+        public string Method { get; set; } = "GET";
+        public string ContentType { get; set; } = "application/json";
+        public string OutputFile { get; set; } = "";
+        public string UploadFile { get; set; } = "";
+        public string Data { get; set; } = "";
+        public bool Verbose { get; set; } = false;
+        public bool ShowHelp { get; set; } = false;
+    }
+
+    /// <summary>
     /// Command-line sample application to demonstrate the use of the {Open} APIs. 
     /// This can be used both for command-line invocation or as a reference on how to leverage the 
     /// APIs. All supported commands are implemented in this sample for convenience.
     /// </summary>
-    class EdgeGridConsole
+    public class EdgeGridConsole
     {
         static void Main(string[] args)
         {
-            string edgeRCFile = "";
-            string section = "";
-            string ask = "";
-            string path = "";
-            List<string> headers = [];
-            string method = "GET";
-            string contentType = "application/json";
+            var options = ParseArguments(args);
 
+            if (options.ShowHelp)
+            {
+                Help();
+                return;
+            }
 
-            string outputfile = "";
-            string uploadfile = "";
-            string data = "";
+            if (options.Verbose)
+            {
+                Console.WriteLine("{0} {1}", options.Method, options.Path);
+                Console.WriteLine("EdgeRCFile: {0}", options.EdgeRCFile);
+                Console.WriteLine("Section: {0}", options.Section);
+                if (options.Data != null)
+                    Console.WriteLine("Data: [{0}]", options.Data);
+                if (options.UploadFile != null)
+                    Console.WriteLine("UploadFile: {0}", options.UploadFile);
+                if (options.OutputFile != null)
+                    Console.WriteLine("OutputFile: {0}", options.OutputFile);
+                foreach (string header in options.Headers)
+                    Console.WriteLine("{0}", header);
+                Console.WriteLine("Content-Type: {0}", options.ContentType);
+            }
 
-            bool verbose = false;
+            Execute(options);
+        }
 
+        /// <summary>
+        /// Parse command-line arguments into CommandLineOptions
+        /// </summary>
+        public static CommandLineOptions ParseArguments(string[] args)
+        {
+            var options = new CommandLineOptions();
             string? firstarg = null;
+
             foreach (string arg in args)
             {
                 if (firstarg != null)
@@ -43,114 +81,105 @@ namespace Akamai.EdgeGrid
                     switch (firstarg)
                     {
                         case "-p":
-                            path = arg;
+                            options.Path = arg;
                             break;
                         case "-e":
-                            edgeRCFile = arg;
+                            options.EdgeRCFile = arg;
                             break;
                         case "-s":
-                            section = arg;
+                            options.Section = arg;
                             break;
                         case "-a":
-                            ask = arg;
+                            options.AccountSwitchKey = arg;
                             break;
                         case "-d":
-                            if (method == "GET")
-                                method = "POST";
-                            data = arg;
+                            if (options.Method == "GET")
+                                options.Method = "POST";
+                            options.Data = arg;
                             break;
                         case "-f":
-                            if (method == "GET")
-                                method = "PUT";
-                            uploadfile = arg;
+                            if (options.Method == "GET")
+                                options.Method = "PUT";
+                            options.UploadFile = arg;
                             break;
                         case "-H":
-                            headers.Add(arg);
+                            options.Headers.Add(arg);
                             break;
                         case "-o":
-                            outputfile = arg;
+                            options.OutputFile = arg;
                             break;
                         case "-T":
-                            contentType = arg;
+                            options.ContentType = arg;
                             break;
                         case "-X":
-                            method = arg;
+                            options.Method = arg;
                             break;
-
                     }
                     firstarg = null;
                 }
                 else if (arg == "-h" || arg == "--help" || arg == "/?")
                 {
-                    Help();
-                    return;
+                    options.ShowHelp = true;
+                    return options;
                 }
                 else if (arg == "-v" || arg == "-vv")
-                    verbose = true;
+                    options.Verbose = true;
                 else if (!arg.StartsWith("-"))
-                    path = arg;
+                    options.Path = arg;
                 else
                     firstarg = arg;
             }
 
-            if (verbose)
-            {
-                Console.WriteLine("{0} {1}", method, path);
-                Console.WriteLine("EdgeRCFile: {0}", edgeRCFile);
-                Console.WriteLine("Section: {0}", section);
-                if (data != null)
-                    Console.WriteLine("Data: [{0}]", data);
-                if (uploadfile != null)
-                    Console.WriteLine("UploadFile: {0}", uploadfile);
-                if (outputfile != null)
-                    Console.WriteLine("OutputFile: {0}", outputfile);
-                foreach (string header in headers)
-                    Console.WriteLine("{0}", header);
-                Console.WriteLine("Content-Type: {0}", contentType);
-            }
-
-            Execute(method: method, path: path, headers: headers, edgeRCFile: edgeRCFile, section: section, accountSwitchKey: ask, data: data, uploadfile: uploadfile, outputfile: outputfile, contentType: contentType, verbose: verbose);
+            return options;
         }
 
-        static void Execute(string method, string path, List<string> headers, string edgeRCFile, string section, string accountSwitchKey, string? data, string? uploadfile, string? outputfile, string contentType, bool verbose = false)
+        /// <summary>
+        /// Add account switch key to path if provided
+        /// </summary>
+        public static string AddAccountSwitchKeyToPath(string path, string accountSwitchKey)
         {
-            if (path == null)
+            if (string.IsNullOrEmpty(accountSwitchKey))
+                return path;
+
+            if (path.Contains("?"))
+            {
+                return path + "&accountSwitchKey=" + accountSwitchKey;
+            }
+            else
+            {
+                return path + "?accountSwitchKey=" + accountSwitchKey;
+            }
+        }
+
+        static void Execute(CommandLineOptions options)
+        {
+            if (string.IsNullOrEmpty(options.Path))
             {
                 Help();
                 return;
             }
 
-            EdgeGridCredentials credentials = new(edgeRCFile, section);
+            EdgeGridCredentials credentials = new(options.EdgeRCFile, options.Section);
 
             // Add an account switch key to a path if provided
-            if (!string.IsNullOrEmpty(accountSwitchKey))
-            {
-                if (path.Contains("?"))
-                {
-                    path += "&accountSwitchKey=" + accountSwitchKey;
-                }
-                else
-                {
-                    path += "?accountSwitchKey=" + accountSwitchKey;
-                }
-            }
+            string path = AddAccountSwitchKeyToPath(options.Path, options.AccountSwitchKey);
 
             var uri = new Uri($"https://{credentials.Host}{path}");
-            var request = new HttpRequestMessage(new HttpMethod(method), uri);
+            var request = new HttpRequestMessage(new HttpMethod(options.Method), uri);
 
-            if (uploadfile != null && uploadfile != "")
+            if (options.UploadFile != null && options.UploadFile != "")
             {
-                FileStream stream = File.OpenRead(uploadfile);
+                FileStream stream = File.OpenRead(options.UploadFile);
                 request.Content = new StreamContent(stream);
             }
 
-            else if (data != null && data != "")
+            else if (options.Data != null && options.Data != "")
             {
-                HttpContent content = new StringContent(data, Encoding.UTF8, "application/json");
+                HttpContent content = new StringContent(options.Data, Encoding.UTF8, "application/json");
                 request.Content = content;
             }
 
-            foreach (string header in headers)
+            foreach (string header in options.Headers)
             {
                 var components = header.Split(':', 2);
                 request.Headers.Add(components[0], components[1]);
