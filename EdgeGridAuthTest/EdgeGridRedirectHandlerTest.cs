@@ -171,7 +171,7 @@ namespace Akamai.EdgeGrid.AuthTest
             var credentials = GetTestCredentials();
             
             // Create an HttpClient using the factory method
-            using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
+            using var client = EdgeGridSigner.CreateHttpClient(credentials);
             
             // Verify that the client was created successfully
             Assert.IsNotNull(client);

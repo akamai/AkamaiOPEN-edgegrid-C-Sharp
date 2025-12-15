@@ -13,7 +13,7 @@ using System.Net.Http;
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 
 // Create an HttpClient with automatic signing and redirect handling
-using var client = EdgeGridV2Signer.CreateHttpClient(credentials);
+using var client = EdgeGridSigner.CreateHttpClient(credentials);
 
 var request = new HttpRequestMessage(HttpMethod.Get, 
     $"https://{credentials.Host}/api/endpoint");
@@ -33,7 +33,7 @@ using Akamai.EdgeGrid.Auth;
 using System.Net.Http;
 
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
-var signer = new EdgeGridV2Signer();
+var signer = new EdgeGridSigner();
 
 using var client = new HttpClient();
 var request = new HttpRequestMessage(HttpMethod.Get, 
@@ -80,7 +80,7 @@ var response = await client.SendAsync(request);
 var credentials = new EdgeGridCredentials("~/.edgerc", "default");
 
 // Method 1: Using the factory method with default configuration
-using var client = EdgeGridV2Signer.CreateHttpClient(credentials, maxRedirects: 5);
+using var client = EdgeGridSigner.CreateHttpClient(credentials, maxRedirects: 5);
 
 // Method 2: Custom base handler for advanced scenarios
 var baseHandler = new HttpClientHandler

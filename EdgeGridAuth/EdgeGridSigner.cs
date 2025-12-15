@@ -176,42 +176,6 @@ namespace Akamai.EdgeGrid.Auth
             return string.Join("\t", canonicalized);
         }
 
-        /// <summary>
-        /// Adds Akamai CLI version headers to User-Agent if environment variables are set
-        /// </summary>
-        internal void AddVersionHeaders(HttpRequestMessage request)
-        {
-            var versionBuilder = new StringBuilder();
-
-            var akamaiCli = Environment.GetEnvironmentVariable("AKAMAI_CLI");
-            var akamaiCliVersion = Environment.GetEnvironmentVariable("AKAMAI_CLI_VERSION");
-            if (!string.IsNullOrEmpty(akamaiCli) && !string.IsNullOrEmpty(akamaiCliVersion))
-            {
-                versionBuilder.Append(" AkamaiCLI/").Append(akamaiCliVersion);
-            }
-
-            var akamaiCliCommand = Environment.GetEnvironmentVariable("AKAMAI_CLI_COMMAND");
-            var akamaiCliCommandVersion = Environment.GetEnvironmentVariable("AKAMAI_CLI_COMMAND_VERSION");
-            if (!string.IsNullOrEmpty(akamaiCliCommand) && !string.IsNullOrEmpty(akamaiCliCommandVersion))
-            {
-                versionBuilder.Append(" AkamaiCLI-").Append(akamaiCliCommand).Append('/').Append(akamaiCliCommandVersion);
-            }
-
-            if (versionBuilder.Length > 0)
-            {
-                string versionHeader = versionBuilder.ToString();
-                if (request.Headers.UserAgent.Count == 0)
-                {
-                    request.Headers.TryAddWithoutValidation("User-Agent", versionHeader.Trim());
-                }
-                else
-                {
-                    var currentUserAgent = string.Join(" ", request.Headers.UserAgent);
-                    request.Headers.Remove("User-Agent");
-                    request.Headers.TryAddWithoutValidation("User-Agent", currentUserAgent + versionHeader);
-                }
-            }
-        }
 
         /// <summary>
         /// Creates a hash of of a byte array using HMACSHA256 and returns it as a base64 string. HMAC is created using the provided secret if present.
@@ -274,9 +238,6 @@ namespace Akamai.EdgeGrid.Auth
             {
                 throw new ArgumentNullException(nameof(request.RequestUri), "Request URI cannot be null.");
             }
-
-            // Add version headers
-            AddVersionHeaders(request);
 
             byte[] requestBodyByteArray;
             if (request.Content == null)

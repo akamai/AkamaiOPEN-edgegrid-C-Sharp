@@ -289,32 +289,6 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        public void Test_UserAgentVersionHeaders()
-        {
-            // Test that Akamai CLI version headers are added
-            Environment.SetEnvironmentVariable("AKAMAI_CLI", "test");
-            Environment.SetEnvironmentVariable("AKAMAI_CLI_VERSION", "1.0.0");
-
-            try
-            {
-                var signer = new EdgeGridSigner();
-                var credential = GetTestCredentials();
-                var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/");
-
-                var signedRequest = signer.Sign(request, credential);
-
-                Assert.IsNotNull(signedRequest);
-                var userAgent = signedRequest.Headers.UserAgent.ToString();
-                Assert.IsTrue(userAgent.Contains("AkamaiCLI/1.0.0"));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("AKAMAI_CLI", null);
-                Environment.SetEnvironmentVariable("AKAMAI_CLI_VERSION", null);
-            }
-        }
-
-        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void Test_HeaderCanonicalization_LeadingWhitespace()
         {
