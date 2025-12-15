@@ -34,7 +34,7 @@ echo ""
 
 # Step 1: Verify tests pass
 echo "Step 1: Running tests..."
-if ! dotnet test "$PROJECT_ROOT" --configuration Release -q; then
+if ! dotnet test "$PROJECT_ROOT" --configuration Release; then
     echo "Error: Tests failed. Aborting release preparation."
     exit 1
 fi
@@ -49,26 +49,29 @@ rm -f "$csproj_file.bak"
 echo "✓ Version updated to $VERSION"
 echo ""
 
-# Step 3: Clean previous builds
-echo "Step 3: Cleaning previous builds..."
+# Step 3: Clean all build artifacts (after version update)
+echo "Step 3: Cleaning all build artifacts..."
 rm -rf "$PROJECT_ROOT/EdgeGridAuth/bin" "$PROJECT_ROOT/EdgeGridAuth/obj"
+rm -rf "$PROJECT_ROOT/EdgeGridAuthTest/bin" "$PROJECT_ROOT/EdgeGridAuthTest/obj"
+rm -rf "$PROJECT_ROOT/EdgeGridConsole/bin" "$PROJECT_ROOT/EdgeGridConsole/obj"
+rm -rf "$PROJECT_ROOT/EdgeGridConsoleTest/bin" "$PROJECT_ROOT/EdgeGridConsoleTest/obj"
 echo "✓ Cleaned"
 echo ""
 
-# Step 4: Build Release
-echo "Step 4: Building in Release mode..."
-if ! dotnet build "$PROJECT_ROOT" -c Release -q; then
-    echo "Error: Build failed. Aborting release preparation."
+# Step 4: Build and test in Release mode
+echo "Step 4: Building and testing in Release mode..."
+if ! dotnet test "$PROJECT_ROOT" --configuration Release; then
+    echo "Error: Build or tests failed. Aborting release preparation."
     exit 1
 fi
-echo "✓ Release build complete"
+echo "✓ Build and tests passed"
 echo ""
 
 # Step 5: Create NuGet package
 echo "Step 5: Creating NuGet package..."
 mkdir -p "$PACKAGE_DIR"
 rm -f "$PACKAGE_DIR"/*.nupkg
-if ! dotnet pack "$PROJECT_ROOT/EdgeGridAuth" -c Release -o "$PACKAGE_DIR" -q; then
+if ! dotnet pack "$PROJECT_ROOT/EdgeGridAuth" -c Release -o "$PACKAGE_DIR"; then
     echo "Error: Package creation failed. Aborting release preparation."
     exit 1
 fi
