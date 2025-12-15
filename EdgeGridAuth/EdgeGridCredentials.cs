@@ -182,28 +182,34 @@ namespace Akamai.EdgeGrid.Auth
                         switch (key.ToLowerInvariant())
                         {
                             case "host":
-                                this.Host = value;
+                                if (string.IsNullOrEmpty(this.Host))
+                                    this.Host = value;
                                 break;
                             case "client_token":
-                                this.ClientToken = value;
+                                if (string.IsNullOrEmpty(this.ClientToken))
+                                    this.ClientToken = value;
                                 break;
                             case "client_secret":
-                                this.ClientSecret = value;
+                                if (string.IsNullOrEmpty(this.ClientSecret))
+                                    this.ClientSecret = value;
                                 break;
                             case "access_token":
-                                this.AccessToken = value;
+                                if (string.IsNullOrEmpty(this.AccessToken))
+                                    this.AccessToken = value;
                                 break;
                             case "headers_to_sign":
-                                this.HeadersToSign = value.Split(',').Select(h => h.Trim().ToLower()).ToList();
+                                if (this.HeadersToSign == null || this.HeadersToSign.Count == 0)
+                                    this.HeadersToSign = value.Split(',').Select(h => h.Trim().ToLower()).ToList();
                                 break;
                             case "max_body":
-                                if (int.TryParse(value, out int maxBodyValue))
+                                if (this.MaxBody == DefaultMaxBody && int.TryParse(value, out int maxBodyValue))
                                 {
                                     this.MaxBody = maxBodyValue;
                                 }
                                 break;
                             case "account_key":
-                                this.AccountKey = value;
+                                if (string.IsNullOrEmpty(this.AccountKey))
+                                    this.AccountKey = value;
                                 break;
                         }
                     }
