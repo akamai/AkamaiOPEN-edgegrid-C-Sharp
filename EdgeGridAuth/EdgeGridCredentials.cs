@@ -70,10 +70,19 @@ namespace Akamai.EdgeGrid.Auth
         public EdgeGridCredentials(string host, string clientToken, string clientSecret, string accessToken,
             List<string>? headersToSign = null, int maxBody = DefaultMaxBody, string? accountKey = null)
         {
-            Host = host ?? throw new ArgumentNullException(nameof(host));
-            ClientToken = clientToken ?? throw new ArgumentNullException(nameof(clientToken));
-            ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
-            AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+            if (string.IsNullOrWhiteSpace(host))
+                throw new ArgumentException("Host cannot be null, empty, or whitespace", nameof(host));
+            if (string.IsNullOrWhiteSpace(clientToken))
+                throw new ArgumentException("Client token cannot be null, empty, or whitespace", nameof(clientToken));
+            if (string.IsNullOrWhiteSpace(clientSecret))
+                throw new ArgumentException("Client secret cannot be null, empty, or whitespace", nameof(clientSecret));
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new ArgumentException("Access token cannot be null, empty, or whitespace", nameof(accessToken));
+            
+            Host = host;
+            ClientToken = clientToken;
+            ClientSecret = clientSecret;
+            AccessToken = accessToken;
             HeadersToSign = headersToSign?.Select(h => h.ToLower()).ToList() ?? new List<string>();
             MaxBody = maxBody;
             AccountKey = accountKey;
@@ -158,7 +167,7 @@ namespace Akamai.EdgeGrid.Auth
             }
         }
 
-        internal void GetCredentialsFromEdgeRCFile(string edgeRCFile, string? section = "default")
+        internal void GetCredentialsFromEdgeRCFile(string edgeRCFile, string section)
         {
             string ExpandedEdgeRCFile = ExpandUserPath(edgeRCFile);
             string EdgeRCContents = File.ReadAllText(ExpandedEdgeRCFile);
@@ -177,6 +186,10 @@ namespace Akamai.EdgeGrid.Auth
                             break;
                         }
                         var keyValue = lines[j].Split('=', 2);
+                        if (keyValue.Length < 2)
+                        {
+                            throw new ArgumentException($"key-value delimiter not found: {lines[j].Trim()}");
+                        }
                         var key = keyValue[0].Trim();
                         var value = keyValue[1].Trim();
                         switch (key.ToLowerInvariant())

@@ -4,7 +4,7 @@
 
 Three new files have been created to facilitate the release and publishing process:
 
-### 1. **prepare-release.sh** (Executable Script)
+### 1. **prepare-release.sh** (executable script)
 
 An automated script that prepares the library for release:
 
@@ -27,7 +27,7 @@ An automated script that prepares the library for release:
 ./prepare-release.sh 1.0.0-beta
 ```
 
-**Location:** `/Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp/prepare-release.sh`
+**Location:** `<project-root-directory>/prepare-release.sh`
 
 ---
 
@@ -50,7 +50,7 @@ An automated script that publishes the package to NuGet.org:
 ./publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_API_KEY
 ```
 
-**Location:** `/Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp/publish-nuget.sh`
+**Location:** `<project-root-directory>/publish-nuget.sh`
 
 ---
 
@@ -70,7 +70,7 @@ Comprehensive guide for the entire release process:
 - Troubleshooting guide
 - Post-release checklist
 
-**Location:** `/Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp/RELEASE.md`
+**Location:** `<project-root-directory>/RELEASE.md`
 
 ---
 
@@ -79,13 +79,13 @@ Comprehensive guide for the entire release process:
 ### For preparation:
 
 ```bash
-cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
+cd <project-root-directory>
 bash prepare-release.sh 1.0.0
 ```
 
 ### For publishing:
 ```bash
-cd /Users/miwojci/dev/AkamaiOPEN-edgegrid-C-Sharp
+cd <project-root-directory>
 bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_NUGET_API_KEY
 ```
 
@@ -154,7 +154,7 @@ bash publish-nuget.sh nupkg/Akamai.EdgeGrid.Auth.1.0.0.nupkg YOUR_NUGET_API_KEY
                │
                ▼
 ┌─────────────────────────────────────────┐
-│ Git tagging (pptional)                  │
+│ Git tagging                             │
 │ git tag -a v<version> -m "..."          │
 │ git push origin v<version>              │
 └──────────────┬──────────────────────────┘

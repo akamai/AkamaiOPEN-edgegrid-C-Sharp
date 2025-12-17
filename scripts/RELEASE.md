@@ -250,7 +250,7 @@ Examples:
 - `1.0.0` – Initial release
 - `1.1.0` – New features added
 - `1.1.1` – Bug fixes
-- `1.0.0` – Initial release
+- `2.0.0` – New breaking changes release
 
 ## Package signing (recommended)
 
@@ -347,5 +347,5 @@ After successfully publishing:
 - [NuGet documentation](https://docs.microsoft.com/nuget/)
 - [Semantic versioning](https://semver.org/)
 - [GitHub Releases](https://help.github.com/articles/creating-releases/)
-- [Akamai EdgeGrid Auth – README](./README.md)
-- [Changelog](./CHANGELOG.md)
+- [Akamai EdgeGrid Auth – README](../README.md)
+- [Changelog](../CHANGELOG.md)

@@ -27,7 +27,7 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void Test_Constructor_NullHost()
         {
             var credentials = new EdgeGridCredentials(
@@ -39,7 +39,7 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void Test_Constructor_NullClientToken()
         {
             var credentials = new EdgeGridCredentials(
@@ -51,7 +51,7 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void Test_Constructor_NullClientSecret()
         {
             var credentials = new EdgeGridCredentials(
@@ -63,7 +63,7 @@ namespace Akamai.EdgeGrid.AuthTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void Test_Constructor_NullAccessToken()
         {
             var credentials = new EdgeGridCredentials(
@@ -71,6 +71,66 @@ namespace Akamai.EdgeGrid.AuthTest
                 clientToken: "test-client-token",
                 clientSecret: "test-secret",
                 accessToken: null!
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Constructor_EmptyHost()
+        {
+            var credentials = new EdgeGridCredentials(
+                host: "",
+                clientToken: "test-client-token",
+                clientSecret: "test-secret",
+                accessToken: "test-access-token"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Constructor_WhitespaceHost()
+        {
+            var credentials = new EdgeGridCredentials(
+                host: "   ",
+                clientToken: "test-client-token",
+                clientSecret: "test-secret",
+                accessToken: "test-access-token"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Constructor_EmptyClientToken()
+        {
+            var credentials = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: "",
+                clientSecret: "test-secret",
+                accessToken: "test-access-token"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Constructor_EmptyClientSecret()
+        {
+            var credentials = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: "test-client-token",
+                clientSecret: "",
+                accessToken: "test-access-token"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Constructor_EmptyAccessToken()
+        {
+            var credentials = new EdgeGridCredentials(
+                host: "test.example.com",
+                clientToken: "test-client-token",
+                clientSecret: "test-secret",
+                accessToken: ""
             );
         }
 
@@ -723,12 +783,12 @@ account_key = file-account-key
 
             try
             {
-                // Create credentials with some values set, others empty
+                // Create credentials with some values set, others that will be overridden
                 var credentials = new EdgeGridCredentials(
                     host: "pre-set-host.example.com",
                     clientToken: "pre-set-token",
-                    clientSecret: "",  // Empty - should be filled from file
-                    accessToken: ""    // Empty - should be filled from file
+                    clientSecret: "temp-secret",  // Will be overridden by file if empty in constructor
+                    accessToken: "temp-access"    // Will be overridden by file if empty in constructor
                 );
 
                 // Call GetCredentialsFromEdgeRCFile using reflection
@@ -740,13 +800,50 @@ account_key = file-account-key
                 // Verify that pre-set values were preserved
                 Assert.AreEqual("pre-set-host.example.com", credentials.Host);
                 Assert.AreEqual("pre-set-token", credentials.ClientToken);
-                // Empty values should be filled from file
-                Assert.AreEqual("file-secret", credentials.ClientSecret);
-                Assert.AreEqual("file-access-token", credentials.AccessToken);
+                // Non-empty values should NOT be overridden by file
+                Assert.AreEqual("temp-secret", credentials.ClientSecret);
+                Assert.AreEqual("temp-access", credentials.AccessToken);
                 // Default max_body should be overridden by file
                 Assert.AreEqual(65536, credentials.MaxBody);
                 // Empty account key should be filled from file
                 Assert.AreEqual("file-account-key", credentials.AccountKey);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_EdgeRCFile_MissingEqualsSign()
+        {
+            // Create a temporary .edgerc file with a line missing the = delimiter
+            string tempFile = Path.GetTempFileName();
+            string edgercContent = @"[default]
+host = test.example.com
+client_token = test-token
+noequalsign
+client_secret = test-secret
+access_token = test-access
+";
+            File.WriteAllText(tempFile, edgercContent);
+
+            try
+            {
+                // This should throw ArgumentException with message about missing delimiter
+                var credentials = new EdgeGridCredentials(
+                    edgeRCFile: tempFile,
+                    section: "default"
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.IsTrue(ex.Message.Contains("key-value delimiter not found"),
+                    $"Expected error message about delimiter, got: {ex.Message}");
+                Assert.IsTrue(ex.Message.Contains("noequalsign"),
+                    $"Expected error message to contain the problematic line, got: {ex.Message}");
+                throw;
             }
             finally
             {

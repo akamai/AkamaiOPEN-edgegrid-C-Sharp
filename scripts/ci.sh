@@ -52,17 +52,8 @@ echo "  Detailed Output: $([ "$DETAILED_OUTPUT" = true ] && echo 'Enabled' || ec
 echo "  Project Root: $PROJECT_ROOT"
 echo ""
 
-# Step 1: Restore dependencies
-echo -e "${BLUE}Step 1: Restoring NuGet dependencies...${NC}"
-if ! dotnet restore "$PROJECT_ROOT" -q; then
-    echo -e "${RED}✗ Failed to restore dependencies${NC}"
-    exit 1
-fi
-echo -e "${GREEN}✓ Dependencies restored${NC}"
-echo ""
-
-# Step 2: Clean previous builds
-echo -e "${BLUE}Step 2: Cleaning previous builds...${NC}"
+# Step 1: Clean previous builds
+echo -e "${BLUE}Step 1: Cleaning previous builds...${NC}"
 rm -rf "$PROJECT_ROOT/EdgeGridAuth/bin" "$PROJECT_ROOT/EdgeGridAuth/obj"
 rm -rf "$PROJECT_ROOT/EdgeGridAuthTest/bin" "$PROJECT_ROOT/EdgeGridAuthTest/obj"
 rm -rf "$PROJECT_ROOT/EdgeGridConsoleTest/bin" "$PROJECT_ROOT/EdgeGridConsoleTest/obj"
@@ -71,8 +62,8 @@ mkdir -p "$COVERAGE_DIR" "$TEST_RESULTS_DIR"
 echo -e "${GREEN}✓ Cleaned${NC}"
 echo ""
 
-# Step 3: Format check with dotnet format (linter)
-echo -e "${BLUE}Step 3: Checking code formatting...${NC}"
+# Step 2: Format check with dotnet format (linter)
+echo -e "${BLUE}Step 2: Checking code formatting...${NC}"
 if ! dotnet format "$PROJECT_ROOT" --verify-no-changes --include "$MAIN_PROJECT" 2>/dev/null; then
     echo -e "${YELLOW}⚠ Code formatting issues detected. Run 'dotnet format' to fix.${NC}"
 else
@@ -80,12 +71,17 @@ else
 fi
 echo ""
 
-# Step 4: Build projects
-echo -e "${BLUE}Step 4: Building projects...${NC}"
-if ! dotnet restore "$MAIN_PROJECT"; then
-    echo -e "${RED}✗ Failed to restore project dependencies${NC}"
+# Step 3: Restore dependencies
+echo -e "${BLUE}Step 3: Restoring NuGet dependencies...${NC}"
+if ! dotnet restore "$PROJECT_ROOT" -q; then
+    echo -e "${RED}✗ Failed to restore dependencies${NC}"
     exit 1
 fi
+echo -e "${GREEN}✓ Dependencies restored${NC}"
+echo ""
+
+# Step 4: Build projects
+echo -e "${BLUE}Step 4: Building projects...${NC}"
 if ! dotnet build "$MAIN_PROJECT" -c Release; then
     echo -e "${RED}✗ Build failed${NC}"
     exit 1

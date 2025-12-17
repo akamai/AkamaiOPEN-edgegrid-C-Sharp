@@ -4,7 +4,7 @@ The EdgeGrid library supports automatic redirect handling with request resigning
 
 ## Quick start (recommended)
 
-### Automatic signing and redirect handling
+### Automatic signing and redirect handling (recommended)
 
 ```csharp
 using Akamai.EdgeGrid.Auth;
@@ -127,7 +127,7 @@ The `EdgeGridRedirectHandler` is a `DelegatingHandler` that:
 
 ## Error handling
 
-### Maximum redirects eceeded
+### Maximum redirects exceeded
 
 ```csharp
 try
