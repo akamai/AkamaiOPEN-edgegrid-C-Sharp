@@ -1,10 +1,6 @@
 # Release notes
 
-All notable changes to this project will be documented in this file.
-
-## Unreleased
-
-## 1.0.0 (Dec 22, 2025)
+## 1.0.0 (Jan XX, 2026)
 
 ### Breaking changes
 

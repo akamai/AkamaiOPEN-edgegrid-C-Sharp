@@ -95,7 +95,7 @@ echo ""
 
 if [[ ! $CONFIRM =~ ^[Yy][Ee][Ss]$ ]]; then
     echo "Publishing cancelled."
-    exit 0
+    exit 1
 fi
 
 # Step 3: Check if package with this version already exists
