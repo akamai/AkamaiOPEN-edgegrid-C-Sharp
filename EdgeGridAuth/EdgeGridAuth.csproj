@@ -10,7 +10,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>Akamai.EdgeGrid.Auth</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-preview</Version>
     <Title>Akamai EdgeGrid Authentication Library</Title>
     <Authors>Akamai Technologies</Authors>
     <Description>Official Akamai EdgeGrid authentication library for .NET 8.0. Provides signing and authentication for Akamai APIs with automatic redirect handling and environment variable credential support.</Description>
