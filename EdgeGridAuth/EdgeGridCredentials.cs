@@ -114,21 +114,24 @@ namespace Akamai.EdgeGrid.Auth
             }
 
             // Read from environment variables first, then fall back to file if needed
-            if (edgeRCFile == null)
-            {
-                GetCredentialsFromEnvironment(Section);
+            GetCredentialsFromEnvironment(Section);
 
-                if (string.IsNullOrEmpty(Host) || string.IsNullOrEmpty(ClientToken) || 
-                    string.IsNullOrEmpty(ClientSecret) || string.IsNullOrEmpty(AccessToken))
+            if (string.IsNullOrEmpty(Host) || string.IsNullOrEmpty(ClientToken) || 
+                string.IsNullOrEmpty(ClientSecret) || string.IsNullOrEmpty(AccessToken))
+            {
+                // If any of the necessary elements are missing, try to read from the edgerc file
+                // This is useful for local development where environment variables may not be set
+                try
                 {
-                    // If any of the necessary elements are missing, try to read from the edgerc file
-                    // This is useful for local development where environment variables may not be set
                     GetCredentialsFromEdgeRCFile(EdgeRCFile, Section);
                 }
-            }
-            else
-            {
-                GetCredentialsFromEdgeRCFile(EdgeRCFile, Section);
+                catch (FileNotFoundException ex)
+                {
+                    // Re-throw with context about which file was missing and why
+                    throw new InvalidOperationException(
+                        $"Attempted to read from EdgeRC file '{EdgeRCFile}' but file was not found. " +
+                        ex);
+                }
             }
 
             if (string.IsNullOrEmpty(Host) || string.IsNullOrEmpty(ClientToken) || 

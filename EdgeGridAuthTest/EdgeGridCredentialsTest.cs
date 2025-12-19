@@ -691,18 +691,16 @@ account_key = file-account-key
                 Environment.SetEnvironmentVariable("AKAMAI_MAX_BODY", "98304"); // Set custom max_body
                 Environment.SetEnvironmentVariable("AKAMAI_ACCOUNT_KEY", null);
 
-                // Pass null to trigger environment read first, then use our temp file path
-                // Since some env vars are missing, it will read from the file to fill them in
-                var credentials = new EdgeGridCredentials(null, "default");
+                // Pass tempFile path to control which file is read
+                // Since some env vars are missing, it will read from the temp file to fill them in
+                var credentials = new EdgeGridCredentials(tempFile, "default");
 
                 // Environment values should be used where set
                 Assert.AreEqual("env-host.example.com", credentials.Host);
                 Assert.AreEqual("env-client-token", credentials.ClientToken);
-                // Since edgeRCFile=null and env vars are incomplete, it reads from ~/.edgerc
-                // which may exist on the system, so we can't assert file values here
-                // Instead, let's verify that HOST and CLIENT_TOKEN from env were preserved
-                Assert.IsNotNull(credentials.ClientSecret);
-                Assert.IsNotNull(credentials.AccessToken);
+                // File values should be used where env vars were not set
+                Assert.AreEqual("file-secret", credentials.ClientSecret);
+                Assert.AreEqual("file-access-token", credentials.AccessToken);
                 // Env max_body should be used
                 Assert.AreEqual(98304, credentials.MaxBody);
             }
