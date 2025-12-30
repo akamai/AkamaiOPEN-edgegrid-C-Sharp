@@ -186,7 +186,7 @@ if [ -n "$TEST_RESULT_FILES" ]; then
     # Create basic JUnit XML
     cat > "$JUNIT_FILE" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="$TOTAL" failures="$FAILED" errors="0" skipped="$SKIPPED">
+<testsuites tests="$TOTAL" failures="$FAILED" errors="0">
   <testsuite name="Akamai.EdgeGrid.Tests" tests="$TOTAL" failures="$FAILED" errors="0" skipped="$SKIPPED" timestamp="$(date -u +"%Y-%m-%dT%H:%M:%S")">
 EOF
     
