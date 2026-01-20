@@ -1,6 +1,6 @@
 # Release notes
 
-## 1.0.0 (Jan XX, 2026)
+## 1.0.0-preview (Jan 21, 2026)
 
 ### Breaking changes
 
