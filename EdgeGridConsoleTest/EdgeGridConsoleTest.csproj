@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Akamai.EdgeGrid.AuthTest</RootNamespace>
-    <AssemblyName>Akamai.EdgeGrid.AuthTest</AssemblyName>
+    <RootNamespace>Akamai.EdgeGrid.ConsoleTest</RootNamespace>
+    <AssemblyName>Akamai.EdgeGrid.ConsoleTest</AssemblyName>
     <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -23,16 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EdgeGridConsole\EdgeGridConsole.csproj" />
     <ProjectReference Include="..\EdgeGridAuth\EdgeGridAuth.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="sample_edgerc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="testdata.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
