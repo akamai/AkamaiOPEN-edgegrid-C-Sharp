@@ -1,5 +1,17 @@
 # Release notes
 
+## 1.0.0 (Nov 25, 2026)
+
+### Breaking changes
+
+* Supports .NET `10.0` and .NET `11.0` only; .NET `8.0` and .NET `9.0` are no longer supported.
+
+### Improvements
+
+* Removed the preview version suffix for the stable release.
+* Updated package copyright metadata to 2026.
+* Updated CI to test the same library assembly on both supported frameworks. Local tests target .NET 10 with SDK 10 and both .NET 10 and .NET 11 with SDK 11.
+
 ## 1.0.0-preview (Jan 21, 2026)
 
 ### Breaking changes

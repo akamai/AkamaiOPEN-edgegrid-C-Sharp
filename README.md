@@ -16,7 +16,16 @@ You can find all Akamai APIs on [TechDocs](https://techdocs.akamai.com/home/page
 
 ## Install
 
-Run `dotnet build` and then `dotnet test` in the root directory.
+Version `1.0.0` supports .NET 10 and .NET 11 only. .NET 8 and .NET 9 are no longer supported.
+
+Install the .NET 10 or .NET 11 SDK, then run `dotnet build` and `dotnet test` in the root directory.
+The library and console target `net10.0`, so either SDK can build them and .NET 11 applications can use the same library assembly.
+The sample console prefers the .NET 10 runtime when installed and can roll forward to .NET 11 or a later major runtime when .NET 10 is unavailable.
+
+With the .NET 10 SDK, tests run on .NET 10. With the .NET 11 SDK and .NET 10 runtime installed, tests automatically run on both .NET 10 and .NET 11 against the same `net10.0` library assembly. 
+To run tests for just one runtime, use `dotnet test --framework net10.0` or, with SDK 11, `dotnet test --framework net11.0`.
+
+To create the NuGet package containing the assembly compatible with both versions, run `dotnet pack EdgeGridAuth/EdgeGridAuth.csproj --configuration Release`.
 
 ## Authentication
 

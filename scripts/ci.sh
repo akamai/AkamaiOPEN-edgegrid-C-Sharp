@@ -9,6 +9,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 MAIN_PROJECT="$PROJECT_ROOT/EdgeGridAuth"
+TEST_PROJECTS=("$PROJECT_ROOT/EdgeGridAuthTest" "$PROJECT_ROOT/EdgeGridConsoleTest")
 REPORTS_DIR="$PROJECT_ROOT/reports"
 COVERAGE_DIR="$REPORTS_DIR/coverage"
 TEST_RESULTS_DIR="$REPORTS_DIR/test-results"
@@ -107,16 +108,20 @@ echo -e "${BLUE}Step 6: Running unit tests...${NC}"
 
 if [ "$COVERAGE_ENABLED" = true ]; then
     echo "  (with code coverage collection)"
-    if ! dotnet test "$PROJECT_ROOT" \
-        --configuration Release \
-        --results-directory "$TEST_RESULTS_DIR" \
-        --logger "trx" \
-        /p:CollectCoverage=true \
-        /p:CoverletOutputFormat=cobertura \
-        /p:CoverletOutput="$COVERAGE_DIR/"; then
-        echo -e "${RED}✗ Tests failed${NC}"
-        exit 1
-    fi
+    for TEST_PROJECT in "${TEST_PROJECTS[@]}"; do
+        PROJECT_COVERAGE_DIR="$COVERAGE_DIR/$(basename "$TEST_PROJECT")"
+        mkdir -p "$PROJECT_COVERAGE_DIR"
+        if ! dotnet test "$TEST_PROJECT" \
+            --configuration Release \
+            --results-directory "$TEST_RESULTS_DIR" \
+            --logger "trx" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput="$PROJECT_COVERAGE_DIR/"; then
+            echo -e "${RED}✗ Tests failed for $(basename "$TEST_PROJECT")${NC}"
+            exit 1
+        fi
+    done
 else
     if ! dotnet test "$PROJECT_ROOT" \
         --verbosity detailed \
@@ -226,15 +231,30 @@ echo ""
 if [ "$COVERAGE_ENABLED" = true ]; then
     echo -e "${BLUE}Step 7: Analyzing code coverage...${NC}"
     
-    COVERAGE_FILE="$COVERAGE_DIR/coverage.cobertura.xml"
-    
-    if [ -f "$COVERAGE_FILE" ]; then
-        echo -e "${GREEN}✓ Coverage report generated${NC}"
-        echo "  File: $COVERAGE_FILE"
-    else
-        echo -e "${YELLOW}⚠ Coverage files not found (this is expected on M1/M2 Macs with certain SDK versions)${NC}"
-        echo "  Note: Tests were executed. To generate coverage reports, see CI.md"
-    fi
+    COVERAGE_REPORT_COUNT=0
+    for TEST_PROJECT in "${TEST_PROJECTS[@]}"; do
+        TEST_PROJECT_NAME="$(basename "$TEST_PROJECT")"
+        if ! TARGET_FRAMEWORKS=$(dotnet msbuild "$TEST_PROJECT/$TEST_PROJECT_NAME.csproj" \
+            -nologo -property:Configuration=Release -getProperty:TargetFrameworks); then
+            echo -e "${RED}✗ Failed to read target frameworks for $TEST_PROJECT_NAME${NC}"
+            exit 1
+        fi
+        if [ -z "$TARGET_FRAMEWORKS" ]; then
+            echo -e "${RED}✗ No target frameworks selected for $TEST_PROJECT_NAME${NC}"
+            exit 1
+        fi
+        while IFS= read -r TARGET_FRAMEWORK; do
+            COVERAGE_FILE="$COVERAGE_DIR/$TEST_PROJECT_NAME/coverage.$TARGET_FRAMEWORK.cobertura.xml"
+            if [ ! -s "$COVERAGE_FILE" ]; then
+                echo -e "${RED}✗ Coverage report missing or empty for $TEST_PROJECT_NAME ($TARGET_FRAMEWORK): $COVERAGE_FILE${NC}"
+                exit 1
+            fi
+            COVERAGE_REPORT_COUNT=$((COVERAGE_REPORT_COUNT + 1))
+            echo "  $COVERAGE_FILE"
+        done <<< "${TARGET_FRAMEWORKS//;/$'\n'}"
+    done
+    COVERAGE_PATTERN="$COVERAGE_DIR/*/*.cobertura.xml"
+    echo -e "${GREEN}✓ Coverage reports generated: $COVERAGE_REPORT_COUNT${NC}"
 fi
 echo ""
 
@@ -249,14 +269,14 @@ echo "Reports and artifacts:"
 echo "  Test Results (TRX):   $TEST_RESULTS_DIR/*.trx"
 echo "  Test Results (JUnit): $TEST_RESULTS_DIR/junit-results.xml"
 if [ "$COVERAGE_ENABLED" = true ]; then
-    echo "  Coverage (Cobertura): $COVERAGE_FILE"
+    echo "  Coverage (Cobertura): $COVERAGE_PATTERN"
 fi
 echo ""
 echo "Jenkins Integration:"
 echo "  - Publish JUnit test results: **/reports/test-results/junit-results.xml"
 echo "  - Publish TRX test results:   **/reports/test-results/results.trx"
 if [ "$COVERAGE_ENABLED" = true ]; then
-    echo "  - Publish Cobertura coverage: **/reports/coverage/coverage.cobertura.xml"
+    echo "  - Publish Cobertura coverage: **/reports/coverage/**/*.cobertura.xml"
 fi
 echo ""
 echo "Next steps:"
@@ -264,6 +284,6 @@ echo "  1. Review test results in: $TEST_RESULTS_DIR"
 if [ "$COVERAGE_ENABLED" = true ]; then
     echo "  2. Generate HTML coverage report:"
     echo "     dotnet tool install -g dotnet-reportgenerator-globaltool"
-    echo "     reportgenerator -reports:$COVERAGE_FILE -targetdir:$REPORTS_DIR/coverage-html"
+    echo "     reportgenerator \"-reports:$COVERAGE_PATTERN\" -targetdir:$REPORTS_DIR/coverage-html"
 fi
 echo ""

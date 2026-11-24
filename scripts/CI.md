@@ -4,6 +4,9 @@ This document explains how to run the EdgeGrid Auth project through a complete C
 
 ## Quick Start
 
+The .NET 10 SDK builds and tests `net10.0`. With the .NET 11 SDK and .NET 10 runtime, the pipeline tests the same `net10.0` library assembly on both `net10.0` and `net11.0`. 
+Jenkins uses the .NET 10 SDK image directly and builds and tests .NET 10 only, without installing additional runtimes or building the repository Dockerfile. GitHub Actions validates both runtimes.
+
 ### Run Basic CI Pipeline
 ```bash
 ./scripts/ci.sh
@@ -64,7 +67,8 @@ The CI pipeline runs the following checks in order:
 ### 7. **Code Coverage** (optional with `--coverage`)
 - Measures line and branch coverage
 - Uses Coverlet for .NET coverage collection
-- Generates Cobertura XML report
+- Generates a separate Cobertura XML report for each test project and target framework
+- Reads each test project's selected frameworks from MSBuild and requires a fresh, nonempty report for every project/framework pair: .NET 10 under SDK 10, and both .NET 10 and .NET 11 under SDK 11
 
 ## Output Locations
 
@@ -78,8 +82,16 @@ reports/test-results/
 ### Coverage Reports
 ```
 reports/coverage/
-├── coverage.cobertura.xml    # Cobertura XML format (Jenkins-compatible)
+├── EdgeGridAuthTest/
+│   ├── coverage.net10.0.cobertura.xml
+│   └── coverage.net11.0.cobertura.xml
+└── EdgeGridConsoleTest/
+    ├── coverage.net10.0.cobertura.xml
+    └── coverage.net11.0.cobertura.xml
 ```
+
+The .NET 11 reports are generated only when SDK 11 or later is used. Separate project directories prevent one test project's reports from overwriting another's. 
+Consumers must include all `reports/coverage/**/*.cobertura.xml` reports.
 
 ## Test Result Formats
 
@@ -96,7 +108,7 @@ The CI pipeline generates test results in multiple formats for maximum compatibi
 - **Contains:** Test names, pass/fail status, execution times
 
 ### Cobertura Coverage Format
-- **File:** `reports/coverage/coverage.cobertura.xml`
+- **Files:** `reports/coverage/**/*.cobertura.xml`
 - **Use for:** Jenkins Cobertura plugin, SonarQube, CodeCov
 - **Contains:** Line coverage, branch coverage, per-file metrics
 
@@ -127,7 +139,7 @@ To create a visual HTML coverage report:
 dotnet tool install -g dotnet-reportgenerator-globaltool
 
 # Generate HTML report
-reportgenerator -reports:reports/coverage/coverage.cobertura.xml \
+reportgenerator "-reports:reports/coverage/**/*.cobertura.xml" \
                 -targetdir:reports/coverage-html
 
 # Open in browser
@@ -159,18 +171,24 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            10.0.x
+            11.0.x
       
       - name: Run CI Pipeline
         run: ./scripts/ci.sh --coverage
       
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v3
+        continue-on-error: true
         with:
-          files: ./reports/coverage/coverage.cobertura.xml
+          directory: ./reports/coverage
+          fail_ci_if_error: false
           flags: unittests
           name: codecov-umbrella
 ```
+
+Codecov uploads are non-blocking while using the unauthenticated legacy v3 uploader, whose shared rate limit can reject otherwise valid uploads. Make uploads blocking only after migrating to a supported uploader, configuring authentication for trusted runs, and defining an explicit fork-PR policy. The CI script still fails if coverage reports are missing or empty.
 
 ### Azure Pipelines Example
 
@@ -186,9 +204,14 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  dotnetVersion: '8.0.x'
+  dotnetVersion: '11.0.x'
 
 steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'runtime'
+      version: '10.0.x'
+
   - task: UseDotNet@2
     inputs:
       version: $(dotnetVersion)
@@ -205,10 +228,9 @@ steps:
       testResultsFormat: 'VSTest'
       testResultsFiles: '**/reports/test-results/*.trx'
   
-  - task: PublishCodeCoverageResults@1
+  - task: PublishCodeCoverageResults@2
     inputs:
-      codeCoverageTool: 'Cobertura'
-      summaryFileLocation: '**/reports/coverage/coverage.cobertura.xml'
+      summaryFileLocation: '**/reports/coverage/**/*.cobertura.xml'
 ```
 
 ### Jenkins Pipeline Example
@@ -234,7 +256,7 @@ pipeline {
             
             // Publish Cobertura coverage
             publishCoverage adapters: [
-                coberturaAdapter('**/reports/coverage/coverage.cobertura.xml')
+                coberturaAdapter('**/reports/coverage/**/*.cobertura.xml')
             ]
             
             // Archive artifacts
@@ -262,7 +284,7 @@ pipeline {
 3. Review test logs for assertion failures
 
 ### Low Coverage
-1. Review `reports/coverage/coverage.cobertura.xml`
+1. Review all reports under `reports/coverage/`
 2. Use HTML reporter to visualize uncovered lines
 3. Add tests for uncovered code paths
 
@@ -270,7 +292,7 @@ pipeline {
 1. Run `dotnet clean` to remove cached builds
 2. Run `dotnet restore` to refresh dependencies
 3. Check for C# syntax errors
-4. Verify .NET 8.0 SDK is installed: `dotnet --version`
+4. Verify the .NET 10 or .NET 11 SDK is installed: `dotnet --version`. To test both runtimes, use SDK 11 and check that both the .NET 10 and .NET 11 runtimes are listed by `dotnet --list-runtimes`.
 
 ### Format Issues
 1. View issues: `dotnet format --verify-no-changes --include EdgeGridAuth`

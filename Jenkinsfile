@@ -17,7 +17,7 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    image 'docker.akamai.com/microsoft-mcr-upstream/dotnet/sdk:8.0'
+                    image 'docker.akamai.com/microsoft-mcr-upstream/dotnet/sdk:10.0'
                     reuseNode true
                     args '--user 0:0'
                 }
@@ -100,7 +100,7 @@ EOF
                       healthScaleFactor: 1.0
 
                 // Publish coverage using Code Coverage API Plugin
-                // recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'reports/coverage/*.xml']])
+                recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'reports/coverage/**/*.cobertura.xml']])
 
                 // Archive all artifacts
                 archiveArtifacts artifacts: 'reports/**/*',

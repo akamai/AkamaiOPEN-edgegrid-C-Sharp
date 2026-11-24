@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Akamai.EdgeGrid.Auth</RootNamespace>
     <AssemblyName>Akamai.EdgeGrid.Auth</AssemblyName>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -10,16 +10,17 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>Akamai.EdgeGrid.Auth</PackageId>
-    <Version>1.0.0-preview</Version>
+    <Version>1.0.0</Version>
     <Title>Akamai EdgeGrid Authentication Library</Title>
     <Authors>Akamai Technologies</Authors>
-    <Description>Official Akamai EdgeGrid authentication library for .NET 8.0. Provides signing and authentication for Akamai APIs with automatic redirect handling and environment variable credential support.</Description>
+    <Copyright>Copyright 2026 Akamai Technologies, Inc. All rights reserved.</Copyright>
+    <Description>Official Akamai EdgeGrid authentication library for .NET 10.0 and .NET 11.0. Provides signing and authentication for Akamai APIs with automatic redirect handling and environment variable credential support.</Description>
     <PackageProjectUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/akamai/AkamaiOPEN-edgegrid-C-Sharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>akamai;edgegrid;authentication;api;http</PackageTags>
-    <PackageReleaseNotes>Initial release version 1.0.0 - Migrated to .NET 8.0 with comprehensive improvements including automatic redirect handling, environment variable credential loading, and extensive test coverage.</PackageReleaseNotes>
+    <PackageReleaseNotes>Stable release version 1.0.0 - Supports .NET 10.0 and .NET 11.0; drops .NET 8.0 and .NET 9.0 support. Includes automatic redirect handling, environment variable credential loading, and extensive test coverage.</PackageReleaseNotes>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
