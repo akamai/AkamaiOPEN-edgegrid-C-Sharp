@@ -11,7 +11,7 @@ The release process consists of two main steps:
 
 ## Prerequisites
 
-- .NET 8.0 SDK installed.
+- The .NET 10 SDK, or the .NET 11 SDK together with the .NET 10 runtime. With SDK 11, tests run on both runtimes against the same `net10.0` library assembly.
 - Git access to the repository.
 - NuGet.org account with publish permissions.
 - NuGet API key (obtained from NuGet.org account settings).
@@ -329,7 +329,7 @@ If authentication fails:
 If the build fails:
 
 - Ensure all tests pass: `dotnet test`.
-- Check that .NET 8.0 SDK is installed: `dotnet --version`.
+- Check that the .NET 10 or .NET 11 SDK is installed: `dotnet --version`. To validate both runtimes, use SDK 11 and check that both .NET 10 and .NET 11 runtimes are listed by `dotnet --list-runtimes`.
 - Clean and rebuild: `rm -rf EdgeGridAuth/bin EdgeGridAuth/obj`.
 
 ## Post-release
